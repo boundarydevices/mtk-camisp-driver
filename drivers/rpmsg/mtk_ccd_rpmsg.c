@@ -218,8 +218,11 @@ mtk_rpmsg_destroy_rpmsgdev(struct mtk_rpmsg_rproc_subdev *mtk_subdev,
 		if (ret)
 			dev_err(dev, "%s:rpmsg_unregister_device failed, info->src(%x)\n",
 				__func__, info->src);
+
 		rpdev = to_rpmsg_device(dev);
 		rpmsg_destroy_ept(rpdev->ept);
+
+		put_device(dev);
 	} else {
 		dev_err(dev, "%s:rpmsg_find_device failed, info->src(%x)\n",
 			__func__, info->src);
@@ -274,6 +277,8 @@ mtk_destroy_client_msgdevice(struct rproc_subdev *subdev,
 	ret = mtk_rpmsg_destroy_rpmsgdev(mtk_subdev, info);
 
 	dev_dbg(&mtk_subdev->pdev->dev, "%s %p\n", __func__, rpdev);
+
+	put_device(dev);
 	return ret;
 }
 EXPORT_SYMBOL_GPL(mtk_destroy_client_msgdevice);
