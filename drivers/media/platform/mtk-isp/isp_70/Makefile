@@ -3,7 +3,7 @@
 subdir-ccflags-y += -Werror
 
 subdir-ccflags-y += -DISP7_0
-obj-$(CONFIG_VIDEO_MTK_ISP_7_CAMSYS) += camsys/
+obj-y += camsys/
 
 subdir-ccflags-y += -DIMGSYS_VER_ISP70
 subdir-ccflags-y += -DIMGSYS_WPE_NUM=2
