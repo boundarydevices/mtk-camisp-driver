@@ -34,7 +34,7 @@ struct mtk_cam_vb2_buf {
 
 	/* DMABUF related */
 	struct dma_buf_attachment	*db_attach;
-	struct dma_buf_map map;
+	struct iosys_map map;
 };
 
 /*********************************************/
