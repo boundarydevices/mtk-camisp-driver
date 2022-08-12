@@ -679,13 +679,13 @@ static const struct v4l2_mbus_framefmt fmt_default = {
 };
 
 static int mtk_cam_seninf_init_cfg(struct v4l2_subdev *sd,
-				   struct v4l2_subdev_pad_config *cfg)
+				   struct v4l2_subdev_state *sd_state)
 {
 	struct v4l2_mbus_framefmt *mf;
 	unsigned int i;
 
 	for (i = 0; i < sd->entity.num_pads; i++) {
-		mf = v4l2_subdev_get_try_format(sd, cfg, i);
+		mf = v4l2_subdev_get_try_format(sd, sd_state, i);
 		*mf = fmt_default;
 	}
 
@@ -693,8 +693,8 @@ static int mtk_cam_seninf_init_cfg(struct v4l2_subdev *sd,
 }
 
 static int mtk_cam_seninf_set_fmt(struct v4l2_subdev *sd,
-				  struct v4l2_subdev_pad_config *cfg,
-			  struct v4l2_subdev_format *fmt)
+				  struct v4l2_subdev_state *sd_state,
+				  struct v4l2_subdev_format *fmt)
 {
 	struct seninf_ctx *ctx = sd_to_ctx(sd);
 	struct v4l2_mbus_framefmt *format;
@@ -706,7 +706,7 @@ static int mtk_cam_seninf_set_fmt(struct v4l2_subdev *sd,
 	format = &ctx->fmt[fmt->pad].format;
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
-		*v4l2_subdev_get_try_format(sd, cfg, fmt->pad) = fmt->format;
+		*v4l2_subdev_get_try_format(sd, sd_state, fmt->pad) = fmt->format;
 		dev_dbg(ctx->dev, "s_fmt pad %d code/res 0x%x/%dx%d which %d=> 0x%x/%dx%d\n",
 			fmt->pad,
 			fmt->format.code,
@@ -743,8 +743,8 @@ static int mtk_cam_seninf_set_fmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_cam_seninf_get_fmt(struct v4l2_subdev *sd,
-				  struct v4l2_subdev_pad_config *cfg,
-			  struct v4l2_subdev_format *fmt)
+				  struct v4l2_subdev_state *sd_state,
+				  struct v4l2_subdev_format *fmt)
 {
 	struct seninf_ctx *ctx = sd_to_ctx(sd);
 	struct v4l2_mbus_framefmt *format;
@@ -755,7 +755,8 @@ static int mtk_cam_seninf_get_fmt(struct v4l2_subdev *sd,
 	format = &ctx->fmt[fmt->pad].format;
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
-		fmt->format = *v4l2_subdev_get_try_format(sd, cfg, fmt->pad);
+		fmt->format = *v4l2_subdev_get_try_format(sd, sd_state,
+							  fmt->pad);
 	} else {
 		fmt->format.code = format->code;
 		fmt->format.width = format->width;

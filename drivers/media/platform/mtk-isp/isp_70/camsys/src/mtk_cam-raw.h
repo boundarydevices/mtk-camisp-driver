@@ -409,11 +409,11 @@ unsigned int mtk_raw_get_hdr_scen_id(struct mtk_cam_ctx *ctx);
 
 struct v4l2_mbus_framefmt*
 mtk_raw_pipeline_get_fmt(struct mtk_raw_pipeline *pipe,
-			struct v4l2_subdev_pad_config *cfg,
+			struct v4l2_subdev_state *sd_state,
 			int padid, int which);
 struct v4l2_rect*
 mtk_raw_pipeline_get_selection(struct mtk_raw_pipeline *pipe,
-			struct v4l2_subdev_pad_config *cfg,
+			struct v4l2_subdev_state *sd_state,
 			int pad, int which);
 int
 mtk_cam_raw_try_res_ctrl(struct mtk_raw_pipeline *pipeline,

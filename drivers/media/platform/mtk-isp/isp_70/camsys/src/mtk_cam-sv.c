@@ -235,7 +235,7 @@ static int mtk_camsv_sd_s_stream(struct v4l2_subdev *sd, int enable)
 }
 
 static int mtk_camsv_init_cfg(struct v4l2_subdev *sd,
-		struct v4l2_subdev_pad_config *cfg)
+		struct v4l2_subdev_state *sd_state)
 {
 	struct v4l2_mbus_framefmt *mf;
 	unsigned int i;
@@ -244,7 +244,7 @@ static int mtk_camsv_init_cfg(struct v4l2_subdev *sd,
 	struct mtk_camsv *sv = pipe->sv;
 
 	for (i = 0; i < sd->entity.num_pads; i++) {
-		mf = v4l2_subdev_get_try_format(sd, cfg, i);
+		mf = v4l2_subdev_get_try_format(sd, sd_state, i);
 		*mf = sv_mfmt_default;
 		pipe->cfg[i].mbus_fmt = sv_mfmt_default;
 
@@ -293,12 +293,13 @@ static int mtk_camsv_try_fmt(struct v4l2_subdev *sd,
 }
 
 static struct v4l2_mbus_framefmt *get_sv_fmt(struct mtk_camsv_pipeline *pipe,
-					  struct v4l2_subdev_pad_config *cfg,
+					  struct v4l2_subdev_state *sd_state,
 					  unsigned int padid, int which)
 {
 	/* format invalid and return default format */
 	if (which == V4L2_SUBDEV_FORMAT_TRY)
-		return v4l2_subdev_get_try_format(&pipe->subdev, cfg, padid);
+		return v4l2_subdev_get_try_format(&pipe->subdev, sd_state,
+						  padid);
 
 	if (WARN_ON(padid >= pipe->subdev.entity.num_pads))
 		return &pipe->cfg[0].mbus_fmt;
@@ -307,7 +308,7 @@ static struct v4l2_mbus_framefmt *get_sv_fmt(struct mtk_camsv_pipeline *pipe,
 }
 
 static int mtk_camsv_call_set_fmt(struct v4l2_subdev *sd,
-			  struct v4l2_subdev_pad_config *cfg,
+			  struct v4l2_subdev_state *sd_state,
 			  struct v4l2_subdev_format *fmt)
 {
 	struct mtk_camsv_pipeline *pipe =
@@ -321,17 +322,17 @@ static int mtk_camsv_call_set_fmt(struct v4l2_subdev *sd,
 		return -EINVAL;
 	}
 
-	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY && !cfg) {
+	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY && !sd_state) {
 		dev_dbg(sv->cam_dev, "%s: Required sd(%p), cfg(%p) for FORMAT_TRY\n",
-					__func__, sd, cfg);
+					__func__, sd, sd_state);
 		return -EINVAL;
 	}
 
 	if (!mtk_camsv_try_fmt(sd, fmt)) {
-		mf = get_sv_fmt(pipe, cfg, fmt->pad, fmt->which);
+		mf = get_sv_fmt(pipe, sd_state, fmt->pad, fmt->which);
 		fmt->format = *mf;
 	} else {
-		mf = get_sv_fmt(pipe, cfg, fmt->pad, fmt->which);
+		mf = get_sv_fmt(pipe, sd_state, fmt->pad, fmt->which);
 		*mf = fmt->format;
 		dev_dbg(sv->cam_dev,
 			"sd:%s pad:%d set format w/h/code %d/%d/0x%x\n",
@@ -360,7 +361,7 @@ int mtk_camsv_call_pending_set_fmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_camsv_set_fmt(struct v4l2_subdev *sd,
-			  struct v4l2_subdev_pad_config *cfg,
+			  struct v4l2_subdev_state *sd_state,
 			  struct v4l2_subdev_format *fmt)
 {
 	struct media_request *req;
@@ -372,11 +373,11 @@ static int mtk_camsv_set_fmt(struct v4l2_subdev *sd,
 	struct mtk_cam_device *cam = dev_get_drvdata(pipe->sv->cam_dev);
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		return mtk_camsv_call_set_fmt(sd, cfg, fmt);
+		return mtk_camsv_call_set_fmt(sd, sd_state, fmt);
 
 	/* if the pipeline is streaming, pending the change */
 	if (!sd->entity.stream_count)
-		return mtk_camsv_call_set_fmt(sd, cfg, fmt);
+		return mtk_camsv_call_set_fmt(sd, sd_state, fmt);
 
 	if (fmt->request_fd <= 0)
 		return -EINVAL;
@@ -402,7 +403,7 @@ static int mtk_camsv_set_fmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_camsv_get_fmt(struct v4l2_subdev *sd,
-			  struct v4l2_subdev_pad_config *cfg,
+			  struct v4l2_subdev_state *sd_state,
 			  struct v4l2_subdev_format *fmt)
 {
 	struct mtk_camsv_pipeline *pipe =
@@ -411,7 +412,7 @@ static int mtk_camsv_get_fmt(struct v4l2_subdev *sd,
 	struct v4l2_mbus_framefmt *mf;
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		mf = v4l2_subdev_get_try_format(sd, cfg, fmt->pad);
+		mf = v4l2_subdev_get_try_format(sd, sd_state, fmt->pad);
 	else {
 		if (WARN_ON(fmt->pad >= sd->entity.num_pads))
 			mf = &pipe->cfg[0].mbus_fmt;

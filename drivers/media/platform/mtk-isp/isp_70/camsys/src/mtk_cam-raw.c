@@ -3162,7 +3162,7 @@ static int mtk_raw_sd_s_stream(struct v4l2_subdev *sd, int enable)
 }
 
 static int mtk_raw_init_cfg(struct v4l2_subdev *sd,
-			    struct v4l2_subdev_pad_config *cfg)
+			    struct v4l2_subdev_state *sd_state)
 {
 	struct v4l2_mbus_framefmt *mf;
 	unsigned int i;
@@ -3171,7 +3171,7 @@ static int mtk_raw_init_cfg(struct v4l2_subdev *sd,
 	struct mtk_raw *raw = pipe->raw;
 
 	for (i = 0; i < sd->entity.num_pads; i++) {
-		mf = v4l2_subdev_get_try_format(sd, cfg, i);
+		mf = v4l2_subdev_get_try_format(sd, sd_state, i);
 		*mf = mfmt_default;
 		pipe->cfg[i].mbus_fmt = mfmt_default;
 
@@ -3206,12 +3206,13 @@ static bool mtk_raw_try_fmt(struct v4l2_subdev *sd,
 
 struct v4l2_mbus_framefmt*
 mtk_raw_pipeline_get_fmt(struct mtk_raw_pipeline *pipe,
-					struct v4l2_subdev_pad_config *cfg,
+					struct v4l2_subdev_state *sd_state,
 					int padid, int which)
 {
 	/* format invalid and return default format */
 	if (which == V4L2_SUBDEV_FORMAT_TRY)
-		return v4l2_subdev_get_try_format(&pipe->subdev, cfg, padid);
+		return v4l2_subdev_get_try_format(&pipe->subdev, sd_state,
+						  padid);
 
 	if (WARN_ON(padid >= pipe->subdev.entity.num_pads))
 		return &pipe->cfg[0].mbus_fmt;
@@ -3221,12 +3222,12 @@ mtk_raw_pipeline_get_fmt(struct mtk_raw_pipeline *pipe,
 
 struct v4l2_rect*
 mtk_raw_pipeline_get_selection(struct mtk_raw_pipeline *pipe,
-					struct v4l2_subdev_pad_config *cfg,
+					struct v4l2_subdev_state *sd_state,
 					int pad, int which)
 {
 	/* format invalid and return default format */
 	if (which == V4L2_SUBDEV_FORMAT_TRY)
-		return v4l2_subdev_get_try_crop(&pipe->subdev, cfg, pad);
+		return v4l2_subdev_get_try_crop(&pipe->subdev, sd_state, pad);
 
 	if (WARN_ON(pad >= pipe->subdev.entity.num_pads))
 		return &pipe->cfg[0].crop;
@@ -3279,7 +3280,7 @@ bool mtk_raw_fmt_get_res(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_set_src_pad_selection_default(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_mbus_framefmt *sink_fmt,
 				struct mtk_cam_resource *res,
 				int pad, int which)
@@ -3288,7 +3289,8 @@ static int mtk_raw_set_src_pad_selection_default(struct v4l2_subdev *sd,
 	struct mtk_raw_pipeline *pipe;
 
 	pipe = container_of(sd, struct mtk_raw_pipeline, subdev);
-	source_sel = mtk_raw_pipeline_get_selection(pipe, cfg, pad, which);
+	source_sel = mtk_raw_pipeline_get_selection(pipe, sd_state, pad,
+						    which);
 	if (source_sel->width > sink_fmt->width) {
 		source_sel->width = sink_fmt->width;
 		/* may need some log */
@@ -3303,7 +3305,7 @@ static int mtk_raw_set_src_pad_selection_default(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_set_src_pad_selection_yuv(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_mbus_framefmt *sink_fmt,
 				struct mtk_cam_resource *res,
 				int pad, int which)
@@ -3314,12 +3316,16 @@ static int mtk_raw_set_src_pad_selection_yuv(struct v4l2_subdev *sd,
 	struct mtk_raw_pipeline *pipe;
 
 	pipe = container_of(sd, struct mtk_raw_pipeline, subdev);
-	mtk_raw_set_src_pad_selection_default(sd, cfg, sink_fmt, res, pad, which);
-	source_sel = mtk_raw_pipeline_get_selection(pipe, cfg, pad, which);
+	mtk_raw_set_src_pad_selection_default(sd, sd_state, sink_fmt, res,
+					      pad, which);
+	source_sel = mtk_raw_pipeline_get_selection(pipe, sd_state, pad,
+						    which);
 
 	for (i = MTK_RAW_YUVO_1_OUT; i < pad; i++) {
-		framefmt = mtk_raw_pipeline_get_fmt(pipe, cfg, pad, which);
-		tmp_sel = mtk_raw_pipeline_get_selection(pipe, cfg, pad, which);
+		framefmt = mtk_raw_pipeline_get_fmt(pipe, sd_state, pad,
+						    which);
+		tmp_sel = mtk_raw_pipeline_get_selection(pipe, sd_state, pad,
+							 which);
 
 		/* Skip disabled YUV pad */
 		if (!mtk_cam_is_pad_fmt_enable(framefmt))
@@ -3345,7 +3351,7 @@ static int mtk_raw_set_src_pad_selection_yuv(struct v4l2_subdev *sd,
 
 static struct v4l2_mbus_framefmt*
 mtk_raw_get_sink_pad_framefmt(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg, int which)
+				struct v4l2_subdev_state *sd_state, int which)
 {
 	struct v4l2_mbus_framefmt *sink_fmt = NULL, *tmp_fmt;
 	struct mtk_raw_pipeline *pipe;
@@ -3353,7 +3359,7 @@ mtk_raw_get_sink_pad_framefmt(struct v4l2_subdev *sd,
 
 	pipe = container_of(sd, struct mtk_raw_pipeline, subdev);
 	for (i = MTK_RAW_SINK; i < MTK_RAW_SOURCE_BEGIN; i++) {
-		tmp_fmt = mtk_raw_pipeline_get_fmt(pipe, cfg, i, which);
+		tmp_fmt = mtk_raw_pipeline_get_fmt(pipe, sd_state, i, which);
 		if (i != MTK_RAW_META_IN &&
 			mtk_cam_is_pad_fmt_enable(tmp_fmt)) {
 			sink_fmt = tmp_fmt;
@@ -3365,7 +3371,7 @@ mtk_raw_get_sink_pad_framefmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_set_pad_selection(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_subdev_selection *sel)
 {
 	struct v4l2_mbus_framefmt *sink_fmt = NULL;
@@ -3383,14 +3389,16 @@ static int mtk_raw_set_pad_selection(struct v4l2_subdev *sd,
 	/*
 	 * Find the sink pad fmt, there must be one eanbled sink pad at least
 	 */
-	sink_fmt = mtk_raw_get_sink_pad_framefmt(sd, cfg, sel->which);
+	sink_fmt = mtk_raw_get_sink_pad_framefmt(sd, sd_state, sel->which);
 	if (!sink_fmt)
 		return -EINVAL;
 
 	node = &pipe->vdev_nodes[sel->pad - MTK_RAW_SINK_NUM];
-	crop = mtk_raw_pipeline_get_selection(pipe, cfg, sel->pad, sel->which);
+	crop = mtk_raw_pipeline_get_selection(pipe, sd_state, sel->pad,
+					      sel->which);
 	*crop = sel->r;
-	ret = node->desc.pad_ops->set_pad_selection(sd, cfg, sink_fmt, res, sel->pad, sel->which);
+	ret = node->desc.pad_ops->set_pad_selection(sd, sd_state, sink_fmt,
+						    res, sel->pad, sel->which);
 	if (ret)
 		return -EINVAL;
 
@@ -3400,14 +3408,14 @@ static int mtk_raw_set_pad_selection(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_get_pad_selection(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_subdev_selection *sel)
 {
 	return 0;
 }
 
 static int mtk_raw_set_sink_pad_fmt(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_subdev_format *fmt)
 {
 	struct device *dev;
@@ -3425,7 +3433,8 @@ static int mtk_raw_set_sink_pad_fmt(struct v4l2_subdev *sd,
 
 	dev = sd->v4l2_dev->dev;
 	pipe = container_of(sd, struct mtk_raw_pipeline, subdev);
-	framefmt = mtk_raw_pipeline_get_fmt(pipe, cfg, fmt->pad, fmt->which);
+	framefmt = mtk_raw_pipeline_get_fmt(pipe, sd_state, fmt->pad,
+					    fmt->which);
 
 	/* If data from sensor, we check the size with max imgo size*/
 	if (fmt->pad < MTK_RAW_SINK_NUM) {
@@ -3456,7 +3465,8 @@ static int mtk_raw_set_sink_pad_fmt(struct v4l2_subdev *sd,
 	for (i = MTK_RAW_SINK; i < MTK_RAW_META_OUT_BEGIN; i++) {
 		if (i == MTK_RAW_META_IN)
 			continue;
-		tmp_fmt = mtk_raw_pipeline_get_fmt(pipe, cfg, i, fmt->which);
+		tmp_fmt = mtk_raw_pipeline_get_fmt(pipe, sd_state, i,
+						   fmt->which);
 		mtk_cam_pad_fmt_enable(tmp_fmt, false);
 	}
 
@@ -3477,7 +3487,8 @@ static int mtk_raw_set_sink_pad_fmt(struct v4l2_subdev *sd,
 
 	/* Propagation inside subdev */
 	for (i = MTK_RAW_SOURCE_BEGIN; i < MTK_RAW_META_OUT_BEGIN; i++) {
-		source_fmt = mtk_raw_pipeline_get_fmt(pipe, cfg, i, fmt->which);
+		source_fmt = mtk_raw_pipeline_get_fmt(pipe, sd_state, i,
+						      fmt->which);
 
 		/* Get default format's desc for the pad */
 		node = &pipe->vdev_nodes[i - MTK_RAW_SINK_NUM];
@@ -3507,7 +3518,7 @@ static int mtk_raw_set_sink_pad_fmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_set_src_pad_fmt_default(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_mbus_framefmt *sink_fmt,
 				struct mtk_cam_resource *res,
 				int pad, int which)
@@ -3520,7 +3531,7 @@ static int mtk_raw_set_src_pad_fmt_default(struct v4l2_subdev *sd,
 
 	dev = sd->v4l2_dev->dev;
 	node = &pipe->vdev_nodes[pad - MTK_RAW_SINK_NUM];
-	source_fmt = mtk_raw_pipeline_get_fmt(pipe, cfg, pad, which);
+	source_fmt = mtk_raw_pipeline_get_fmt(pipe, sd_state, pad, which);
 	if (source_fmt->width > sink_fmt->width) {
 		dev_info(dev,
 			"%s(%d): adjusted: width(%d) over sink (%d)\n",
@@ -3552,7 +3563,7 @@ static int mtk_raw_set_src_pad_fmt_default(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_set_src_pad_fmt_rzh1n2(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_mbus_framefmt *sink_fmt,
 				struct mtk_cam_resource *res,
 				int pad, int which)
@@ -3564,12 +3575,15 @@ static int mtk_raw_set_src_pad_fmt_rzh1n2(struct v4l2_subdev *sd,
 		container_of(sd, struct mtk_raw_pipeline, subdev);
 
 	dev = sd->v4l2_dev->dev;
-	mtk_raw_set_src_pad_fmt_default(sd, cfg, sink_fmt, res, pad, which);
-	source_fmt = mtk_raw_pipeline_get_fmt(pipe, cfg, pad, which);
+	mtk_raw_set_src_pad_fmt_default(sd, sd_state, sink_fmt, res, pad,
+					which);
+	source_fmt = mtk_raw_pipeline_get_fmt(pipe, sd_state, pad, which);
 
 	/* rzh1n2to_r1 and rzh1n2to_r3 size must be the same */
 	if (pad == MTK_RAW_RZH1N2TO_3_OUT) {
-		tmp_fmt = mtk_raw_pipeline_get_fmt(pipe, cfg, MTK_RAW_RZH1N2TO_1_OUT, which);
+		tmp_fmt = mtk_raw_pipeline_get_fmt(pipe, sd_state,
+						   MTK_RAW_RZH1N2TO_1_OUT,
+						   which);
 		if (mtk_cam_is_pad_fmt_enable(tmp_fmt) &&
 			source_fmt->height != tmp_fmt->height &&
 			source_fmt->width != tmp_fmt->width) {
@@ -3586,7 +3600,7 @@ static int mtk_raw_set_src_pad_fmt_rzh1n2(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_set_src_pad_fmt(struct v4l2_subdev *sd,
-	struct v4l2_subdev_pad_config *cfg,
+	struct v4l2_subdev_state *sd_state,
 	struct v4l2_subdev_format *fmt)
 {
 	struct device *dev;
@@ -3607,7 +3621,7 @@ static int mtk_raw_set_src_pad_fmt(struct v4l2_subdev *sd,
 	/*
 	 * Find the sink pad fmt, there must be one eanbled sink pad at least
 	 */
-	sink_fmt = mtk_raw_get_sink_pad_framefmt(sd, cfg, fmt->which);
+	sink_fmt = mtk_raw_get_sink_pad_framefmt(sd, sd_state, fmt->which);
 	if (!sink_fmt) {
 		dev_info(dev,
 			"%s(%d): Set fmt pad:%d(%s), no s_fmt on sink pad\n",
@@ -3624,11 +3638,13 @@ static int mtk_raw_set_src_pad_fmt(struct v4l2_subdev *sd,
 
 	if (node->desc.pad_ops->set_pad_fmt) {
 		/* call source pad's set_pad_fmt op to adjust fmt by pad */
-		source_fmt = mtk_raw_pipeline_get_fmt(pipe, cfg, fmt->pad, fmt->which);
+		source_fmt = mtk_raw_pipeline_get_fmt(pipe, sd_state,
+						      fmt->pad, fmt->which);
 		/* TODO: copy the fileds we are used only*/
 		*source_fmt = fmt->format;
-		ret = node->desc.pad_ops->set_pad_fmt(sd, cfg, sink_fmt, &res, fmt->pad,
-			fmt->which);
+		ret = node->desc.pad_ops->set_pad_fmt(sd, sd_state, sink_fmt,
+						      &res, fmt->pad,
+						      fmt->which);
 	}
 
 	if (ret)
@@ -3646,14 +3662,14 @@ static int mtk_raw_set_src_pad_fmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_try_pad_fmt(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_subdev_format *fmt)
 {
 
 	if (fmt->pad >= MTK_RAW_SINK && fmt->pad < MTK_RAW_SOURCE_BEGIN)
-		mtk_raw_set_sink_pad_fmt(sd, cfg, fmt);
+		mtk_raw_set_sink_pad_fmt(sd, sd_state, fmt);
 	else if (fmt->pad < MTK_RAW_PIPELINE_PADS_NUM)
-		mtk_raw_set_src_pad_fmt(sd, cfg, fmt);
+		mtk_raw_set_src_pad_fmt(sd, sd_state, fmt);
 	else
 		return -EINVAL;
 
@@ -3662,7 +3678,7 @@ static int mtk_raw_try_pad_fmt(struct v4l2_subdev *sd,
 
 /* To be deplicated */
 static int mtk_raw_call_set_fmt(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_subdev_format *fmt,
 				bool streaming)
 {
@@ -3677,22 +3693,24 @@ static int mtk_raw_call_set_fmt(struct v4l2_subdev *sd,
 		return -EINVAL;
 	}
 
-	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY && !cfg) {
+	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY && !sd_state) {
 		dev_dbg(raw->cam_dev, "%s: Required sd(%p), cfg(%p) for FORMAT_TRY\n",
-			__func__, sd, cfg);
+			__func__, sd, sd_state);
 		return -EINVAL;
 	}
 
 	if (!mtk_raw_try_fmt(sd, fmt) &&
 			!mtk_cam_feature_is_pure_m2m(
 			pipe->feature_pending)) {
-		mf = mtk_raw_pipeline_get_fmt(pipe, cfg, fmt->pad, fmt->which);
+		mf = mtk_raw_pipeline_get_fmt(pipe, sd_state, fmt->pad,
+					      fmt->which);
 		fmt->format = *mf;
 		dev_info(raw->cam_dev,
 			"sd:%s pad:%d didn't apply and keep format w/h/code %d/%d/0x%x\n",
 			sd->name, fmt->pad, mf->width, mf->height, mf->code);
 	} else {
-		mf = mtk_raw_pipeline_get_fmt(pipe, cfg, fmt->pad, fmt->which);
+		mf = mtk_raw_pipeline_get_fmt(pipe, sd_state, fmt->pad,
+					      fmt->which);
 		*mf = fmt->format;
 		dev_dbg(raw->cam_dev,
 			"sd:%s pad:%d set format w/h/code %d/%d/0x%x\n",
@@ -3709,7 +3727,7 @@ static int mtk_raw_call_set_fmt(struct v4l2_subdev *sd,
 			img_fmt->fmt.pix_mp.width = mf->width;
 			img_fmt->fmt.pix_mp.height = mf->height;
 		}
-		source_mf = mtk_raw_pipeline_get_fmt(pipe, cfg,
+		source_mf = mtk_raw_pipeline_get_fmt(pipe, sd_state,
 								MTK_RAW_MAIN_STREAM_OUT,
 								fmt->which);
 
@@ -3748,7 +3766,7 @@ int mtk_raw_call_pending_set_fmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_set_fmt(struct v4l2_subdev *sd,
-				struct v4l2_subdev_pad_config *cfg,
+				struct v4l2_subdev_state *sd_state,
 				struct v4l2_subdev_format *fmt)
 {
 	struct media_request *req;
@@ -3759,11 +3777,11 @@ static int mtk_raw_set_fmt(struct v4l2_subdev *sd,
 	struct mtk_cam_device *cam = dev_get_drvdata(pipe->raw->cam_dev);
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		return mtk_raw_try_pad_fmt(sd, cfg, fmt);
+		return mtk_raw_try_pad_fmt(sd, sd_state, fmt);
 
 	/* if the pipeline is streaming, pending the change */
 	if (!sd->entity.stream_count)
-		return mtk_raw_call_set_fmt(sd, cfg, fmt, false);
+		return mtk_raw_call_set_fmt(sd, sd_state, fmt, false);
 
 	if (fmt->request_fd <= 0)
 		return -EINVAL;
@@ -3789,15 +3807,15 @@ static int mtk_raw_set_fmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_raw_get_fmt(struct v4l2_subdev *sd,
-			   struct v4l2_subdev_pad_config *cfg,
-			  struct v4l2_subdev_format *fmt)
+			   struct v4l2_subdev_state *sd_state,
+			   struct v4l2_subdev_format *fmt)
 {
 	struct mtk_raw_pipeline *pipe =
 		container_of(sd, struct mtk_raw_pipeline, subdev);
 	struct mtk_raw *raw = pipe->raw;
 	struct v4l2_mbus_framefmt *mf;
 
-	mf = mtk_raw_pipeline_get_fmt(pipe, cfg, fmt->pad, fmt->which);
+	mf = mtk_raw_pipeline_get_fmt(pipe, sd_state, fmt->pad, fmt->which);
 	fmt->format = *mf;
 	dev_dbg(raw->cam_dev, "sd:%s pad:%d get format w/h/code %d/%d/0x%x\n",
 		sd->name, fmt->pad, fmt->format.width, fmt->format.height,
