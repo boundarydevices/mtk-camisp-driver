@@ -568,7 +568,7 @@ int mtk_ccd_put_fd(struct mtk_ccd *ccd,
 
 			if (atomic_long_read(&buf->dbuf->file->f_count) > 1 &&
 			    current->files)
-				__close_fd(current->files, target_fd);
+				close_fd(target_fd);
 			else
 				dev_info(ccd_memory->dev,
 						 "%s user space signal exit to close fd already",
