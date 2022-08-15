@@ -655,7 +655,7 @@ static void *get_kva(struct mtk_imgsys_dev_buffer *buf)
 	struct dma_buf *dmabuf;
 	void *vaddr;
 	// struct header_desc *desc;
-	struct dma_buf_map map;
+	struct iosys_map map;
 	int ret;
 
 	int fd = buf->vbb.vb2_buf.planes[0].m.fd;
@@ -697,7 +697,7 @@ ERROR_PUT:
 static void put_kva(struct buf_va_info_t *buf_va_info)
 {
 	struct dma_buf *dmabuf;
-	struct dma_buf_map map = DMA_BUF_MAP_INIT_VADDR((void *)buf_va_info->kva);
+	struct iosys_map map = IOSYS_MAP_INIT_VADDR((void *)buf_va_info->kva);
 
 	dmabuf = buf_va_info->dma_buf_putkva;
 	if (!IS_ERR(dmabuf)) {

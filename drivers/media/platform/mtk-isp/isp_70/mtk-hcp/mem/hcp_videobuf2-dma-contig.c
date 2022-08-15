@@ -71,7 +71,7 @@ static void *hcp_vb2_dc_cookie(struct vb2_buffer *vb, void *buf_priv)
 static void *hcp_vb2_dc_vaddr(struct vb2_buffer *vb, void *buf_priv)
 {
 	struct vb2_dc_buf *buf = buf_priv;
-	struct dma_buf_map map;
+	struct iosys_map map;
 	int ret;
 
 	if (!buf->vaddr && buf->db_attach) {
@@ -343,11 +343,11 @@ hcp_vb2_dc_dmabuf_ops_end_cpu_access(struct dma_buf *dbuf,
 }
 
 static int hcp_vb2_dc_dmabuf_ops_vmap(struct dma_buf *dbuf,
-	struct dma_buf_map *map)
+	struct iosys_map *map)
 {
 	struct vb2_dc_buf *buf = dbuf->priv;
 
-	dma_buf_map_set_vaddr(map, buf->vaddr);
+	iosys_map_set_vaddr(map, buf->vaddr);
 
 	return 0;
 }

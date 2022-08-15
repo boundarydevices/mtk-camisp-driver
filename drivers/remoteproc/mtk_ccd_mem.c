@@ -88,7 +88,7 @@ static dma_addr_t mtk_ccd_buf_get_daddr(struct mtk_ccd_buf *buf)
 static void *mtk_ccd_buf_get_vaddr(struct mtk_ccd_buf *buf)
 {
 	int ret;
-	struct dma_buf_map map;
+	struct iosys_map map;
 
 	if (!buf->vaddr && buf->db_attach) {
 		ret = dma_buf_vmap(buf->db_attach->dmabuf, &map);
@@ -295,11 +295,11 @@ static void mtk_ccd_dmabuf_ops_release(struct dma_buf *dbuf)
  *	}
  */
 
-static int mtk_ccd_dmabuf_ops_vmap(struct dma_buf *dbuf, struct dma_buf_map *map)
+static int mtk_ccd_dmabuf_ops_vmap(struct dma_buf *dbuf, struct iosys_map *map)
 {
 	struct mtk_ccd_buf *buf = dbuf->priv;
 
-	dma_buf_map_set_vaddr(map, buf->vaddr);
+	iosys_map_set_vaddr(map, buf->vaddr);
 
 	return 0;
 }

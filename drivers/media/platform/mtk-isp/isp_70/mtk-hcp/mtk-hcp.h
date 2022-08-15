@@ -366,7 +366,7 @@ struct mtk_hcp_reserve_mblock {
 	struct dma_buf_attachment *attach;
 	struct sg_table *sgt;
 	struct kref kref;
-	struct dma_buf_map map;
+	struct iosys_map map;
 };
 
 int mtk_hcp_set_apu_dc(struct platform_device *pdev,
