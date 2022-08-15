@@ -7205,3 +7205,4 @@ module_exit(mtk_cam_exit);
 
 MODULE_DESCRIPTION("Camera ISP driver");
 MODULE_LICENSE("GPL");
+MODULE_IMPORT_NS(DMA_BUF);
