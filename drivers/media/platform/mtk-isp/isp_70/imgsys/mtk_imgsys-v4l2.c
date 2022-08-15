@@ -142,7 +142,7 @@ static int mtk_imgsys_subdev_s_stream(struct v4l2_subdev *sd,
 }
 
 static int mtk_imgsys_subdev_get_fmt(struct v4l2_subdev *sd,
-				  struct v4l2_subdev_pad_config *cfg,
+				  struct v4l2_subdev_state *sd_state,
 				  struct v4l2_subdev_format *fmt)
 {
 	struct mtk_imgsys_pipe *imgsys_pipe = mtk_imgsys_subdev_to_pipe(sd);
@@ -153,7 +153,7 @@ static int mtk_imgsys_subdev_get_fmt(struct v4l2_subdev *sd,
 	if (fmt->which == V4L2_SUBDEV_FORMAT_ACTIVE) {
 		fmt->format = imgsys_pipe->nodes[pad].pad_fmt;
 	} else {
-		mf = v4l2_subdev_get_try_format(sd, cfg, pad);
+		mf = v4l2_subdev_get_try_format(sd, sd_state, pad);
 		fmt->format = *mf;
 	}
 
@@ -166,7 +166,7 @@ static int mtk_imgsys_subdev_get_fmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_imgsys_subdev_set_fmt(struct v4l2_subdev *sd,
-				  struct v4l2_subdev_pad_config *cfg,
+				  struct v4l2_subdev_state *sd_state,
 				  struct v4l2_subdev_format *fmt)
 {
 	struct mtk_imgsys_pipe *imgsys_pipe = mtk_imgsys_subdev_to_pipe(sd);
@@ -178,7 +178,7 @@ static int mtk_imgsys_subdev_set_fmt(struct v4l2_subdev *sd,
 		fmt->format.width, fmt->format.height);
 
 	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY)
-		mf = v4l2_subdev_get_try_format(sd, cfg, pad);
+		mf = v4l2_subdev_get_try_format(sd, sd_state, pad);
 	else
 		mf = &imgsys_pipe->nodes[pad].pad_fmt;
 
@@ -207,7 +207,7 @@ static int mtk_imgsys_subdev_set_fmt(struct v4l2_subdev *sd,
 }
 
 static int mtk_imgsys_subdev_get_selection(struct v4l2_subdev *sd,
-					struct v4l2_subdev_pad_config *cfg,
+					struct v4l2_subdev_state *sd_state,
 					struct v4l2_subdev_selection *sel)
 {
 	struct v4l2_rect *try_sel, *r;
@@ -228,7 +228,7 @@ static int mtk_imgsys_subdev_get_selection(struct v4l2_subdev *sd,
 
 	switch (sel->target) {
 	case V4L2_SEL_TGT_CROP:
-		try_sel = v4l2_subdev_get_try_crop(sd, cfg, sel->pad);
+		try_sel = v4l2_subdev_get_try_crop(sd, sd_state, sel->pad);
 		/* effective resolution */
 		r = &imgsys_pipe->nodes[sel->pad].crop;
 		break;
@@ -249,7 +249,7 @@ static int mtk_imgsys_subdev_get_selection(struct v4l2_subdev *sd,
 }
 
 static int mtk_imgsys_subdev_set_selection(struct v4l2_subdev *sd,
-					struct v4l2_subdev_pad_config *cfg,
+					struct v4l2_subdev_state *sd_state,
 					struct v4l2_subdev_selection *sel)
 {
 	struct v4l2_rect *rect, *try_sel;
@@ -270,7 +270,7 @@ static int mtk_imgsys_subdev_set_selection(struct v4l2_subdev *sd,
 
 	switch (sel->target) {
 	case V4L2_SEL_TGT_CROP:
-		try_sel = v4l2_subdev_get_try_crop(sd, cfg, sel->pad);
+		try_sel = v4l2_subdev_get_try_crop(sd, sd_state, sel->pad);
 		rect = &imgsys_pipe->nodes[sel->pad].crop;
 		break;
 	default:

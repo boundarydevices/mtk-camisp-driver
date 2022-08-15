@@ -34,19 +34,19 @@ static int mtk_imgsys_subdev_s_stream(struct v4l2_subdev *sd,
 				int enable);
 
 static int mtk_imgsys_subdev_get_fmt(struct v4l2_subdev *sd,
-			   struct v4l2_subdev_pad_config *cfg,
+			   struct v4l2_subdev_state *sd_state,
 			   struct v4l2_subdev_format *fmt);
 
 static int mtk_imgsys_subdev_set_fmt(struct v4l2_subdev *sd,
-			   struct v4l2_subdev_pad_config *cfg,
+			   struct v4l2_subdev_state *sd_state,
 			   struct v4l2_subdev_format *fmt);
 
 static int mtk_imgsys_subdev_get_selection(struct v4l2_subdev *sd,
-				 struct v4l2_subdev_pad_config *cfg,
+				 struct v4l2_subdev_state *sd_state,
 				 struct v4l2_subdev_selection *sel);
 
 static int mtk_imgsys_subdev_set_selection(struct v4l2_subdev *sd,
-				 struct v4l2_subdev_pad_config *cfg,
+				 struct v4l2_subdev_state *sd_state,
 				 struct v4l2_subdev_selection *sel);
 
 static int mtk_imgsys_link_setup(struct media_entity *entity,
