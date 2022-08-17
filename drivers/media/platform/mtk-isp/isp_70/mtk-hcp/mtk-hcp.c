@@ -1972,10 +1972,11 @@ err_alloc:
 
 static const struct of_device_id mtk_hcp_match[] = {
 #if defined(IMGSYS_VER_ISP71)
-	{.compatible = "mediatek,hcp", .data = (void *)&isp71_hcp_data}
+	{.compatible = "mediatek,hcp", .data = (void *)&isp71_hcp_data},
 #elif defined(IMGSYS_VER_ISP70)
-	{.compatible = "mediatek,hcp", .data = (void *)&isp70_hcp_data}
+	{.compatible = "mediatek,hcp", .data = (void *)&isp70_hcp_data},
 #endif
+	{}
 };
 MODULE_DEVICE_TABLE(of, mtk_hcp_match);
 
