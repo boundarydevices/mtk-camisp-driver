@@ -640,6 +640,7 @@ void imgsys_traw_set_initial_value(struct mtk_imgsys_dev *imgsys_dev)
 #endif
 	pr_debug("%s\n", __func__);
 }
+EXPORT_SYMBOL(imgsys_traw_set_initial_value);
 
 void imgsys_traw_set_initial_value_hw(struct mtk_imgsys_dev *imgsys_dev)
 {
@@ -666,6 +667,8 @@ void imgsys_traw_set_initial_value_hw(struct mtk_imgsys_dev *imgsys_dev)
 
 	pr_debug("%s\n", __func__);
 }
+EXPORT_SYMBOL(imgsys_traw_set_initial_value_hw);
+
 
 void imgsys_traw_debug_dump(struct mtk_imgsys_dev *imgsys_dev,
 							unsigned int engine)
@@ -747,6 +750,7 @@ void imgsys_traw_debug_dump(struct mtk_imgsys_dev *imgsys_dev,
 err_debug_dump:
 	pr_info("%s: -\n", __func__);
 }
+EXPORT_SYMBOL(imgsys_traw_debug_dump);
 
 void imgsys_traw_uninit(struct mtk_imgsys_dev *imgsys_dev)
 {
@@ -761,3 +765,4 @@ void imgsys_traw_uninit(struct mtk_imgsys_dev *imgsys_dev)
 
 	pr_debug("%s\n", __func__);
 }
+EXPORT_SYMBOL(imgsys_traw_uninit);

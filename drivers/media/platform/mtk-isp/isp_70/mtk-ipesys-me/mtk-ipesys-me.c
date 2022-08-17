@@ -142,7 +142,7 @@ void ipesys_me_debug_dump(struct mtk_imgsys_dev *imgsys_dev,
 }
 EXPORT_SYMBOL(ipesys_me_debug_dump);
 
-static void ipesys_me_debug_dump_local(void)
+void ipesys_me_debug_dump_local(void)
 {
 	void __iomem *meRegBA = 0L;
 	unsigned int i;

@@ -1697,7 +1697,6 @@ static int allocate_working_buffer_helper(struct platform_device *pdev)
 
 	return 0;
 }
-EXPORT_SYMBOL(allocate_working_buffer_helper);
 
 static int release_working_buffer_helper(struct platform_device *pdev)
 {
@@ -1755,7 +1754,6 @@ static int release_working_buffer_helper(struct platform_device *pdev)
 
 	return 0;
 }
-EXPORT_SYMBOL(release_working_buffer_helper);
 
 int mtk_hcp_allocate_working_buffer(struct platform_device *pdev, unsigned int mode)
 {

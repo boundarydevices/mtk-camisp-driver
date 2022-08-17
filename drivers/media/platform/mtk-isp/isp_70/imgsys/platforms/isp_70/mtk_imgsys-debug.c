@@ -74,6 +74,7 @@ void imgsys_main_init(struct mtk_imgsys_dev *imgsys_dev)
 
 	pr_info("%s: -.\n", __func__);
 }
+EXPORT_SYMBOL(imgsys_main_init);
 
 void imgsys_main_set_init(struct mtk_imgsys_dev *imgsys_dev)
 {
@@ -107,6 +108,7 @@ void imgsys_main_set_init(struct mtk_imgsys_dev *imgsys_dev)
 
 	pr_debug("%s: -.\n", __func__);
 }
+EXPORT_SYMBOL(imgsys_main_set_init);
 
 void imgsys_main_uninit(struct mtk_imgsys_dev *imgsys_dev)
 {
@@ -134,6 +136,7 @@ void imgsys_main_uninit(struct mtk_imgsys_dev *imgsys_dev)
 
 	pr_debug("%s: -.\n", __func__);
 }
+EXPORT_SYMBOL(imgsys_main_uninit);
 
 void imgsys_debug_dump_routine(struct mtk_imgsys_dev *imgsys_dev,
 	const struct module_ops *imgsys_modules,

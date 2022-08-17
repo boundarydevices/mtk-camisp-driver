@@ -399,3 +399,5 @@ void imgsys_dip_uninit(struct mtk_imgsys_dev *imgsys_dev)
 	pr_debug("%s: -\n", __func__);
 }
 EXPORT_SYMBOL(imgsys_dip_uninit);
+
+MODULE_LICENSE("GPL v2");
