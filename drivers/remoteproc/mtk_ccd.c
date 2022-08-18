@@ -476,3 +476,4 @@ module_exit(ccd_exit);
 
 MODULE_LICENSE("GPL v2");
 MODULE_DESCRIPTION("MediaTek CCD driver");
+MODULE_IMPORT_NS(DMA_BUF);
