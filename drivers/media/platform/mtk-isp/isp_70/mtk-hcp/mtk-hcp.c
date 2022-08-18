@@ -2036,3 +2036,4 @@ module_platform_driver(mtk_hcp_driver);
 
 MODULE_LICENSE("GPL v2");
 MODULE_DESCRIPTION("Mediatek hetero control process driver");
+MODULE_IMPORT_NS(DMA_BUF);
