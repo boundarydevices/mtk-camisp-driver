@@ -124,7 +124,7 @@ static struct mtk_ccd_rpmsg_ops ccd_rpmsg_ops = {
 static void ccd_add_rpmsg_subdev(struct mtk_ccd *ccd)
 {
 	ccd->rpmsg_subdev =
-		mtk_rpmsg_create_rproc_subdev(to_platform_device(ccd->dev),
+		mtk_ccd_rpmsg_create_rproc_subdev(to_platform_device(ccd->dev),
 					      &ccd_rpmsg_ops);
 	if (ccd->rpmsg_subdev)
 		rproc_add_subdev(ccd->rproc, ccd->rpmsg_subdev);
@@ -134,7 +134,7 @@ static void ccd_remove_rpmsg_subdev(struct mtk_ccd *ccd)
 {
 	if (ccd->rpmsg_subdev) {
 		rproc_remove_subdev(ccd->rproc, ccd->rpmsg_subdev);
-		mtk_rpmsg_destroy_rproc_subdev(ccd->rpmsg_subdev);
+		mtk_ccd_rpmsg_destroy_rproc_subdev(ccd->rpmsg_subdev);
 		ccd->rpmsg_subdev = NULL;
 	}
 }

@@ -67,10 +67,10 @@ int mtk_destroy_client_msgdevice(struct rproc_subdev *subdev,
 			     struct rpmsg_channel_info *info);
 
 struct rproc_subdev *
-mtk_rpmsg_create_rproc_subdev(struct platform_device *pdev,
+mtk_ccd_rpmsg_create_rproc_subdev(struct platform_device *pdev,
 			      struct mtk_ccd_rpmsg_ops *ops);
 
-void mtk_rpmsg_destroy_rproc_subdev(struct rproc_subdev *subdev);
+void mtk_ccd_rpmsg_destroy_rproc_subdev(struct rproc_subdev *subdev);
 
 
 int mtk_rpmsg_subdev_probe(struct rproc_subdev *subdev);

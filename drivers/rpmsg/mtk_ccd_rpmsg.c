@@ -419,7 +419,7 @@ void mtk_rpmsg_subdev_remove(struct rproc_subdev *subdev)
 }
 
 struct rproc_subdev *
-mtk_rpmsg_create_rproc_subdev(struct platform_device *pdev,
+mtk_ccd_rpmsg_create_rproc_subdev(struct platform_device *pdev,
 			      struct mtk_ccd_rpmsg_ops *ops)
 {
 	struct mtk_rpmsg_rproc_subdev *mtk_subdev;
@@ -455,16 +455,16 @@ mtk_rpmsg_create_rproc_subdev(struct platform_device *pdev,
 
 	return &mtk_subdev->subdev;
 }
-EXPORT_SYMBOL_GPL(mtk_rpmsg_create_rproc_subdev);
+EXPORT_SYMBOL_GPL(mtk_ccd_rpmsg_create_rproc_subdev);
 
-void mtk_rpmsg_destroy_rproc_subdev(struct rproc_subdev *subdev)
+void mtk_ccd_rpmsg_destroy_rproc_subdev(struct rproc_subdev *subdev)
 {
 	struct mtk_rpmsg_rproc_subdev *mtk_subdev = to_mtk_subdev(subdev);
 
 	idr_destroy(&mtk_subdev->endpoints);
 	kfree(mtk_subdev);
 }
-EXPORT_SYMBOL_GPL(mtk_rpmsg_destroy_rproc_subdev);
+EXPORT_SYMBOL_GPL(mtk_ccd_rpmsg_destroy_rproc_subdev);
 
 static int ccd_msgdev_cb(struct rpmsg_device *rpdev, void *data,
 			 int len, void *priv, u32 src)
