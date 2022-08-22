@@ -3,6 +3,7 @@
 # Generic framework for controlling remote processors
 
 ccflags-y += -I$(top)/include
+ccflags-y += -I$(srctree)/drivers/remoteproc
 
 obj-$(CONFIG_MTKCCD_REMOTEPROC) += mtk-ccd.o
 
