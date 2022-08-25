@@ -23,8 +23,7 @@ mtk-cam-isp-objs +=  mtk_cam-hsf.o
 
 include $(src)/mtk_csi_phy_2_0/sub_drv.mk
 
-mtk-cam-plat-mt8195-objs :=  mtk_cam-plat-mt8195.o
-obj-$(CONFIG_VIDEO_MTK_ISP_7_CAMSYS) += mtk-cam-plat-mt8195.o
-
+mtk-cam-plat-impl-objs :=  mtk_cam-plat-$(MTK_PLATFORM).o
+obj-$(CONFIG_VIDEO_MTK_ISP_7_CAMSYS) += mtk-cam-plat-impl.o
 obj-$(CONFIG_VIDEO_MTK_ISP_7_CAMSYS) += mtk-cam-plat-util.o
 obj-$(CONFIG_VIDEO_MTK_ISP_7_CAMSYS) += mtk-cam-isp.o
