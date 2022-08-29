@@ -2,9 +2,9 @@
 #
 # Copyright (C) 2018 MediaTek Inc.
 #
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/mtk-hcp
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/imgsys/
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/mtk-ipesys-me/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/mtk-hcp
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/imgsys/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/mtk-ipesys-me/
 ccflags-y += -I$(srctree)/drivers/iommu
 
 #mtk_imgsys_hw-objs := \

@@ -2,12 +2,12 @@
 #
 # Copyright (C) 2018 MediaTek Inc.
 #
-export MTK_IMGSYS_VER := $(subst ",,$(CONFIG_MTK_IMGSYS_VER)")
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/mtk-hcp
+export MTK_IMGSYS_VER := 70
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/mtk-hcp
 ccflags-$(CONFIG_MTK_CMDQ_MBOX_EXT) += -I$(srctree)/drivers/misc/mediatek/cmdq/mailbox/
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/imgsys/
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/imgsys/platforms/
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/imgsys/platforms/isp_70/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/imgsys/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/imgsys/platforms/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/imgsys/platforms/isp_70/
 
 # Utilities to provide frame-based streaming model
 # with v4l2 user interfaces and alloc context managing
@@ -25,5 +25,5 @@ else ifeq ($(MTK_IMGSYS_VER), 70)
 endif
 $(info "ipesys, subdir-ccflags-y = $(subdir-ccflags-y)")
 
-obj-y += mtk-ipesys-me.o
+obj-$(CONFIG_VIDEO_MTK_ISP_7_IMGSYS) += mtk-ipesys-me.o
 

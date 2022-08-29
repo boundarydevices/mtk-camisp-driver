@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-2.0
 #
 
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/mtk-hcp
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/mtk-hcp
 ccflags-y += -I$(srctree)/include/linux/mailbox/
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/imgsys/
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/imgsys/platforms/
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/imgsys/platforms/isp_70
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/mtk-ipesys-me/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/imgsys/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/imgsys/platforms/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/imgsys/platforms/isp_70
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/mtk-ipesys-me/
 ccflags-y += -I$(srctree)/drivers/iommu
 
 mtk_imgsys_util-objs := \
@@ -25,5 +25,5 @@ platforms/isp_70/modules/mtk_imgsys-traw.o \
 platforms/isp_70/modules/mtk_imgsys-pqdip.o \
 platforms/isp_70/modules/mtk_imgsys-wpe.o
 
-obj-y += mtk_imgsys_util.o
-obj-y += mtk_imgsys_hw_isp.o
+obj-$(CONFIG_VIDEO_MTK_ISP_7_IMGSYS) += mtk_imgsys_util.o
+obj-$(CONFIG_VIDEO_MTK_ISP_7_IMGSYS) += mtk_imgsys_hw_isp.o

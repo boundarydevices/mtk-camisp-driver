@@ -15,8 +15,8 @@ subdir-ccflags-y += -Werror
 #ccflags-y += -I$(srctree)/drivers/misc/mediatek/scp/$(CONFIG_MTK_PLATFORM)
 #ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/2.4
 #ccflags-y += -I$(srctree)/drivers/misc/mediatek/m4u/$(MTK_PLATFORM)
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/imgsys/
-ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/mtk-hcp/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/imgsys/
+ccflags-y += -I$(top)/drivers/media/platform/mtk-isp/isp_70/mtk-hcp/
 
 #ifeq ($(CONFIG_MTK_ION),y)
 #    ccflags-y += -I$(srctree)/drivers/staging/android/mtk_ion/
@@ -31,8 +31,11 @@ ccflags-y += -I$(srctree)/drivers/media/platform/mtk-isp/isp_70/mtk-hcp/
 ccflags-y += -I$(srctree)/drivers/dma-buf/heaps/ \
              -I$(srctree)/drivers/iommu
 
-obj-y += mem/hcp_videobuf2-memops.o
-obj-y += mem/hcp_videobuf2-vmalloc.o
-obj-y += mem/hcp_videobuf2-dma-contig.o
-obj-y += mtk-hcp_isp70.o
-obj-y += mtk-hcp.o
+mtk_hcp-objs := \
+mem/hcp_videobuf2-memops.o \
+mem/hcp_videobuf2-vmalloc.o \
+mem/hcp_videobuf2-dma-contig.o \
+mtk-hcp_isp70.o \
+mtk-hcp.o
+
+obj-$(CONFIG_VIDEO_MTK_ISP_7_IMGSYS) += mtk_hcp.o
