@@ -63,7 +63,7 @@ static int apply_next_req(struct mtk_cam_ut *ut)
 	if (!ut->with_testmdl) {
 		spin_lock_irqsave(&ut->spinlock_irq, flags);
 		if (!ut->m2m_available) {
-			dev_info(ut->dev, "%s: m2m not avialable\n");
+			dev_info(ut->dev, "m2m not avialable\n");
 			spin_unlock_irqrestore(&ut->spinlock_irq, flags);
 			return 0;
 		}
@@ -333,7 +333,7 @@ static int cam_composer_init(struct mtk_cam_ut *ut)
 
 	ccd = (struct mtk_ccd *)ut->rproc_handle->priv;
 	rpmsg_subdev = ccd->rpmsg_subdev;
-	snprintf(msg->name, RPMSG_NAME_SIZE, "mtk-isp-unit-test\0\n");
+	snprintf(msg->name, RPMSG_NAME_SIZE, "mtk-isp-unit-test");
 	msg->src = CCD_IPI_ISP_MAIN;
 	ut->rpmsg_dev = mtk_create_client_msgdevice(rpmsg_subdev, msg);
 	if (!ut->rpmsg_dev) {
@@ -594,7 +594,7 @@ static long cam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		msgbuf->size = IPI_FRAME_BUF_TOTAL_SIZE;
 		msgbuf->ccd_fd = dmabuf_ipi_fd;
 		msgbuf->iova = ut->msg_mem->iova;
-		dev_info(dev, "[CREATE_SESSION] ut->msg_mem->va 0x%x size %d\n",
+		dev_info(dev, "[CREATE_SESSION] ut->msg_mem->va 0x%p size %d\n",
 				ut->msg_mem->va, msgbuf->size);
 		/* ipi msg end */
 
@@ -707,7 +707,7 @@ static long cam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			}
 		}
 		/* ipi msg */
-		dev_info(dev, "[ENQUE] msg_mem->va 0x%x size %d cur_msgbuf_offset 0x%x cur_workbuf_offset 0x%x frame_no %d\n",
+		dev_info(dev, "[ENQUE] msg_mem->va 0x%p size %d cur_msgbuf_offset 0x%x cur_workbuf_offset 0x%x frame_no %d\n",
 				ut->msg_mem->va, ut->msg_mem->size,
 				frame_info->cur_msgbuf_offset,
 				enque.frame_param.cur_workbuf_offset,
@@ -827,8 +827,8 @@ static long cam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		mtk_ccd_put_buffer(ccd, &smem);
 
 		dev_dbg(dev,
-			"%s:sw buffers release, mem(%p), sz(%d)\n",
-			__func__, smem.iova, smem.len);
+			"%s:sw buffers release, mem(%pad), sz(%d)\n",
+			__func__, &smem.iova, smem.len);
 
 		return 0;
 	}
@@ -1089,7 +1089,7 @@ static int mtk_cam_ut_master_bind(struct device *dev)
 	}
 #endif
 
-	dev_info(dev, "component_bind_all with data = 0x%llx\n", dev_get_drvdata(dev));
+	dev_info(dev, "component_bind_all with data = 0x%px\n", dev_get_drvdata(dev));
 	ret = component_bind_all(dev, dev_get_drvdata(dev));
 	if (ret) {
 		dev_info(dev, "Failed to bind all component: %d\n", ret);

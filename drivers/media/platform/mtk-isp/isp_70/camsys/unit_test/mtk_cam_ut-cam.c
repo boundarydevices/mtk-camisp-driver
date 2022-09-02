@@ -188,8 +188,8 @@ static int ut_raw_apply_cq(struct device *dev,
 	struct mtk_ut_raw_device *raw = dev_get_drvdata(dev);
 	void __iomem *base = raw->base;
 
-	dev_info(dev, "[%s] cq baseaddr = 0x%x, cq size = 0x%x, cq offset = 0x%x, sub_cq size = 0x%x, sub_cq_offset = 0x%x\n",
-		__func__, cq_addr, cq_size, cq_offset, sub_cq_size, sub_cq_offset);
+	dev_info(dev, "[%s] cq baseaddr = %pad, cq size = 0x%x, cq offset = 0x%x, sub_cq size = 0x%x, sub_cq_offset = 0x%x\n",
+		__func__, &cq_addr, cq_size, cq_offset, sub_cq_size, sub_cq_offset);
 		writel_relaxed(cq_addr + cq_offset, base + REG_CQ_THR0_BASEADDR);
 		writel_relaxed(cq_size, base + REG_CQ_THR0_DESC_SIZE);
 
