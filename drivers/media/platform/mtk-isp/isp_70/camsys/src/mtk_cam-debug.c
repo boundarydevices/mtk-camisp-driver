@@ -12,6 +12,7 @@
 #include "mtk_cam-regs.h"
 #include "mtk_cam-debug.h"
 #include "mtk_camera-v4l2-controls.h"
+#include "mtk_camera-videodev2.h"
 #include <soc/mediatek/smi.h>
 #if IS_ENABLED(CONFIG_MTK_AEE_FEATURE)
 #include <aee.h>

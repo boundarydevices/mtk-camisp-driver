@@ -26,6 +26,7 @@
 #endif
 #include "mtk_cam-tg-flash.h"
 #include "mtk_camera-v4l2-controls.h"
+#include "mtk_camera-videodev2.h"
 #include "imgsys/mtk_imgsys-cmdq-ext.h"
 
 #define SENSOR_SET_DEADLINE_MS  18

@@ -35,6 +35,7 @@
 
 #include "mtk_cam-sv.h"
 #include "mtk_camera-v4l2-controls.h"
+#include "mtk_camera-videodev2.h"
 
 #ifdef CONFIG_MTK_SMI_EXT
 #include "smi_public.h"

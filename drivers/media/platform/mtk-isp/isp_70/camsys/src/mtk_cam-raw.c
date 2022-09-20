@@ -31,6 +31,7 @@
 #include "mtk_cam-seninf-if.h"
 #include "mtk_cam-tg-flash.h"
 #include "mtk_camera-v4l2-controls.h"
+#include "mtk_camera-videodev2.h"
 
 #include "mtk_cam-dmadbg.h"
 #include "mtk_cam-raw_debug.h"
