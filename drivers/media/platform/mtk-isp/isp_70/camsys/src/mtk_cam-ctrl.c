@@ -27,7 +27,6 @@
 #include "mtk_cam-tg-flash.h"
 #include "mtk_camera-v4l2-controls.h"
 #include "imgsys/mtk_imgsys-cmdq-ext.h"
-#include "frame_sync_camsys.h"
 
 #define SENSOR_SET_DEADLINE_MS  18
 #define SENSOR_SET_RESERVED_MS  7
@@ -248,7 +247,6 @@ static bool mtk_cam_req_frame_sync_start(struct mtk_cam_request *req)
 		dev_dbg(cam->dev, "%s:%s:fs_sync_frame(1): ctxs: 0x%x\n",
 			__func__, req->req.debug_str, req->ctx_used);
 
-		fs_sync_frame(1);
 		ret = true;
 		goto EXIT;
 
@@ -297,7 +295,7 @@ static bool mtk_cam_req_frame_sync_end(struct mtk_cam_request *req)
 		dev_dbg(cam->dev,
 			"%s:%s:fs_sync_frame(0): ctxs: 0x%x\n",
 			__func__, req->req.debug_str, req->ctx_used);
-		fs_sync_frame(0);
+
 		ret = true;
 		goto EXIT;
 	}
