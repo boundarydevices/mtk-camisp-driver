@@ -35,19 +35,10 @@ struct fd_info {
 
 struct fd_tbl {
 	uint8_t fd_num;
-	unsigned int *fds;
+	uint64_t fds; // user address, point to unsigned int array
 } __attribute__ ((__packed__));
-#ifdef CONFIG_COMPAT
-struct fd_tbl_compat {
-	uint8_t fd_num;
-	compat_uptr_t fds;
-} __attribute__ ((__packed__));
-#define MTKDIP_IOC_ADD_IOVA _IOW('V', BASE_VIDIOC_PRIVATE + 10, struct fd_tbl_compat)
-#define MTKDIP_IOC_DEL_IOVA _IOW('V', BASE_VIDIOC_PRIVATE + 11, struct fd_tbl_compat)
-#else
 #define MTKDIP_IOC_ADD_IOVA _IOW('V', BASE_VIDIOC_PRIVATE + 10, struct fd_tbl)
 #define MTKDIP_IOC_DEL_IOVA _IOW('V', BASE_VIDIOC_PRIVATE + 11, struct fd_tbl)
-#endif
 
 struct sensor_info {
 	uint16_t full_wd;

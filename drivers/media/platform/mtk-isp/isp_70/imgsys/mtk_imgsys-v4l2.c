@@ -1897,7 +1897,6 @@ long mtk_imgsys_subdev_compat_ioctl(struct v4l2_subdev *subdev, unsigned int cmd
 								unsigned long arg)
 {
 	struct fd_info fd_data32;
-	struct fd_tbl_compat fdtbl_data32;
 	struct fd_tbl fdtbl_data;
 	struct init_info init_data;
 	struct ctrl_info ctrl_data;
@@ -1914,13 +1913,11 @@ long mtk_imgsys_subdev_compat_ioctl(struct v4l2_subdev *subdev, unsigned int cmd
 		return subdev->ops->core->ioctl(subdev, cmd, &fd_data32);
 	case MTKDIP_IOC_ADD_IOVA:
 	case MTKDIP_IOC_DEL_IOVA:
-		if (copy_from_user(&fdtbl_data32, (void __user *)arg, sizeof(fdtbl_data32))) {
+		if (copy_from_user(&fdtbl_data, (void __user *)arg, sizeof(fdtbl_data))) {
 			pr_info("Failed to copy from user_ptr=%pK size=%zu\n",
-				(void __user *)arg, sizeof(fdtbl_data32));
+				(void __user *)arg, sizeof(fdtbl_data));
 			return -EFAULT;
 		}
-		fdtbl_data.fd_num = fdtbl_data32.fd_num;
-		fdtbl_data.fds = compat_ptr(fdtbl_data32.fds);
 		return subdev->ops->core->ioctl(subdev, cmd, &fdtbl_data);
 	case MTKDIP_IOC_S_INIT_INFO:
 		if (copy_from_user(&init_data, (void __user *)arg, sizeof(init_data))) {
