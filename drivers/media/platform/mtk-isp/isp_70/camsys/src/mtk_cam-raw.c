@@ -589,7 +589,7 @@ static int mtk_cam_raw_set_res_ctrl(struct v4l2_ctrl *ctrl)
 
 	ret = mtk_cam_raw_res_store(pipeline, res_user);
 	pipeline->user_res = *res_user;
-	if (pipeline->subdev.entity.stream_count) {
+	if (pipeline->subdev.entity.pads->stream_count) {
 		/* If the pipeline is streaming, pending the change */
 		dev_dbg(dev, "%s:pipe(%d): pending res calc has not been supported except bin\n",
 			__func__, pipeline->id);
@@ -598,7 +598,7 @@ static int mtk_cam_raw_set_res_ctrl(struct v4l2_ctrl *ctrl)
 
 	dev_dbg(dev,
 		"%s:pipe(%d):streaming(%d), feature_pending(0x%llx), raw_res.feature(0x%llx), feature_active(0x%llx)\n",
-		__func__, pipeline->id, pipeline->subdev.entity.stream_count,
+		__func__, pipeline->id, pipeline->subdev.entity.pads->stream_count,
 		pipeline->feature_pending, pipeline->user_res.raw_res.feature,
 		pipeline->feature_active);
 
@@ -717,7 +717,7 @@ static int mtk_raw_try_ctrl(struct v4l2_ctrl *ctrl)
 
 		dev_dbg(dev,
 				"%s:pipe(%d):streaming(%d), feature_pending(0x%llx), feature_active(0x%llx)\n",
-				__func__, pipeline->id, pipeline->subdev.entity.stream_count,
+				__func__, pipeline->id, pipeline->subdev.entity.pads->stream_count,
 				pipeline->feature_pending, pipeline->feature_active);
 
 		dev_dbg(dev, "%s:pipe(%d): res ctrl end\n", __func__,
@@ -773,7 +773,7 @@ static int mtk_raw_set_ctrl(struct v4l2_ctrl *ctrl)
 		 */
 		pipeline->sensor_mode_update = ctrl->val;
 		dev_info(dev, "%s:pipe(%d):streaming(%d), sensor_mode_update(%d)\n",
-			 __func__, pipeline->id, pipeline->subdev.entity.stream_count,
+			 __func__, pipeline->id, pipeline->subdev.entity.pads->stream_count,
 			 pipeline->sensor_mode_update);
 		break;
 	case V4L2_CID_MTK_CAM_TG_FLASH_CFG:
@@ -784,7 +784,7 @@ static int mtk_raw_set_ctrl(struct v4l2_ctrl *ctrl)
 
 			dev_dbg(dev,
 				"%s:pipe(%d):streaming(%d), feature_pending(0x%llx), feature_active(0x%llx)\n",
-				__func__, pipeline->id, pipeline->subdev.entity.stream_count,
+				__func__, pipeline->id, pipeline->subdev.entity.pads->stream_count,
 				pipeline->feature_pending, pipeline->feature_active);
 			ret = 0;
 			break;
@@ -794,7 +794,7 @@ static int mtk_raw_set_ctrl(struct v4l2_ctrl *ctrl)
 
 		dev_dbg(dev,
 			"%s:pipe(%d):streaming(%d), hw_mode(0x%llx)\n",
-			__func__, pipeline->id, pipeline->subdev.entity.stream_count,
+			__func__, pipeline->id, pipeline->subdev.entity.pads->stream_count,
 			pipeline->hw_mode);
 
 		ret = 0;
@@ -3781,7 +3781,7 @@ static int mtk_raw_set_fmt(struct v4l2_subdev *sd,
 		return mtk_raw_try_pad_fmt(sd, sd_state, fmt);
 
 	/* if the pipeline is streaming, pending the change */
-	if (!sd->entity.stream_count)
+	if (!sd->entity.pads->stream_count)
 		return mtk_raw_call_set_fmt(sd, sd_state, fmt, false);
 
 	if (fmt->request_fd <= 0)
@@ -3836,11 +3836,13 @@ struct v4l2_subdev *mtk_cam_find_sensor(struct mtk_cam_ctx *ctx,
 {
 	struct media_graph *graph;
 	struct v4l2_subdev *sensor = NULL;
+	struct media_pad *pad = entity->pads;
 
 	graph = &ctx->pipeline.graph;
-	media_graph_walk_start(graph, entity);
+	media_graph_walk_start(graph, entity->pads);
 
-	while ((entity = media_graph_walk_next(graph))) {
+	while ((pad = media_graph_walk_next(graph))) {
+		entity = pad->entity;
 		dev_dbg(ctx->cam->dev, "linked entity: %s\n", entity->name);
 		sensor = NULL;
 
@@ -3894,7 +3896,7 @@ static int mtk_cam_media_link_setup(struct media_entity *entity,
 		pipe->vdev_nodes[pad - MTK_RAW_SINK_NUM].enabled =
 			!!(flags & MEDIA_LNK_FL_ENABLED);
 
-	if (!entity->stream_count && !(flags & MEDIA_LNK_FL_ENABLED))
+	if (!entity->pads->stream_count && !(flags & MEDIA_LNK_FL_ENABLED))
 		memset(pipe->cfg, 0, sizeof(pipe->cfg));
 
 	if (pad == MTK_RAW_SINK && flags & MEDIA_LNK_FL_ENABLED)

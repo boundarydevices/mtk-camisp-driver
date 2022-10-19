@@ -642,12 +642,12 @@ void mtk_cam_req_seninf_change(struct mtk_cam_request *req)
 					 req_stream_data->seninf_new->name);
 
 			mtk_cam_apply_pending_dev_config(req_stream_data);
-			m_pipe = req_stream_data->seninf_new->entity.pipe;
-			req_stream_data->seninf_new->entity.stream_count++;
-			req_stream_data->seninf_new->entity.pipe =
-				req_stream_data->seninf_old->entity.pipe;
-			req_stream_data->seninf_old->entity.stream_count--;
-			req_stream_data->seninf_old->entity.pipe = m_pipe;
+			m_pipe = req_stream_data->seninf_new->entity.pads->pipe;
+			req_stream_data->seninf_new->entity.pads->stream_count++;
+			req_stream_data->seninf_new->entity.pads->pipe =
+				req_stream_data->seninf_old->entity.pads->pipe;
+			req_stream_data->seninf_old->entity.pads->stream_count--;
+			req_stream_data->seninf_old->entity.pads->pipe = m_pipe;
 
 			dev_info(cam->dev,
 				 "%s: pipe(%d):seninf(%s):seninf_set_camtg, pad(%d) camtg(%d)",

@@ -5407,7 +5407,7 @@ struct mtk_cam_ctx *mtk_cam_find_ctx(struct mtk_cam_device *cam,
 	unsigned int i;
 
 	for (i = 0;  i < cam->max_stream_num; i++) {
-		if (entity->pipe == &cam->ctxs[i].pipeline)
+		if (entity->pads->pipe == &cam->ctxs[i].pipeline)
 			return &cam->ctxs[i];
 	}
 
@@ -5422,6 +5422,7 @@ struct mtk_cam_ctx *mtk_cam_start_ctx(struct mtk_cam_device *cam,
 	struct v4l2_subdev **target_sd;
 	int ret, i, is_first_ctx;
 	struct media_entity *entity = &node->vdev.entity;
+	struct media_pad *pad = entity->pads;
 
 	dev_info(cam->dev, "%s:ctx(%d): triggered by %s\n",
 		 __func__, ctx->stream_id, entity->name);
@@ -5523,7 +5524,7 @@ struct mtk_cam_ctx *mtk_cam_start_ctx(struct mtk_cam_device *cam,
 	}
 
 	mtk_cam_sv_working_buf_pool_init(ctx);
-	ret = media_pipeline_start(entity, &ctx->pipeline);
+	ret = media_pipeline_start(entity->pads, &ctx->pipeline);
 	if (ret) {
 		dev_info(cam->dev,
 			 "%s:pipe(%d):failed in media_pipeline_start:%d\n",
@@ -5533,10 +5534,11 @@ struct mtk_cam_ctx *mtk_cam_start_ctx(struct mtk_cam_device *cam,
 
 	/* traverse to update used subdevs & number of nodes */
 	graph = &ctx->pipeline.graph;
-	media_graph_walk_start(graph, entity);
+	media_graph_walk_start(graph, entity->pads);
 
 	i = 0;
-	while ((entity = media_graph_walk_next(graph))) {
+	while ((pad = media_graph_walk_next(graph))) {
+		entity = pad->entity;
 		dev_dbg(cam->dev, "linked entity %s\n", entity->name);
 
 		target_sd = NULL;
@@ -5577,7 +5579,7 @@ struct mtk_cam_ctx *mtk_cam_start_ctx(struct mtk_cam_device *cam,
 	return ctx;
 
 fail_stop_pipeline:
-	media_pipeline_stop(entity);
+	media_pipeline_stop(entity->pads);
 fail_uninit_sv_wq:
 	destroy_workqueue(ctx->sv_wq);
 fail_uninit_frame_done_wq:
@@ -5617,7 +5619,7 @@ void mtk_cam_stop_ctx(struct mtk_cam_ctx *ctx, struct media_entity *entity)
 	dev_info(cam->dev, "%s:ctx(%d): triggered by %s\n",
 		 __func__, ctx->stream_id, entity->name);
 
-	media_pipeline_stop(entity);
+	media_pipeline_stop(entity->pads);
 	if (ctx->session_created) {
 		dev_dbg(cam->dev,
 			"%s:ctx(%d): session_created, wait for composer session destroy\n",
@@ -5644,12 +5646,12 @@ void mtk_cam_stop_ctx(struct mtk_cam_ctx *ctx, struct media_entity *entity)
 					dev_info(cam->dev,
 						"failed to streamoff %s:%d\n",
 						sd->name, ret);
-				sd->entity.stream_count = 0;
-				sd->entity.pipe = NULL;
+				sd->entity.pads->stream_count = 0;
+				sd->entity.pads->pipe = NULL;
 			} else if (sd->entity.function ==
 						MEDIA_ENT_F_CAM_SENSOR) {
-				sd->entity.stream_count = 0;
-				sd->entity.pipe = NULL;
+				sd->entity.pads->stream_count = 0;
+				sd->entity.pads->pipe = NULL;
 			}
 		}
 	}
