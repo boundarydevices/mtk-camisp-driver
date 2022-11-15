@@ -1141,7 +1141,7 @@ void mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 static int fops_camera_open(struct file *file)
 {
 	struct mtk_camera_stream *stream = video_drvdata(file);
-	struct mtk_camera_fh *handle = file->private_data;
+	struct mtk_camera_fh *handle;
 	int ret = 0;
 
 	/* Create the device handle. */
