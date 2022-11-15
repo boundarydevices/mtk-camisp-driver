@@ -27,10 +27,10 @@
 
 #define MTK_VIDEO_CAPTURE_DEF_WIDTH         1920U
 #define MTK_VIDEO_CAPTURE_DEF_HEIGHT        1080U
-#define MTK_VIDEO_CAPTURE_MIN_WIDTH         160U
-#define MTK_VIDEO_CAPTURE_MAX_WIDTH         3840
-#define MTK_VIDEO_CAPTURE_MIN_HEIGHT        96U
-#define MTK_VIDEO_CAPTURE_MAX_HEIGHT        2160
+#define MTK_VIDEO_CAPTURE_MIN_WIDTH         2U
+#define MTK_VIDEO_CAPTURE_MAX_WIDTH         8192U
+#define MTK_VIDEO_CAPTURE_MIN_HEIGHT        2U
+#define MTK_VIDEO_CAPTURE_MAX_HEIGHT        8192U
 
 static struct v4l2_frmsize_discrete mtk_camera_sizes_yuyv[] = {
 	{ 640, 360   },
