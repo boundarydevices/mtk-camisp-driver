@@ -755,7 +755,7 @@ STOP_SCAN:
 				ae_data.LTM_Sum[0], ae_data.LTM_Sum[1],
 				ae_data.LTM_Sum[2], ae_data.LTM_Sum[3]);
 		} else
-			dev_info(ctx->cam->dev,
+			dev_dbg(ctx->cam->dev,
 				"%s:%s:ctx(%d):pipe(%d):de-queue seq(%d):handle seq(%d),done(0x%x),pipes(req:0x%x,ctx:0x%x,all:0x%x),del_job(%d),del_req(%d)\n",
 			__func__, req->req.debug_str, ctx->stream_id, pipe_id,
 			dequeued_frame_seq_no, s_data->frame_seq_no, req->done_status,
@@ -2886,7 +2886,7 @@ static int mtk_cam_req_update(struct mtk_cam_device *cam,
 	int raw_feature;
 	int ret;
 
-	dev_info(cam->dev, "update request:%s\n", req->req.debug_str);
+	dev_dbg(cam->dev, "update request:%s\n", req->req.debug_str);
 
 	mtk_cam_req_set_fmt(cam, req);
 
@@ -3300,7 +3300,7 @@ void mtk_cam_dev_req_try_queue(struct mtk_cam_device *cam)
 				if (raw_hdl_obj) {
 					s_data->flags |= MTK_CAM_REQ_S_DATA_FLAG_RAW_HDL_EN;
 					s_data->raw_hdl_obj = raw_hdl_obj;
-					dev_info(cam->dev,
+					dev_dbg(cam->dev,
 						"%s:%s:ctx(%d): find pipe hdl\n",
 						__func__, req->req.debug_str, i);
 				}
@@ -3312,7 +3312,7 @@ void mtk_cam_dev_req_try_queue(struct mtk_cam_device *cam)
 				if (s_data->sensor && s_data->sensor->ctrl_handler &&
 				    sensor_hdl_obj) {
 					s_data->sensor_hdl_obj = sensor_hdl_obj;
-					dev_info(cam->dev,
+					dev_dbg(cam->dev,
 						"%s:%s:ctx(%d): find sensor(%s) hdl\n",
 						__func__, req->req.debug_str, i,
 						s_data->sensor->name);
@@ -4723,7 +4723,7 @@ void mtk_cam_dev_req_enqueue(struct mtk_cam_device *cam,
 				queue_work(ctx->composer_wq, &frame_work->work);
 			}
 
-			dev_info(cam->dev, "%s:ctx:%d:req:%d(%s) enqueue ctx_used:0x%x,streaming_ctx:0x%x,job cnt:%d, running(%d)\n",
+			dev_dbg(cam->dev, "%s:ctx:%d:req:%d(%s) enqueue ctx_used:0x%x,streaming_ctx:0x%x,job cnt:%d, running(%d)\n",
 				__func__, stream_id, req_stream_data->frame_seq_no,
 				req->req.debug_str, req->ctx_used, cam->streaming_ctx,
 				cam->running_job_count, atomic_read(&ctx->running_s_data_cnt));
