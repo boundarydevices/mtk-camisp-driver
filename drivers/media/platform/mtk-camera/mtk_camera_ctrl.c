@@ -297,25 +297,25 @@ static int mtk_camera_ctrls_create(struct mtk_camera_ctx *ctx)
 
 	ret = v4l2_ctrl_handler_init(&ctx->ctrl_hdl, MTK_CAMERA_MAX_CTRLS_HINT);
 
-	// ctx->ctrls.brightness = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
-	//					&mtk_camera_ctrl_ops,
-	//					V4L2_CID_BRIGHTNESS,
-	//					-1023, 1023, 1, 0);
+	ctx->ctrls.brightness = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
+						&mtk_camera_ctrl_ops,
+						V4L2_CID_BRIGHTNESS,
+						0, 100, 1, 0);
 
-	// ctx->ctrls.contrast = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
-	//					&mtk_camera_ctrl_ops,
-	//					V4L2_CID_CONTRAST,
-	//					0, 2000, 1, 100);
+	ctx->ctrls.contrast = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
+						&mtk_camera_ctrl_ops,
+						V4L2_CID_CONTRAST,
+						0, 10, 1, 0);
 
-	// ctx->ctrls.saturation = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
-	//					&mtk_camera_ctrl_ops,
-	//					V4L2_CID_SATURATION,
-	//					0, 2, 1, 1);
+	ctx->ctrls.saturation = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
+						&mtk_camera_ctrl_ops,
+						V4L2_CID_SATURATION,
+						0, 10, 1, 0);
 
 	ctx->ctrls.sharpness = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
 						&mtk_camera_ctrl_ops,
 						V4L2_CID_SHARPNESS,
-						-10, 50, 1, 0);
+						0, 10, 1, 0);
 
 	// ctx->ctrls.hue = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
 	//					&mtk_camera_ctrl_ops,
@@ -398,13 +398,13 @@ static int mtk_camera_ctrls_create(struct mtk_camera_ctx *ctx)
 	//					&mtk_camera_ctrl_sensor_orientation,
 	//					NULL);
 
-	ctx->ctrls.min_fps = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
-						&mtk_camera_ctrl_min_fps,
-						NULL);
+	// ctx->ctrls.min_fps = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
+	//					&mtk_camera_ctrl_min_fps,
+	//					NULL);
 
-	ctx->ctrls.max_fps = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
-						&mtk_camera_ctrl_max_fps,
-						NULL);
+	// ctx->ctrls.max_fps = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
+	//					&mtk_camera_ctrl_max_fps,
+	//					NULL);
 
 	ctx->ctrls.exposure_region_left = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
 						&mtk_camera_ctrl_exposure_region_left,
@@ -422,9 +422,9 @@ static int mtk_camera_ctrls_create(struct mtk_camera_ctx *ctx)
 						&mtk_camera_ctrl_exposure_region_bottom,
 						NULL);
 
-	ctx->ctrls.exposure_weight = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
-						&mtk_camera_ctrl_exposure_weight,
-						NULL);
+	// ctx->ctrls.exposure_weight = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
+	//					&mtk_camera_ctrl_exposure_weight,
+	//					NULL);
 
 	ctx->ctrls.exposure_region_trigger = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
 						&mtk_camera_ctrl_exposure_region_trigger,
@@ -441,9 +441,9 @@ static int mtk_camera_ctrls_create(struct mtk_camera_ctx *ctx)
 						&mtk_camera_ctrl_iso,
 						NULL);
 
-	ctx->ctrls.frame_duration = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
-						&mtk_camera_ctrl_frame_duration,
-						NULL);
+	// ctx->ctrls.frame_duration = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
+	//					&mtk_camera_ctrl_frame_duration,
+	//					NULL);
 
 	// ctx->ctrls.hdr = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
 	//					&mtk_camera_ctrl_hdr,
