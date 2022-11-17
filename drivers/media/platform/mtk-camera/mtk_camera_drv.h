@@ -124,6 +124,7 @@ struct mtk_camera_ctx {
 
 	struct v4l2_fh fh;
 	struct vb2_queue queue;
+	unsigned int sequence;
 	enum mtk_instance_state state;
 	struct mtk_q_data q_data;
 	int id;

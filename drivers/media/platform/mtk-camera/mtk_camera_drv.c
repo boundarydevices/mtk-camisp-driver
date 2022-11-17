@@ -420,6 +420,7 @@ static int vb2ops_camera_start_streaming(struct vb2_queue *q, unsigned int count
 			return -EINVAL;
 		}
 		ctx->state = MTK_STATE_START;
+		ctx->sequence = 0;
 	} else
 		dev_err(ctx->dev, "cam%d:[%d] state=(%x) invalid call\n",
 			ctx->camera_id, ctx->id, ctx->state);
@@ -1078,10 +1079,16 @@ static void mtk_handle_buffer(struct mtk_camera_mem *fb)
 	for (i = 0; i < fb->num_planes; i++)
 		vb2_set_plane_payload(vb, i, fb->planes[i].size);
 
+	/* TODO: Use sensor expose time instead of ktime_get_ns() */
+	vb->timestamp = ktime_get_ns();
+	vb2_v4l2->sequence = ctx->sequence;
+
 	if (fb->status == BUFFER_FILLED)
 		vb2_buffer_done(vb, VB2_BUF_STATE_DONE);
 	else
 		vb2_buffer_done(vb, VB2_BUF_STATE_ERROR);
+
+	ctx->sequence++;
 }
 
 void mtk_camera_unlock(struct mtk_camera_ctx *ctx)
