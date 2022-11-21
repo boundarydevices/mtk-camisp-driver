@@ -266,6 +266,8 @@ struct mtk_raw_pipeline {
 	/* pde module */
 	struct mtk_raw_pde_config pde_config;
 	s64 hw_mode;
+	atomic_t open_refcnt;
+	struct mutex refcnt_lock;
 };
 
 struct mtk_raw_device {

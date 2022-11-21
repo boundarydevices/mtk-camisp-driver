@@ -3171,6 +3171,14 @@ static int mtk_raw_init_cfg(struct v4l2_subdev *sd,
 		container_of(sd, struct mtk_raw_pipeline, subdev);
 	struct mtk_raw *raw = pipe->raw;
 
+	mutex_lock(&pipe->refcnt_lock);
+	if (atomic_read(&(pipe->open_refcnt)) > 0) {
+		mutex_unlock(&pipe->refcnt_lock);
+		return -EBUSY;
+	}
+	atomic_inc(&pipe->open_refcnt);
+	mutex_unlock(&pipe->refcnt_lock);
+
 	for (i = 0; i < sd->entity.num_pads; i++) {
 		mf = v4l2_subdev_get_try_format(sd, sd_state, i);
 		*mf = mfmt_default;
@@ -3938,6 +3946,22 @@ mtk_raw_s_frame_interval(struct v4l2_subdev *sd,
 
 	return 0;
 }
+
+static int mtk_raw_subdev_close(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
+{
+	struct mtk_raw_pipeline *pipe =
+		container_of(sd, struct mtk_raw_pipeline, subdev);
+
+	mutex_lock(&pipe->refcnt_lock);
+	atomic_dec(&pipe->open_refcnt);
+	mutex_unlock(&pipe->refcnt_lock);
+
+	return 0;
+}
+
+static const struct v4l2_subdev_internal_ops mtk_raw_subdev_internal_ops = {
+	.close = mtk_raw_subdev_close,
+};
 
 static const struct v4l2_subdev_core_ops mtk_raw_subdev_core_ops = {
 	.subscribe_event = mtk_raw_sd_subscribe_event,
@@ -5660,10 +5684,14 @@ static int mtk_raw_pipeline_register(unsigned int id, struct device *dev,
 	pipe->id = id;
 	pipe->dynamic_exposure_num_max = 3;
 
+	mutex_init(&pipe->refcnt_lock);
+	atomic_set(&pipe->open_refcnt, 0);
+
 	/* Initialize subdev */
 	v4l2_subdev_init(sd, &mtk_raw_subdev_ops);
 	sd->entity.function = MEDIA_ENT_F_PROC_VIDEO_PIXEL_FORMATTER;
 	sd->entity.ops = &mtk_cam_media_entity_ops;
+	sd->internal_ops = &mtk_raw_subdev_internal_ops;
 	sd->flags = V4L2_SUBDEV_FL_HAS_DEVNODE | V4L2_SUBDEV_FL_HAS_EVENTS;
 	snprintf(sd->name, sizeof(sd->name),
 		 "%s-%d", dev_driver_string(dev), pipe->id);
@@ -5741,6 +5769,7 @@ static void mtk_raw_pipeline_unregister(struct mtk_raw_pipeline *pipe)
 	mutex_destroy(&pipe->res_config.resource_lock);
 	v4l2_device_unregister_subdev(&pipe->subdev);
 	media_entity_cleanup(&pipe->subdev.entity);
+	mutex_destroy(&pipe->refcnt_lock);
 }
 
 int mtk_raw_setup_dependencies(struct mtk_raw *raw)
