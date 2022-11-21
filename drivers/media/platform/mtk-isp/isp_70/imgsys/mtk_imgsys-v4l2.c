@@ -1508,7 +1508,7 @@ static int mtkdip_ioc_add_kva(struct v4l2_subdev *subdev, void *arg)
 	struct dma_buf_attachment *attach;
 	struct sg_table *sgt;
 	dma_addr_t dma_addr;
-	struct iosys_map map;
+	struct iosys_map map = {0};
 	int i;
 
 	kva_list = get_fd_kva_list();
@@ -1598,7 +1598,7 @@ static int mtkdip_ioc_del_kva(struct v4l2_subdev *subdev, void *arg)
 	bool find = false;
 	struct list_head *ptr = NULL;
 	int i;
-	struct iosys_map map;
+	struct iosys_map map = {0};
 
 	kva_list = get_fd_kva_list();
 	for (i = 0; i < fd_info->fd_num; i++) {
