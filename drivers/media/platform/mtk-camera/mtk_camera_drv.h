@@ -43,7 +43,8 @@
 struct mtk_camera_fmt {
 	char *name;
 	u32  fourcc;
-	u32  bpp[3];
+	u8   depth[MTK_CAMERA_MAX_PLANES];
+	u8   row_depth[MTK_CAMERA_MAX_PLANES];
 	bool mplane;
 	u32  num_planes;
 	struct v4l2_frmsize_discrete *sizes;

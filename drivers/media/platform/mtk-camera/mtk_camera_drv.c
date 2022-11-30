@@ -119,7 +119,8 @@ static struct mtk_camera_fmt mtk_camera_formats_video[] = {
 	{
 		.name   = "YUYV",
 		.fourcc = V4L2_PIX_FMT_YUYV,
-		.bpp	= {16, 0, 0},
+		.depth	= {16},
+		.row_depth = {16},
 		.mplane = false,
 		.num_planes = 1,
 		.sizes  = mtk_camera_sizes_yuyv,
@@ -129,7 +130,8 @@ static struct mtk_camera_fmt mtk_camera_formats_video[] = {
 	{
 		.name   = "YM21",
 		.fourcc = V4L2_PIX_FMT_YVU420M,
-		.bpp	= {8, 2, 2},
+		.depth	= {8, 2, 2},
+		.row_depth = {8, 4, 4},
 		.mplane = true,
 		.num_planes = 3,
 		.sizes	= mtk_camera_sizes_ym21,
@@ -139,7 +141,8 @@ static struct mtk_camera_fmt mtk_camera_formats_video[] = {
 	{
 		.name	= "NM12",
 		.fourcc = V4L2_PIX_FMT_NV12M,
-		.bpp	= {8, 4, 0},
+		.depth	= {8, 4},
+		.row_depth = {8, 8},
 		.mplane = true,
 		.num_planes = 2,
 		.sizes	= mtk_camera_sizes_nm12,
@@ -149,7 +152,8 @@ static struct mtk_camera_fmt mtk_camera_formats_video[] = {
 	{
 		.name	= "RGB3",
 		.fourcc = V4L2_PIX_FMT_RGB24,
-		.bpp	= {24, 0, 0},
+		.depth	= {24},
+		.row_depth = {24},
 		.mplane = false,
 		.num_planes = 1,
 		.sizes	= mtk_camera_sizes_rgb3,
@@ -507,6 +511,7 @@ static int mtk_camera_try_fmt_mplane(struct v4l2_format *f, struct mtk_camera_fm
 {
 	struct v4l2_pix_format_mplane *pix_fmt_mp = &f->fmt.pix_mp;
 	unsigned int bytesperline = 0;
+	unsigned int sizeimage = 0;
 	int i;
 	u32 memory_type = 0;
 	u32 org_w, org_h;
@@ -555,9 +560,10 @@ static int mtk_camera_try_fmt_mplane(struct v4l2_format *f, struct mtk_camera_fm
 			pix_fmt_mp->plane_fmt[0].sizeimage = MTK_CAMERA_JPEG_DEFAULT_SIZEIMAGE;
 	} else {
 		for (i = 0; i < pix_fmt_mp->num_planes; i++) {
-			bytesperline = pix_fmt_mp->width * fmt->bpp[i] / 8;
+			bytesperline = pix_fmt_mp->width * fmt->row_depth[i] / 8;
+			sizeimage = pix_fmt_mp->height * pix_fmt_mp->width * fmt->depth[i] / 8;
 			pix_fmt_mp->plane_fmt[i].bytesperline = bytesperline;
-			pix_fmt_mp->plane_fmt[i].sizeimage = pix_fmt_mp->height * bytesperline;
+			pix_fmt_mp->plane_fmt[i].sizeimage = sizeimage;
 			pr_debug("mplane format %s, width:%u, height:%u, sizeimage: %u\n",
 				fmt->name, pix_fmt_mp->width, pix_fmt_mp->height,
 				pix_fmt_mp->plane_fmt[i].sizeimage);
@@ -1110,6 +1116,8 @@ static void mtk_camera_release(struct mtk_camera_ctx *ctx)
 void mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 {
 	struct mtk_q_data *q_data = &ctx->q_data;
+	unsigned int bytesperline = 0;
+	unsigned int sizeimage = 0;
 	unsigned int i;
 
 	memset(q_data, 0, sizeof(struct mtk_q_data));
@@ -1122,8 +1130,10 @@ void mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 		q_data->formats = mtk_camera_formats_video;
 		q_data->num_formats = ARRAY_SIZE(mtk_camera_formats_video);
 		for (i = 0; i < q_data->fmt->num_planes; ++i) {
-			q_data->bytesperline[i] = q_data->width * q_data->fmt->bpp[i] / 8;
-			q_data->sizeimage[i] = q_data->bytesperline[i] * q_data->height;
+			bytesperline = q_data->width * q_data->fmt->row_depth[i] / 8;
+			sizeimage = q_data->height * q_data->width * q_data->fmt->depth[i] / 8;
+			q_data->bytesperline[i] = bytesperline;
+			q_data->sizeimage[i] = sizeimage;
 		}
 	} else if (ctx->stream_id == STREAM_CAPTURE) {
 		q_data->fmt = mtk_camera_formats_capture;
