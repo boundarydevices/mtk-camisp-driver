@@ -406,35 +406,35 @@ static int mtk_camera_ctrls_create(struct mtk_camera_ctx *ctx)
 	//					&mtk_camera_ctrl_max_fps,
 	//					NULL);
 
-	ctx->ctrls.exposure_region_left = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
-						&mtk_camera_ctrl_exposure_region_left,
-						NULL);
+	// ctx->ctrls.exposure_region_left = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
+	//					&mtk_camera_ctrl_exposure_region_left,
+	//					NULL);
 
-	ctx->ctrls.exposure_region_top = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
-						&mtk_camera_ctrl_exposure_region_top,
-						NULL);
+	// ctx->ctrls.exposure_region_top = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
+	//					&mtk_camera_ctrl_exposure_region_top,
+	//					NULL);
 
-	ctx->ctrls.exposure_region_right = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
-						&mtk_camera_ctrl_exposure_region_right,
-						NULL);
+	// ctx->ctrls.exposure_region_right = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
+	//					&mtk_camera_ctrl_exposure_region_right,
+	//					NULL);
 
-	ctx->ctrls.exposure_region_bottom = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
-						&mtk_camera_ctrl_exposure_region_bottom,
-						NULL);
+	// ctx->ctrls.exposure_region_bottom = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
+	//					&mtk_camera_ctrl_exposure_region_bottom,
+	//					NULL);
 
 	// ctx->ctrls.exposure_weight = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
 	//					&mtk_camera_ctrl_exposure_weight,
 	//					NULL);
 
-	ctx->ctrls.exposure_region_trigger = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
-						&mtk_camera_ctrl_exposure_region_trigger,
-						NULL);
+	// ctx->ctrls.exposure_region_trigger = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
+	//					&mtk_camera_ctrl_exposure_region_trigger,
+	//					NULL);
 
-	if (ctx->ctrls.exposure_region_trigger == NULL)
-		dev_err(ctx->dev, "Register ctrl exposure_region_trigger failed ret=%d\n",
-			ctx->ctrl_hdl.error);
-	else
-		ctx->ctrls.exposure_region_trigger->flags |= V4L2_CTRL_FLAG_EXECUTE_ON_WRITE;
+	// if (ctx->ctrls.exposure_region_trigger == NULL)
+	//	dev_err(ctx->dev, "Register ctrl exposure_region_trigger failed ret=%d\n",
+	//		ctx->ctrl_hdl.error);
+	// else
+	//	ctx->ctrls.exposure_region_trigger->flags |= V4L2_CTRL_FLAG_EXECUTE_ON_WRITE;
 
 
 	ctx->ctrls.iso = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
