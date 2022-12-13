@@ -41,6 +41,8 @@
 #define STATE_NUM_AT_SOF 3
 #define INITIAL_DROP_FRAME_CNT 1
 
+#define CHECK_PIPE_ID_RANGE(id) ((id < 0) || (id >= CAMSV_PIPELINE_NUM))
+
 enum MTK_CAMSYS_STATE_RESULT {
 	STATE_RESULT_TRIGGER_CQ = 0,
 	STATE_RESULT_PASS_CQ_INIT,
@@ -923,7 +925,15 @@ static int mtk_camsys_exp_switch_cam_mux(struct mtk_raw_device *raw_dev,
 		sv_main_id = get_main_sv_pipe_id(ctx->cam, ctx->pipe->enabled_raw);
 		sv_sub_id = get_sub_sv_pipe_id(ctx->cam, ctx->pipe->enabled_raw);
 		sv_main_idx = sv_main_id - MTKCAM_SUBDEV_CAMSV_START;
+		if (CHECK_PIPE_ID_RANGE(sv_main_idx)) {
+			dev_dbg(ctx->cam->dev, "invalid sv_main_idx %d", sv_main_idx);
+			return -EINVAL;
+		}
 		sv_sub_idx = sv_sub_id - MTKCAM_SUBDEV_CAMSV_START;
+		if (CHECK_PIPE_ID_RANGE(sv_sub_idx)) {
+			dev_dbg(ctx->cam->dev, "invalid sv_sub_idx %d", sv_sub_idx);
+			return -EINVAL;
+		}
 		switch (type) {
 		case EXPOSURE_CHANGE_3_to_2:
 		case EXPOSURE_CHANGE_1_to_2:
@@ -998,6 +1008,10 @@ static int mtk_camsys_exp_switch_cam_mux(struct mtk_raw_device *raw_dev,
 	} else if (type != EXPOSURE_CHANGE_NONE && config_exposure_num == 2) {
 		sv_main_id = get_main_sv_pipe_id(ctx->cam, ctx->pipe->enabled_raw);
 		sv_main_idx = sv_main_id - MTKCAM_SUBDEV_CAMSV_START;
+		if (CHECK_PIPE_ID_RANGE(sv_main_idx)) {
+			dev_dbg(ctx->cam->dev, "invalid sv_main_idx %d", sv_main_idx);
+			return -EINVAL;
+		}
 		switch (type) {
 		case EXPOSURE_CHANGE_2_to_1:
 			settings[0].seninf = ctx->seninf;
@@ -1079,18 +1093,28 @@ static int mtk_cam_hdr_switch_toggle(struct mtk_cam_ctx *ctx, int raw_feature)
 	struct mtk_raw_device *raw_dev;
 	struct mtk_camsv_device *camsv_dev;
 	struct device *dev_sv;
-	int sv_main_id, sv_sub_id;
+	int sv_main_id, sv_sub_id, sv_main_idx, sv_sub_idx;
 
 	raw_dev = get_master_raw_dev(ctx->cam, ctx->pipe);
 	sv_main_id = get_main_sv_pipe_id(ctx->cam, ctx->pipe->enabled_raw);
-	dev_sv = ctx->cam->sv.devs[sv_main_id - MTKCAM_PIPE_CAMSV_0];
+	sv_main_idx = sv_main_id - MTKCAM_PIPE_CAMSV_0;
+	if (CHECK_PIPE_ID_RANGE(sv_main_idx)) {
+		dev_dbg(camsv_dev->dev, "invalid sv_sub_idx %d", sv_main_idx);
+		return -EINVAL;
+	}
+	dev_sv = ctx->cam->sv.devs[sv_main_idx];
 	camsv_dev = dev_get_drvdata(dev_sv);
 	enable_tg_db(raw_dev, 0);
 	mtk_cam_sv_toggle_tg_db(camsv_dev);
 	if (raw_feature == STAGGER_3_EXPOSURE_LE_NE_SE ||
 	    raw_feature == STAGGER_3_EXPOSURE_SE_NE_LE) {
 		sv_sub_id = get_sub_sv_pipe_id(ctx->cam, ctx->pipe->enabled_raw);
-		dev_sv = ctx->cam->sv.devs[sv_sub_id - MTKCAM_PIPE_CAMSV_0];
+		sv_sub_idx = sv_sub_id - MTKCAM_PIPE_CAMSV_0;
+		if (CHECK_PIPE_ID_RANGE(sv_sub_idx)) {
+			dev_dbg(camsv_dev->dev, "invalid sv_sub_idx %d", sv_sub_idx);
+			return -EINVAL;
+		}
+		dev_sv = ctx->cam->sv.devs[sv_sub_idx];
 		camsv_dev = dev_get_drvdata(dev_sv);
 		mtk_cam_sv_toggle_tg_db(camsv_dev);
 	}
