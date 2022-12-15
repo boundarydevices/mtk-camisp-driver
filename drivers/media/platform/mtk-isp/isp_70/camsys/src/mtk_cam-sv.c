@@ -1943,6 +1943,10 @@ int mtk_cam_sv_dev_config(
 			mf = &ctx->pipe->cfg[MTK_RAW_SINK].mbus_fmt;
 		}
 	} else {
+		if (idx >= MAX_SV_PIPES_PER_STREAM) {
+			dev_dbg(dev, "invalid sv_pipe id %d\n", idx);
+			return -EINVAL;
+		}
 		img_fmt = &ctx->sv_pipe[idx]
 			->vdev_nodes[MTK_CAMSV_MAIN_STREAM_OUT-MTK_CAMSV_SINK_NUM].active_fmt;
 		pad_idx = ctx->sv_pipe[idx]->seninf_padidx;
@@ -2052,6 +2056,10 @@ int mtk_cam_sv_dev_stream_on(
 		camsv_dev = dev_get_drvdata(dev_sv);
 		camsv_dev->is_enqueued = 1;
 	} else {
+		if (idx >= MAX_SV_PIPES_PER_STREAM) {
+			dev_dbg(dev, "invalid used_sv_dev id %d\n", idx);
+			return -EINVAL;
+		}
 		dev_sv = mtk_cam_find_sv_dev(cam, ctx->used_sv_dev[idx]);
 		if (dev_sv == NULL) {
 			dev_dbg(dev, "stream on camsv device not found\n");

@@ -400,7 +400,8 @@ static int mtk_cam_sensor_switch_start_hw(struct mtk_cam_ctx *ctx,
 	struct mtk_cam_device *cam = ctx->cam;
 	struct mtk_raw_device *raw_dev;
 	struct device *dev;
-	int i, j, ret, tgo_pxl_mode, feature_first_req, exp_no;
+	int i, j, tgo_pxl_mode, feature_first_req, exp_no;
+	int ret = 0;
 
 	if (!ctx->used_raw_num)
 		goto set_pixelmode_tg;
@@ -474,6 +475,7 @@ static int mtk_cam_sensor_switch_start_hw(struct mtk_cam_ctx *ctx,
 				if (mtk_cam_is_hsf(ctx)) {
 					dev_info(cam->dev,
 						 "error: un-support hsf stagger mode\n");
+					ret = -EPERM;
 					goto fail_switch_stop;
 				}
 
