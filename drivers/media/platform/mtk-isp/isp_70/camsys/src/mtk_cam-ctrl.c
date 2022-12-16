@@ -2019,7 +2019,7 @@ static int mtk_camsys_ts_state_handle(
 {
 	struct mtk_cam_ctx *ctx = sensor_ctrl->ctx;
 	struct mtk_camsys_ctrl_state *state_temp = NULL;
-	struct mtk_camsys_ctrl_state *state_rec[STATE_NUM_AT_SOF];
+	struct mtk_camsys_ctrl_state *state_rec[STATE_NUM_AT_SOF] = {NULL};
 	struct mtk_cam_request *req;
 	struct mtk_cam_request_stream_data *req_stream_data;
 	int stateidx;
@@ -3701,7 +3701,7 @@ static int mtk_camsys_camsv_state_handle(
 {
 	struct mtk_cam_ctx *ctx = sensor_ctrl->ctx;
 	struct mtk_camsys_ctrl_state *state_temp, *state_outer = NULL;
-	struct mtk_camsys_ctrl_state *state_rec[STATE_NUM_AT_SOF];
+	struct mtk_camsys_ctrl_state *state_rec[STATE_NUM_AT_SOF] = {NULL};
 	struct mtk_cam_request *req;
 	struct mtk_cam_request_stream_data *req_stream_data;
 	int stateidx;
