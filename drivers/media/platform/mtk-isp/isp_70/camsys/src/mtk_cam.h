@@ -468,7 +468,7 @@ mtk_cam_ctrl_state_get_req(struct mtk_camsys_ctrl_state *state)
 static inline int
 mtk_cam_req_get_num_s_data(struct mtk_cam_request *req, int pipe_id)
 {
-	if (pipe_id < 0 || pipe_id > MTKCAM_SUBDEV_MAX)
+	if (pipe_id < 0 || pipe_id >= MTKCAM_SUBDEV_MAX)
 		return 0;
 
 	return req->p_data[pipe_id].s_data_num;
@@ -487,7 +487,7 @@ mtk_cam_req_get_s_data_no_chk(struct mtk_cam_request *req, int pipe_id, int idx)
 static inline struct mtk_cam_request_stream_data*
 mtk_cam_req_get_s_data(struct mtk_cam_request *req, int pipe_id, int idx)
 {
-	if (!req || pipe_id < 0 || pipe_id > MTKCAM_SUBDEV_MAX)
+	if (!req || pipe_id < 0 || pipe_id >= MTKCAM_SUBDEV_MAX)
 		return NULL;
 
 	if (idx < 0 || idx >= req->p_data[pipe_id].s_data_num)
