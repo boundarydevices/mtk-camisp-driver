@@ -7,6 +7,8 @@ export CONFIG_VIDEO_MTK_ISP_7_CAMSYS=m
 export CONFIG_VIDEO_MTK_ISP_7_IMGSYS=m
 export CONFIG_VIDEO_MTK_ISP_7_CAMSYS_UT=n
 export CONFIG_VIDEO_MEDIATEK_CAMERA=m
+export CONFIG_MTK_V4L2_IMGSENSOR=m
+export CONFIG_CUSTOM_KERNEL_IMGSENSOR="imx214_mipi_raw"
 
 export top := $(src)
 
@@ -14,6 +16,7 @@ obj-y += drivers/rpmsg/
 obj-y += drivers/remoteproc/
 obj-y += drivers/media/platform/mtk-isp/isp_70/
 obj-y += drivers/media/platform/mtk-camera/
+obj-y += drivers/misc/mediatek/imgsensor/src-v4l2/
 
 else
 
