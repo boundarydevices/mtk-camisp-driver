@@ -6,7 +6,6 @@
 #ifndef _KD_CAMERA_FEATURE_H_
 #define _KD_CAMERA_FEATURE_H_
 
-
 //#include "kd_camera_feature_id.h"
 //#include "kd_camera_feature_enum.h"
 
@@ -56,5 +55,5 @@ enum CAMERA_DUAL_CAMERA_SENSOR_ENUM {
 	? (enum IMGSENSOR_SENSOR_IDX)IMGSENSOR_SENSOR_DUAL2IDX(idx) \
 	: IMGSENSOR_SENSOR_IDX_NONE)
 
-#endif              /* _KD_IMGSENSOR_DATA_H */
+#endif /* _KD_IMGSENSOR_DATA_H */
 

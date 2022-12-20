@@ -1,0 +1,19 @@
+config MTK_V4L2_IMGSENSOR
+	tristate "MediaTek v4l2 image sensor support"
+	select VIDEO_V4L2_SUBDEV_API
+	select MEDIA_CONTROLLER
+	select V4L2_FWNODE
+	select I2C
+	help
+	  This is a Video4Linux2 sensor-level driver for the MediaTek
+	  image sensors.
+	  To compile this driver as a module, choose M here: the
+	  module wll be called imgsensor.
+
+config CUSTOM_KERNEL_IMGSENSOR
+	string "Custom image sensor driver"
+	help
+	  Kernel space image sensor driver. Define  project used all image
+	  sensors .The value is combination of CUSTOM_KERNEL_MAIN_IMGSENSOR,
+	  CUSTOM_KERNEL_MAIN_BACKUP_IMGSENSOR, CUSTOM_KERNEL_SUB_IMGSENSOR,
+	  and CUSTOM_KERNEL_SUB_BACKUP_IMGSENSOR

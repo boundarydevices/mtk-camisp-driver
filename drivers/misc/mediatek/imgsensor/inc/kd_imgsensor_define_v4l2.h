@@ -111,38 +111,10 @@ enum SENSOR_SCENARIO_ID_ENUM {
 	SENSOR_SCENARIO_ID_NONE = 0xFFFF,
 };
 
-
-#define SCENARIO_STRING_SIZE 64
-/*
-static char _scenario_names[SENSOR_SCENARIO_ID_MAX][SCENARIO_STRING_SIZE] = {
-	"SENSOR_SCENARIO_ID_NORMAL_PREVIEW",
-	"SENSOR_SCENARIO_ID_NORMAL_CAPTURE",
-	"SENSOR_SCENARIO_ID_NORMAL_VIDEO",
-	"SENSOR_SCENARIO_ID_HIGHSPEED_VIDEO",
-	"SENSOR_SCENARIO_ID_SLIM_VIDEO",
-	"SENSOR_SCENARIO_ID_CUSTOM1",
-	"SENSOR_SCENARIO_ID_CUSTOM2",
-	"SENSOR_SCENARIO_ID_CUSTOM3",
-	"SENSOR_SCENARIO_ID_CUSTOM4",
-	"SENSOR_SCENARIO_ID_CUSTOM5",
-	"SENSOR_SCENARIO_ID_CUSTOM6",
-	"SENSOR_SCENARIO_ID_CUSTOM7",
-	"SENSOR_SCENARIO_ID_CUSTOM8",
-	"SENSOR_SCENARIO_ID_CUSTOM9",
-	"SENSOR_SCENARIO_ID_CUSTOM10",
-	"SENSOR_SCENARIO_ID_CUSTOM11",
-	"SENSOR_SCENARIO_ID_CUSTOM12",
-	"SENSOR_SCENARIO_ID_CUSTOM13",
-	"SENSOR_SCENARIO_ID_CUSTOM14",
-	"SENSOR_SCENARIO_ID_CUSTOM15",
-};
-*/
-
 enum ACDK_CAMERA_OPERATION_MODE_ENUM {
 	MSDK_CAMERA_OPERATION_NORMAL_MODE = 0,
 	MSDK_CAMERA_OPERATION_META_MODE
 };
-
 
 /************************************************************************
  *
@@ -378,8 +350,6 @@ enum ACDK_SENSOR_AWB_STATUS_ENUM {
 	SENSOR_AWB_LOCKED
 };
 
-
-
 enum ACDK_SENSOR_INTERFACE_TYPE_ENUM {
 	SENSOR_INTERFACE_TYPE_PARALLEL = 0,
 	SENSOR_INTERFACE_TYPE_MIPI,
@@ -478,7 +448,6 @@ struct ACDK_SENSOR_RESOLUTION_INFO_STRUCT {
 	MUINT16 SensorHeight[SENSOR_SCENARIO_ID_MAX];
 };
 
-
 struct ACDK_SENSOR_INFO_STRUCT {
 
 	MUINT8 SensorClockFreq; /* MHz */
@@ -559,7 +528,6 @@ enum ACDK_CCT_REG_TYPE_ENUM {
 	ACDK_CCT_REG_CCD
 };
 
-
 /* R/W ISP/Sensor Register */
 struct ACDK_CCT_REG_RW_STRUCT {
 	enum ACDK_CCT_REG_TYPE_ENUM Type;
@@ -576,8 +544,6 @@ struct ACDK_CCT_SENSOR_INFO_STRUCT {
 	MUINT16 GrabXOffset;
 	MUINT16 GrabYOffset;
 };
-
-
 
 enum SENSOR_TYPE_ENUM {
 	CMOS_SENSOR = 0,
@@ -627,8 +593,6 @@ enum ACDK_SENSOR_IMAGE_MIRROR_ENUM {
 	ACDK_SENSOR_IMAGE_V_MIRROR,
 	ACDK_SENSOR_IMAGE_HV_MIRROR
 };
-
-
 
 struct ACDK_SENSOR_EXPOSURE_WINDOW_STRUCT {
 	/* The first grabed column data of the image sensor in pixel
@@ -945,8 +909,6 @@ struct IMGSENSOR_GPIO_STRUCT {
 
 #define NVRAM_CAMERA_SENSOR_FILE_VERSION        1
 
-
-
 /* Sensor table */
 #define MAXIMUM_SENSOR_CCT_REG_NUMBER   100
 #define MAXIMUM_SENSOR_ENG_REG_NUMBER   100
@@ -1103,7 +1065,6 @@ struct COMPAT_ACDK_SENSOR_PRESOLUTION_STRUCT {
 
 #endif
 
-
 /************************************************************************
  *
  ************************************************************************/
@@ -1256,7 +1217,6 @@ struct ACDK_KD_SENSOR_SYNC_STRUCT {
 	MUINT8 uDummy;
 };
 
-
 struct SENSOR_AE_REF_STRUCT {
 	MUINT16 AeRefLV05Shutter;   /* Sensor AE Shutter under Lv05 */
 	MUINT16 AeRefLV13Shutter;   /* Sensor AE Shutter under Lv13 */
@@ -1264,14 +1224,12 @@ struct SENSOR_AE_REF_STRUCT {
 	MUINT16 AeRefLV13Gain;  /* Sensor AE Gain under Lv13 */
 };
 
-
 struct SENSOR_AWB_GAIN_REF_STRUCT {
 	MUINT16 AwbRefD65Rgain; /* Sensor AWB R Gain under D65 */
 	MUINT16 AwbRefD65Bgain; /* Sensor AWB B Gain under D65 */
 	MUINT16 AwbRefCWFRgain; /* Sensor AWB R Gain under CWF */
 	MUINT16 AwbRefCWFBgain; /* Sensor AWB B Gain under CWF */
 };
-
 
 struct SENSOR_AE_AWB_REF_STRUCT {
 
@@ -1283,8 +1241,6 @@ struct SENSOR_AE_AWB_REF_STRUCT {
 	MUINT32 SensorLV05LV13EVRef;    /* EV calculate  for ASD usage */
 };
 
-
-
 struct SENSOR_AE_CUR_STRUCT {
 	MUINT16 AeCurShutter;   /* Current Sensor AE Shutter */
 	MUINT16 AeCurGain;  /* Current Sensor AE Gain */
@@ -1295,7 +1251,6 @@ struct SENSOR_AWB_GAIN_CUR_STRUCT {
 	MUINT16 AwbCurBgain;    /* Current Sensor AWB R Gain */
 };
 
-
 struct SENSOR_AE_AWB_CUR_STRUCT {
 
 	/* AE Current information for ASD usage */
@@ -1304,7 +1259,6 @@ struct SENSOR_AE_AWB_CUR_STRUCT {
 	/* AWB Gain Current information for ASD usage */
 	struct SENSOR_AWB_GAIN_CUR_STRUCT SensorAwbGainCur;
 };
-
 
 struct SENSOR_EXIF_INFO_STRUCT {
 	MUINT32 FNumber;
@@ -1374,13 +1328,11 @@ enum ACDK_SENSOR_3A_LOCK_ENUM {
 	/* SENSOR_3A_AF_UNLOCK, */
 };
 
-
 struct ACDK_SENSOR_JPEG_OUTPUT_PARA {
 	MUINT32 tgtWidth;
 	MUINT32 tgtHeight;
 	MUINT32 quality;
 };
-
 
 /* for JPEG Sensor Info */
 struct ACDK_SENSOR_JPEG_INFO {
@@ -1424,4 +1376,4 @@ enum IMGSENSOR_AE_ACTION {
 	IMGSENSOR_EXTEND_FRAME_LENGTH_TO_DOL = 0x1,
 };
 
-#endif              /* _KD_IMGSENSOR_DATA_H */
+#endif /* _KD_IMGSENSOR_DATA_H */
