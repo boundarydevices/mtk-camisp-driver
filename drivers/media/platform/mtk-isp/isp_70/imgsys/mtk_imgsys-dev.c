@@ -655,7 +655,7 @@ static void *get_kva(struct mtk_imgsys_dev_buffer *buf)
 	struct dma_buf *dmabuf;
 	void *vaddr;
 	// struct header_desc *desc;
-	struct iosys_map map;
+	struct iosys_map map = {0};
 	int ret;
 
 	int fd = buf->vbb.vb2_buf.planes[0].m.fd;

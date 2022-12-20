@@ -366,7 +366,7 @@ static struct dma_buf *hcp_vb2_vmalloc_get_dmabuf(struct vb2_buffer *vb,
 static int hcp_vb2_vmalloc_map_dmabuf(void *mem_priv)
 {
 	struct vb2_vmalloc_buf *buf = mem_priv;
-	struct iosys_map map;
+	struct iosys_map map = {0};
 	int ret;
 
 	ret = dma_buf_vmap(buf->dbuf, &map);

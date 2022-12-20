@@ -473,6 +473,7 @@ static void imgsys_cmdq_cb_work(struct work_struct *work)
 
 		user_cb_data.sta = cb_param->err;
 		user_cb_data.data = (void *)cb_param->frm_info;
+		user_cb_data.pkt = NULL;
 		cb_param->cmdqTs.tsUserCbStart = ktime_get_boottime_ns()/1000;
 		IMGSYS_SYSTRACE_BEGIN(
 			"%s_%s|Imgsys MWFrame:#%d MWReq:#%d ReqFd:%d Own:%llx\n",
@@ -657,6 +658,7 @@ static void imgsys_cmdq_task_cb(struct cmdq_cb_data data)
 
 			user_cb_data.sta = cb_param->err;
 			user_cb_data.data = (void *)cb_param->frm_info;
+			user_cb_data.pkt = NULL;
 			cb_param->user_cmdq_err_cb(
 				user_cb_data, real_frm_idx, 1/*isHWhang*/);
 		}

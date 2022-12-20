@@ -1355,8 +1355,8 @@ static long mtk_hcp_ioctl(struct file *file, unsigned int cmd,
 	long ret = -1;
 	//void *mem_priv;
 	struct mtk_hcp *hcp_dev = (struct mtk_hcp *)file->private_data;
-	struct share_buf buffer;
-	struct packet data;
+	struct share_buf buffer = {0};
+	struct packet data = {0};
 	int index;
 	struct msg *msg;
 	unsigned long flag;
@@ -1457,8 +1457,8 @@ static long mtk_hcp_compat_ioctl(struct file *file, unsigned int cmd,
 	long ret = -1;
 	struct share_buf __user *share_data32;
 
-	struct share_buf buffer;
-	struct compat_packet data;
+	struct share_buf buffer = {0};
+	struct compat_packet data = {0};
 	int index;
 	struct msg *msg;
 	unsigned long flag;

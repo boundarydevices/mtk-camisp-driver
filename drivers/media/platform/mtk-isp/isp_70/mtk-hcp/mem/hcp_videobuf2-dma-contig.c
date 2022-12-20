@@ -71,7 +71,7 @@ static void *hcp_vb2_dc_cookie(struct vb2_buffer *vb, void *buf_priv)
 static void *hcp_vb2_dc_vaddr(struct vb2_buffer *vb, void *buf_priv)
 {
 	struct vb2_dc_buf *buf = buf_priv;
-	struct iosys_map map;
+	struct iosys_map map = {0};
 	int ret;
 
 	if (!buf->vaddr && buf->db_attach) {
