@@ -685,7 +685,7 @@ static int mtk_raw_try_ctrl(struct v4l2_ctrl *ctrl)
 	struct device *dev;
 	struct mtk_raw_pipeline *pipeline;
 	struct mtk_cam_resource *res_user;
-	struct mtk_cam_resource_config res_cfg;
+	struct mtk_cam_resource_config res_cfg = {0};
 	int ret = 0;
 
 	pipeline = mtk_cam_ctrl_handler_to_raw_pipeline(ctrl->handler);
@@ -3617,7 +3617,7 @@ static int mtk_raw_set_src_pad_fmt(struct v4l2_subdev *sd,
 	struct mtk_cam_video_device *node;
 	struct mtk_raw_pipeline *pipe;
 	int ret = 0;
-	struct v4l2_mbus_framefmt *source_fmt, *sink_fmt = NULL;
+	struct v4l2_mbus_framefmt *source_fmt = NULL, *sink_fmt = NULL;
 
 	/* Do nothing for pad to meta video device */
 	if (fmt->pad >= MTK_RAW_META_OUT_BEGIN)
@@ -3658,6 +3658,13 @@ static int mtk_raw_set_src_pad_fmt(struct v4l2_subdev *sd,
 
 	if (ret)
 		return ret;
+
+	if (!source_fmt) {
+		dev_info(dev,
+			"%s(%d): Set fmt pad:%d(%s), no source_fmt\n",
+			__func__, fmt->which, fmt->pad, node->desc.name);
+		return -EINVAL;
+	}
 
 	dev_dbg(dev,
 		"%s(%d): s_fmt to pad:%d(%s), user(0x%x/%d/%d) driver(0x%x/%d/%d)\n",

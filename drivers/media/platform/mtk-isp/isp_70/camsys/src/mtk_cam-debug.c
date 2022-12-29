@@ -932,7 +932,7 @@ static void mtk_cam_exceptoin_detect_work(struct work_struct *work)
 	struct mtk_cam_request *req = mtk_cam_s_data_get_req(s_data);
 	struct mtk_cam_ctx *ctx = mtk_cam_s_data_get_ctx(s_data);
 	int ret;
-	bool streamoff;
+	bool streamoff = false;
 
 	ret = wait_event_freezable_timeout(ctx->cam->debug_exception_waitq,
 					   mtk_cam_exceptoin_is_job_done(s_data, &streamoff),

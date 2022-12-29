@@ -2438,7 +2438,7 @@ static void mtk_camsys_raw_frame_start(struct mtk_raw_device *raw_dev,
 	struct mtk_cam_request_stream_data *req_stream_data;
 	struct mtk_camsys_sensor_ctrl *sensor_ctrl = &ctx->sensor_ctrl;
 	struct mtk_cam_working_buf_entry *buf_entry;
-	struct mtk_camsys_ctrl_state *current_state;
+	struct mtk_camsys_ctrl_state *current_state = NULL;
 	dma_addr_t base_addr;
 	enum MTK_CAMSYS_STATE_RESULT state_handle_ret;
 	bool is_apply = false;
@@ -4256,7 +4256,7 @@ static int timer_setsensor(int fps_ratio, int sub_sample)
 int mtk_camsys_ctrl_start(struct mtk_cam_ctx *ctx)
 {
 	struct mtk_camsys_sensor_ctrl *camsys_sensor_ctrl = &ctx->sensor_ctrl;
-	struct v4l2_subdev_frame_interval fi;
+	struct v4l2_subdev_frame_interval fi = {0};
 	int fps_factor = 1, sub_ratio = 0;
 
 	if (ctx->used_raw_num) {
@@ -4316,7 +4316,7 @@ int mtk_camsys_ctrl_start(struct mtk_cam_ctx *ctx)
 void mtk_camsys_ctrl_update(struct mtk_cam_ctx *ctx)
 {
 	struct mtk_camsys_sensor_ctrl *camsys_sensor_ctrl = &ctx->sensor_ctrl;
-	struct v4l2_subdev_frame_interval fi;
+	struct v4l2_subdev_frame_interval fi = {0};
 	int fps_factor = 1, sub_ratio = 0;
 
 	if (ctx->used_raw_num) {

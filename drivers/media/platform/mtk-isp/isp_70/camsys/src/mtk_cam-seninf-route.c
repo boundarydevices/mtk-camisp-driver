@@ -368,7 +368,7 @@ int mtk_cam_seninf_get_vcinfo(struct seninf_ctx *ctx)
 {
 	int ret = 0;
 	int i, grp, grp_metadata, raw_cnt;
-	struct mtk_mbus_frame_desc fd;
+	struct mtk_mbus_frame_desc fd = {0};
 	struct seninf_vcinfo *vcinfo = &ctx->vcinfo;
 	struct seninf_vc *vc;
 	int desc;
@@ -383,6 +383,7 @@ int mtk_cam_seninf_get_vcinfo(struct seninf_ctx *ctx)
 	if (!ctrl) {
 		dev_info(ctx->dev, "%s, no V4L2_CID_MTK_FRAME_DESC %s\n",
 			__func__, sensor_sd->name);
+		return -EINVAL;
 	}
 
 	ctrl->p_new.p = &fd;

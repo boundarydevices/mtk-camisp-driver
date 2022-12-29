@@ -306,7 +306,7 @@ static void mtk_cam_req_return_pipe_buffers(struct mtk_cam_request *req,
 	struct mtk_cam_buffer *buf;
 	struct mtk_cam_video_device *node;
 	struct vb2_buffer *vb;
-	int i, buf_state, buf_start, buf_end, buf_ret_cnt;
+	int i, buf_state, buf_start = 0, buf_end = 0, buf_ret_cnt = 0;
 
 	s_data_pipe = mtk_cam_req_get_s_data(req, pipe_id, index);
 	if (!s_data_pipe) {
@@ -326,7 +326,6 @@ static void mtk_cam_req_return_pipe_buffers(struct mtk_cam_request *req,
 		buf_end = MTK_CAMSV_PIPELINE_PADS_NUM;
 	}
 
-	buf_ret_cnt = 0;
 	for (i = buf_start; i < buf_end; i++) {
 		/* make sure do not touch req/s_data after vb2_buffe_done */
 		buf = mtk_cam_s_data_get_vbuf(s_data_pipe, i);
@@ -663,7 +662,7 @@ int mtk_cam_dequeue_req_frame(struct mtk_cam_ctx *ctx,
 	int dequeue_cnt, s_data_cnt, handled_cnt;
 	bool del_job, del_req;
 	bool unreliable = false;
-	struct mtk_ae_debug_data ae_data;
+	struct mtk_ae_debug_data ae_data = {0};
 
 	dequeue_cnt = 0;
 	s_data_cnt = 0;
@@ -3898,7 +3897,7 @@ int get_last_sv_pipe_id(struct mtk_cam_device *cam,
 struct mtk_raw_device *get_master_raw_dev(struct mtk_cam_device *cam,
 					  struct mtk_raw_pipeline *pipe)
 {
-	struct device *dev_master;
+	struct device *dev_master = NULL;
 	unsigned int i;
 
 	for (i = 0; i < cam->num_raw_drivers; i++) {
@@ -3914,7 +3913,7 @@ struct mtk_raw_device *get_master_raw_dev(struct mtk_cam_device *cam,
 struct mtk_raw_device *get_slave_raw_dev(struct mtk_cam_device *cam,
 					 struct mtk_raw_pipeline *pipe)
 {
-	struct device *dev_slave;
+	struct device *dev_slave = NULL;
 	unsigned int i;
 
 	for (i = 0; i < cam->num_raw_drivers - 1; i++) {
@@ -3930,7 +3929,7 @@ struct mtk_raw_device *get_slave_raw_dev(struct mtk_cam_device *cam,
 struct mtk_raw_device *get_slave2_raw_dev(struct mtk_cam_device *cam,
 					  struct mtk_raw_pipeline *pipe)
 {
-	struct device *dev_slave;
+	struct device *dev_slave = NULL;
 	unsigned int i;
 
 	for (i = 0; i < cam->num_raw_drivers; i++) {
@@ -6395,7 +6394,7 @@ static int mtk_cam_create_links(struct mtk_cam_device *cam)
 {
 	struct v4l2_subdev *sd;
 	unsigned int i;
-	int ret;
+	int ret = 0;
 
 	i = 0;
 	v4l2_device_for_each_subdev(sd, &cam->v4l2_dev) {

@@ -693,6 +693,9 @@ static inline void
 mtk_cam_pad_fmt_enable(struct v4l2_mbus_framefmt *framefmt,
 					bool enable)
 {
+	if (!framefmt)
+		return;
+
 	if (enable)
 		framefmt->flags |= V4L2_MBUS_FRAMEFMT_PAD_ENABLE;
 	else
