@@ -3929,8 +3929,9 @@ mtk_cam_get_link_enabled_raw(struct v4l2_subdev *seninf)
 
 	cam = container_of(seninf->v4l2_dev->mdev, struct mtk_cam_device, media_dev);
 
-	for (i = MTKCAM_SUBDEV_RAW_0; i <= MTKCAM_SUBDEV_RAW_END; i++) {
-		if (cam->raw.pipelines[i].res_config.seninf == seninf)
+	for (i = MTKCAM_SUBDEV_RAW_0; i < MTKCAM_SUBDEV_RAW_END; i++) {
+		if ((i < RAW_PIPELINE_NUM) &&
+			(cam->raw.pipelines[i].res_config.seninf == seninf))
 			return &cam->raw.pipelines[i];
 	}
 
@@ -5685,7 +5686,7 @@ static int mtk_raw_pipeline_register(unsigned int id, struct device *dev,
 	struct mtk_cam_device *cam = dev_get_drvdata(pipe->raw->cam_dev);
 	struct v4l2_subdev *sd = &pipe->subdev;
 	struct mtk_cam_video_device *video;
-	unsigned int i;
+	int i;
 	int ret;
 
 	pipe->id = id;
@@ -5739,8 +5740,10 @@ static int mtk_raw_pipeline_register(unsigned int id, struct device *dev,
 		video->uid.id = video->desc.dma_port;
 		video->ctx = &cam->ctxs[id];
 		ret = mtk_cam_video_register(video, v4l2_dev);
-		if (ret)
+		if (ret) {
+			i--;
 			goto fail_unregister_video;
+		}
 
 		if (V4L2_TYPE_IS_OUTPUT(video->desc.buf_type))
 			ret = media_create_pad_link(&video->vdev.entity, 0,
@@ -5760,8 +5763,10 @@ static int mtk_raw_pipeline_register(unsigned int id, struct device *dev,
 	return 0;
 
 fail_unregister_video:
-	for (i = i - 1; i >= 0; i--)
+	while (i >= 0) {
 		mtk_cam_video_unregister(pipe->vdev_nodes + i);
+		i--;
+	}
 
 	return ret;
 }

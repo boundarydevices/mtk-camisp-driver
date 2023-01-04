@@ -2114,7 +2114,7 @@ static int mtk_camsv_pipeline_register(
 	struct mtk_camsv_device *camsv_dev = dev_get_drvdata(dev);
 	struct v4l2_subdev *sd = &pipe->subdev;
 	struct mtk_cam_video_device *video;
-	unsigned int i;
+	int i;
 	int ret;
 
 	pipe->id = id;
@@ -2167,8 +2167,10 @@ static int mtk_camsv_pipeline_register(
 		video->uid.id = video->desc.dma_port;
 		video->ctx = &cam->ctxs[id];
 		ret = mtk_cam_video_register(video, v4l2_dev);
-		if (ret)
+		if (ret) {
+			i--;
 			goto fail_unregister_video;
+		}
 
 		if (V4L2_TYPE_IS_OUTPUT(video->desc.buf_type))
 			ret = media_create_pad_link(&video->vdev.entity, 0,
@@ -2188,8 +2190,10 @@ static int mtk_camsv_pipeline_register(
 	return 0;
 
 fail_unregister_video:
-	for (i = i-1; i >= 0; i--)
+	while (i >= 0) {
 		mtk_cam_video_unregister(pipe->vdev_nodes + i);
+		i--;
+	}
 
 	return ret;
 }

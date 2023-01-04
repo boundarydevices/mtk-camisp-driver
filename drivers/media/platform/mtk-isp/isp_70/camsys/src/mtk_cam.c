@@ -3932,7 +3932,10 @@ struct mtk_raw_device *get_slave2_raw_dev(struct mtk_cam_device *cam,
 	struct device *dev_slave = NULL;
 	unsigned int i;
 
-	for (i = 0; i < cam->num_raw_drivers; i++) {
+	if (ARRAY_SIZE(cam->raw.devs) < 3)
+		return NULL;
+
+	for (i = 0; i < cam->num_raw_drivers - 2; i++) {
 		if (pipe->enabled_raw & (1 << i)) {
 			dev_slave = cam->raw.devs[i + 2];
 			break;
@@ -6338,7 +6341,8 @@ static int config_bridge_pad_links(struct mtk_cam_device *cam,
 
 	for (i = 0; i < cam->max_stream_num; i++) {
 		if (i >= MTKCAM_SUBDEV_RAW_START &&
-			i < (MTKCAM_SUBDEV_RAW_START + cam->num_raw_drivers)) {
+			i < (MTKCAM_SUBDEV_RAW_START + cam->num_raw_drivers) &&
+			i < RAW_PIPELINE_NUM) {
 			pipe_entity = &cam->raw.pipelines[i].subdev.entity;
 
 			dev_info(cam->dev, "create pad link %s %s\n",
