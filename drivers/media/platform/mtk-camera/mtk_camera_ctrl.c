@@ -317,10 +317,10 @@ static int mtk_camera_ctrls_create(struct mtk_camera_ctx *ctx)
 						V4L2_CID_SHARPNESS,
 						0, 10, 1, 0);
 
-	// ctx->ctrls.hue = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
-	//					&mtk_camera_ctrl_ops,
-	//					V4L2_CID_HUE,
-	//					0, 2, 1, 1);
+	ctx->ctrls.hue = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
+						&mtk_camera_ctrl_ops,
+						V4L2_CID_HUE,
+						0, 100, 1, 0);
 
 	// ctx->ctrls.gamma = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
 	//					&mtk_camera_ctrl_ops,
