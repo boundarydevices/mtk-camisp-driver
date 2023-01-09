@@ -88,7 +88,7 @@ static dma_addr_t mtk_ccd_buf_get_daddr(struct mtk_ccd_buf *buf)
 static void *mtk_ccd_buf_get_vaddr(struct mtk_ccd_buf *buf)
 {
 	int ret;
-	struct iosys_map map;
+	struct iosys_map map = {0};
 
 	if (!buf->vaddr && buf->db_attach) {
 		ret = dma_buf_vmap(buf->db_attach->dmabuf, &map);

@@ -224,8 +224,8 @@ static long ccd_unlocked_ioctl(struct file *filp, unsigned int cmd,
 	struct mtk_ccd *ccd = (struct mtk_ccd *)filp->private_data;
 	unsigned char *user_addr = (unsigned char *)arg;
 	struct ccd_master_listen_item listen_obj;
-	struct ccd_worker_item work_obj;
-	struct ccd_master_status_item master_obj;
+	struct ccd_worker_item work_obj = {0};
+	struct ccd_master_status_item master_obj = {0};
 
 	switch (cmd) {
 	case IOCTL_CCD_MASTER_INIT:
