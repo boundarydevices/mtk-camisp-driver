@@ -243,6 +243,25 @@ static inline bool mtk_camsv_is_sv_pipe(int pipe_id)
 		(pipe_id < MTKCAM_SUBDEV_CAMSV_END);
 }
 
+static inline bool mtk_camsv_is_yuv_format(unsigned int fmt)
+{
+	bool ret = false;
+
+	switch (fmt) {
+	case V4L2_PIX_FMT_YUYV:
+	case V4L2_PIX_FMT_YVYU:
+	case V4L2_PIX_FMT_UYVY:
+	case V4L2_PIX_FMT_VYUY:
+		ret = true;
+		break;
+	default:
+		ret = false;
+		break;
+	}
+
+	return ret;
+}
+
 struct mtk_larb;
 int mtk_camsv_setup_dependencies(struct mtk_camsv *sv, struct mtk_larb *larb);
 int mtk_camsv_register_entities(
@@ -304,6 +323,7 @@ int mtk_cam_find_sv_dev_index(struct mtk_cam_ctx *ctx, unsigned int idx);
 int mtk_cam_sv_apply_all_buffers(struct mtk_cam_ctx *ctx, u64 ts_ns);
 int mtk_cam_sv_apply_next_buffer(struct mtk_cam_ctx *ctx,
 	unsigned int pipe_id, u64 ts_ns);
+int mtk_cam_get_sv_pixel_mode(struct mtk_cam_ctx *ctx, unsigned int idx);
 int mtk_cam_sv_rgbw_apply_next_buffer(
 	struct mtk_cam_request_stream_data *s_data);
 int mtk_cam_sv_apply_switch_buffers(struct mtk_cam_ctx *ctx);

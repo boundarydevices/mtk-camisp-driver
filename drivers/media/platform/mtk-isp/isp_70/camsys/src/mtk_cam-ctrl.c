@@ -67,6 +67,14 @@ static void mtk_cam_event_eos(struct mtk_raw_pipeline *pipeline)
 	v4l2_event_queue(pipeline->subdev.devnode, &event);
 }
 
+static void mtk_camsv_event_eos(struct mtk_camsv_device *camsv_dev)
+{
+	struct v4l2_event event = {
+		.type = V4L2_EVENT_EOS,
+	};
+	v4l2_event_queue(camsv_dev->pipeline->subdev.devnode, &event);
+}
+
 static void mtk_cam_event_frame_sync(struct mtk_raw_pipeline *pipeline,
 				     unsigned int frame_seq_no)
 {
@@ -3730,6 +3738,8 @@ static int mtk_camsys_camsv_state_handle(
 	struct mtk_cam_request_stream_data *req_stream_data;
 	int stateidx;
 	int que_cnt = 0;
+	u64 time_boot = ktime_get_boottime_ns();
+	u64 time_mono = ktime_get_ns();
 
 	/* List state-queue status*/
 	spin_lock(&sensor_ctrl->camsys_state_lock);
@@ -3744,8 +3754,10 @@ static int mtk_camsys_camsv_state_handle(
 			state_rec[stateidx] = state_temp;
 			/* Find outer state element */
 			if (state_temp->estate == E_STATE_OUTER ||
-				state_temp->estate == E_STATE_OUTER_HW_DELAY)
+				state_temp->estate == E_STATE_OUTER_HW_DELAY) {
+				mtk_cam_set_timestamp(req_stream_data, time_boot, time_mono);
 				state_outer = state_temp;
+			}
 			dev_dbg(camsv_dev->dev,
 				"[SOF] STATE_CHECK [N-%d] Req:%d / State:%d\n",
 				stateidx, req_stream_data->frame_seq_no,
@@ -3860,8 +3872,8 @@ static void mtk_camsys_camsv_frame_start(struct mtk_camsv_device *camsv_dev,
 		req = mtk_cam_get_req(ctx, dequeued_frame_seq_no);
 		if (req) {
 			req_stream_data = mtk_cam_req_get_s_data(req, ctx->stream_id, 0);
-			req_stream_data->timestamp = ktime_get_boottime_ns();
-			req_stream_data->timestamp_mono = ktime_get_ns();
+			//req_stream_data->timestamp = ktime_get_boottime_ns();
+			//req_stream_data->timestamp_mono = ktime_get_ns();
 		}
 		mtk_camsys_camsv_check_frame_done(ctx, dequeued_frame_seq_no,
 			ctx->stream_id + MTKCAM_SUBDEV_CAMSV_START);
@@ -4342,6 +4354,8 @@ void mtk_camsys_ctrl_stop(struct mtk_cam_ctx *ctx)
 {
 	struct mtk_camsys_sensor_ctrl *camsys_sensor_ctrl = &ctx->sensor_ctrl;
 	struct mtk_camsys_ctrl_state *state_entry, *state_entry_prev;
+	struct mtk_camsv_device *camsv_dev;
+	int i;
 
 	spin_lock(&camsys_sensor_ctrl->camsys_state_lock);
 	list_for_each_entry_safe(state_entry, state_entry_prev,
@@ -4357,6 +4371,14 @@ void mtk_camsys_ctrl_stop(struct mtk_cam_ctx *ctx)
 	kthread_flush_work(&camsys_sensor_ctrl->work);
 	if (ctx->used_raw_num)
 		mtk_cam_event_eos(ctx->pipe);
+	else if (ctx->used_sv_num) {
+		for (i = 0; i < ctx->used_sv_num; i++) {
+			camsv_dev = get_camsv_dev(ctx->cam, ctx->sv_pipe[i]);
+			mtk_camsv_event_eos(camsv_dev);
+			dev_info(ctx->cam->dev,
+				"[%s] camsv %d mtk_camsv_event_eos", __func__, i);
+		}
+	}
 	dev_info(ctx->cam->dev, "[%s] ctx:%d/raw_dev:0x%x\n",
 		__func__, ctx->stream_id, ctx->used_raw_dev);
 }

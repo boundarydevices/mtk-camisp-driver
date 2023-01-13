@@ -66,12 +66,14 @@ void mtk_cam_set_sv_meta_stats_info(
 		unsigned int width, unsigned int height,
 		unsigned int stride)
 {
+#if PDAF_READY
 	if (!plat_fp) {
 		pr_info("%s platform fp is NULL ", __func__);
 		return;
 	}
 	plat_fp->set_sv_meta_stats_info(
 		dma_port, vaddr, width, height, stride);
+#endif
 }
 EXPORT_SYMBOL(mtk_cam_set_sv_meta_stats_info);
 

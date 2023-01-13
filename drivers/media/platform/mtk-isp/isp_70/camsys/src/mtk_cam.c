@@ -6017,7 +6017,8 @@ int mtk_cam_ctx_stream_on(struct mtk_cam_ctx *ctx)
 			/* use 8-pixel mode as default */
 			mtk_cam_call_seninf_set_pixelmode(ctx,
 							  ctx->seninf,
-							  ctx->sv_pipe[i]->seninf_padidx, 3);
+							  ctx->sv_pipe[i]->seninf_padidx,
+							  mtk_cam_get_sv_pixel_mode(ctx, i));
 			mtk_cam_seninf_set_camtg(ctx->seninf,
 						 ctx->sv_pipe[i]->seninf_padidx,
 						 ctx->sv_pipe[i]->cammux_id);
@@ -6336,7 +6337,10 @@ static int config_bridge_pad_links(struct mtk_cam_device *cam,
 				   struct v4l2_subdev *seninf)
 {
 	struct media_entity *pipe_entity;
-	unsigned int i, j;
+	unsigned int i;
+#if PDAF_READY
+	unsigned int j;
+#endif
 	int ret;
 
 	for (i = 0; i < cam->max_stream_num; i++) {
@@ -6363,6 +6367,9 @@ static int config_bridge_pad_links(struct mtk_cam_device *cam,
 			}
 		} else if (i >= MTKCAM_SUBDEV_CAMSV_START && i < MTKCAM_SUBDEV_CAMSV_END) {
 			pipe_entity = &cam->sv.pipelines[i-MTKCAM_SUBDEV_CAMSV_START].subdev.entity;
+
+			if (pipe_entity->name == NULL)
+				continue;
 
 			dev_info(cam->dev, "create pad link %s %s\n",
 				seninf->entity.name, pipe_entity->name);

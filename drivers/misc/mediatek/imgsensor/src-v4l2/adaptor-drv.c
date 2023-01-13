@@ -96,6 +96,9 @@ static int get_outfmt_code(struct adaptor_ctx *ctx)
 		return MEDIA_BUS_FMT_SGRBG12_1X12;
 	case SENSOR_OUTPUT_FORMAT_RAW12_R:
 		return MEDIA_BUS_FMT_SRGGB12_1X12;
+	case SENSOR_OUTPUT_FORMAT_YUYV:
+		pr_info("set to yuyv output_format %d\n", outfmt);
+		return MEDIA_BUS_FMT_YUYV8_2X8;
 	}
 
 	pr_warn("unknown output format %d\n", outfmt);

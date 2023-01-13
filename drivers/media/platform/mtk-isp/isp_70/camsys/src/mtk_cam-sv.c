@@ -186,6 +186,8 @@ static int mtk_camsv_sd_subscribe_event(struct v4l2_subdev *subdev,
 		return v4l2_event_subscribe(fh, sub, 0, NULL);
 	case V4L2_EVENT_REQUEST_DRAINED:
 		return v4l2_event_subscribe(fh, sub, 0, NULL);
+	case V4L2_EVENT_EOS:
+		return v4l2_event_subscribe(fh, sub, 0, NULL);
 	default:
 		return -EINVAL;
 	}
@@ -618,6 +620,34 @@ static const struct mtk_cam_format_desc sv_stream_out_fmts[] = {
 			.pixelformat = V4L2_PIX_FMT_MTISP_SRGGB14,
 		},
 	},
+	{
+		.vfmt.fmt.pix_mp = {
+			.width = IMG_MAX_WIDTH,
+			.height = IMG_MAX_HEIGHT,
+			.pixelformat = V4L2_PIX_FMT_YUYV,
+		},
+	},
+	{
+		.vfmt.fmt.pix_mp = {
+			.width = IMG_MAX_WIDTH,
+			.height = IMG_MAX_HEIGHT,
+			.pixelformat = V4L2_PIX_FMT_YVYU,
+		},
+	},
+	{
+		.vfmt.fmt.pix_mp = {
+			.width = IMG_MAX_WIDTH,
+			.height = IMG_MAX_HEIGHT,
+			.pixelformat = V4L2_PIX_FMT_UYVY,
+		},
+	},
+	{
+		.vfmt.fmt.pix_mp = {
+			.width = IMG_MAX_WIDTH,
+			.height = IMG_MAX_HEIGHT,
+			.pixelformat = V4L2_PIX_FMT_VYUY,
+		},
+	},
 };
 
 #define MTK_CAMSV_TOTAL_CAPTURE_QUEUES 1
@@ -850,6 +880,22 @@ unsigned int mtk_cam_sv_format_sel(unsigned int pixel_fmt)
 	case V4L2_PIX_FMT_MTISP_SRGGB14:
 		fmt.Bits.TG1_FMT = SV_TG_FMT_RAW14;
 		break;
+	case V4L2_PIX_FMT_YUYV:
+		fmt.Bits.TG1_SW = TG_SW_UYVY;
+		fmt.Bits.TG1_FMT = SV_TG_FMT_YUV422;
+		break;
+	case V4L2_PIX_FMT_YVYU:
+		fmt.Bits.TG1_SW = TG_SW_UYVY;
+		fmt.Bits.TG1_FMT = SV_TG_FMT_YUV422;
+		break;
+	case V4L2_PIX_FMT_UYVY:
+		fmt.Bits.TG1_SW = TG_SW_UYVY;
+		fmt.Bits.TG1_FMT = SV_TG_FMT_YUV422;
+		break;
+	case V4L2_PIX_FMT_VYUY:
+		fmt.Bits.TG1_SW = TG_SW_UYVY;
+		fmt.Bits.TG1_FMT = SV_TG_FMT_YUV422;
+		break;
 	default:
 		break;
 	}
@@ -904,6 +950,9 @@ unsigned int mtk_cam_sv_xsize_cal(struct mtkcam_ipi_input_param *cfg_in_param)
 		break;
 	case SV_TG_FMT_RAW14:
 		size = (cfg_in_param->in_crop.s.w * 14) / 8;
+		break;
+	case SV_TG_FMT_YUV422:
+		size = cfg_in_param->in_crop.s.w;
 		break;
 	default:
 		return 0;
@@ -1178,6 +1227,14 @@ int mtk_cam_sv_top_config(
 		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK_CON,
 			CAMSV_PAK_CON, PAK_IN_BIT, 14);
 		break;
+	case SV_TG_FMT_YUV422:
+		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
+			CAMSV_MODULE_EN, PAK_EN, 0);
+		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
+			CAMSV_MODULE_EN, PAK_SEL, 1);
+		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
+			CAMSV_PAK, PAK_MODE, 0);
+		break;
 	default:
 		dev_dbg(dev->dev, "unknown tg format(%d)", fmt.Bits.TG1_FMT);
 		ret = -1;
@@ -1232,6 +1289,7 @@ int mtk_cam_sv_dmao_config(
 {
 	int ret = 0;
 	unsigned int stride;
+	union CAMSV_FMT_SEL fmt;
 
 	/* imgo dma setting */
 	CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_XSIZE,
@@ -1278,20 +1336,33 @@ int mtk_cam_sv_dmao_config(
 #else //MT8195
 	/* imgo stride */
 	stride = CAMSV_READ_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE);
+	fmt.Raw = cfg_in_param->fmt;
+
 	switch (cfg_in_param->pixel_mode) {
 	case 0:
 		stride = stride | (1<<27) | (1<<16);
 		CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE, stride);
 		break;
 	case 1:
-		stride = stride | (1<<27) | (3<<16);
+		if (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422)
+			stride = stride | (1<<27) | (1<<16);
+		else
+			stride = stride | (1<<27) | (3<<16);
 		CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE, stride);
 		break;
 	case 2:
-		stride = stride | (1<<27) | (7<<16);
+		if (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422)
+			stride = stride | (1<<27) | (3<<16);
+		else
+			stride = stride | (1<<27) | (7<<16);
 		CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE, stride);
 		break;
 	case 3:
+		if (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422) {
+			dev_dbg(sub_dev->dev, "not support pixel mode(%d) for YUV format", cfg_in_param->pixel_mode);
+			ret = -1;
+			goto EXIT;
+		}
 		stride = stride | (1<<27) | (15<<16);
 		CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE, stride);
 		break;
@@ -1851,6 +1922,16 @@ int mtk_cam_sv_apply_next_buffer(struct mtk_cam_ctx *ctx,
 	return 1;
 }
 
+int mtk_cam_get_sv_pixel_mode(struct mtk_cam_ctx *ctx, unsigned int idx)
+{
+	struct v4l2_format *img_fmt;
+
+	img_fmt = &ctx->sv_pipe[idx]
+		->vdev_nodes[MTK_CAMSV_MAIN_STREAM_OUT-MTK_CAMSV_SINK_NUM].active_fmt;
+
+	return (mtk_camsv_is_yuv_format(img_fmt->fmt.pix_mp.pixelformat)) ? 2 : 3;
+}
+
 int mtk_cam_sv_rgbw_apply_next_buffer(
 	struct mtk_cam_request_stream_data *s_data)
 {
@@ -1963,10 +2044,14 @@ int mtk_cam_sv_dev_config(
 	cfg_in_param.in_crop.s.w = img_fmt->fmt.pix_mp.width;
 	cfg_in_param.in_crop.s.h = img_fmt->fmt.pix_mp.height;
 #else
-	cfg_in_param.in_crop.s.w = ALIGN(img_fmt->fmt.pix_mp.width, 4);
-	cfg_in_param.in_crop.s.h = ALIGN(img_fmt->fmt.pix_mp.height, 4);
+	cfg_in_param.in_crop.s.w =
+		(mtk_camsv_is_yuv_format(img_fmt->fmt.pix_mp.pixelformat)) ?
+		ALIGN(img_fmt->fmt.pix_mp.width, 4) * 2 :
+		ALIGN(img_fmt->fmt.pix_mp.width, 4);
+	cfg_in_param.in_crop.s.h = img_fmt->fmt.pix_mp.height;
 #endif //#ifdef ISP7_1
-	dev_info(dev, "sink pad code:0x%x raw's imgo stride:%d\n", mf->code,
+	dev_info(dev, "sink pad code:0x%x camsv's imgo  w/h/stride:%d/%d/%d\n", mf->code,
+		cfg_in_param.in_crop.s.w, cfg_in_param.in_crop.s.h,
 		img_fmt->fmt.pix_mp.plane_fmt[0].bytesperline);
 	cfg_in_param.raw_pixel_id = mtk_cam_get_sensor_pixel_id(mf->code);
 	cfg_in_param.subsample = 0;
@@ -2284,7 +2369,8 @@ int mtk_camsv_register_entities(
 
 	for (i = 0; i < CAMSV_PIPELINE_NUM; i++) {
 		struct mtk_camsv_pipeline *pipe = sv->pipelines + i;
-
+		if (sv->devs[i] == NULL)
+			continue;
 		pipe->sv = sv;
 		memset(pipe->cfg, 0, sizeof(*pipe->cfg));
 		ret = mtk_camsv_pipeline_register(MTKCAM_SUBDEV_CAMSV_START + i,
@@ -2602,7 +2688,7 @@ static int mtk_camsv_pm_suspend(struct device *dev)
 		camsv_dev->base + REG_CAMSV_TG_SEN_MODE);
 
 	/* Force ISP HW to idle */
-	ret = pm_runtime_put_sync(dev);
+	ret = pm_runtime_force_suspend(dev);
 	return ret;
 }
 
@@ -2618,7 +2704,7 @@ static int mtk_camsv_pm_resume(struct device *dev)
 		return 0;
 
 	/* Force ISP HW to resume */
-	ret = pm_runtime_get_sync(dev);
+	ret = pm_runtime_force_resume(dev);
 	if (ret)
 		return ret;
 

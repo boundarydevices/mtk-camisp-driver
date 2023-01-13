@@ -1028,6 +1028,8 @@ void mtk_cam_qos_init(struct mtk_cam_device *cam)
 	for (engine_id = CAMSV_START; engine_id < CAMSV_END; engine_id++) {
 		sv_mmqos = sv_qos + engine_id;
 		enginesv_dev = cam->sv.devs[engine_id];
+		if (enginesv_dev == NULL)
+			continue;
 		for (port_id = 0; port_id < sv_qos_port_num; port_id++) {
 			sv_dev = dev_get_drvdata(enginesv_dev);
 			dvfs_info->sv_qos_req[i] =

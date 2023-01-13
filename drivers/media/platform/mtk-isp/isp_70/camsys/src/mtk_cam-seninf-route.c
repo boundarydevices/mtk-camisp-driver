@@ -30,9 +30,12 @@
 void mtk_cam_seninf_init_res(struct seninf_core *core)
 {
 	int i;
+	int start_seninf_mux;
+
+	start_seninf_mux = SENINF_MUX1;
 
 	INIT_LIST_HEAD(&core->list_mux);
-	for (i = 0; i < g_seninf_ops->mux_num; i++) {
+	for (i = start_seninf_mux; i < g_seninf_ops->mux_num; i++) {
 		core->mux[i].idx = i;
 		list_add_tail(&core->mux[i].list, &core->list_mux);
 	}
@@ -237,6 +240,8 @@ static int get_mbus_format_by_dt(int dt)
 		return MEDIA_BUS_FMT_SBGGR10_1X10;
 	case 0x2c:
 		return MEDIA_BUS_FMT_SBGGR12_1X12;
+	case 0x1e:
+		return MEDIA_BUS_FMT_YUYV8_2X8;
 	default:
 		/* default raw8 for other data types */
 		return MEDIA_BUS_FMT_SBGGR8_1X8;
@@ -269,6 +274,15 @@ static int get_vcinfo_by_pad_fmt(struct seninf_ctx *ctx)
 		vc = &vcinfo->vc[vcinfo->cnt++];
 		vc->vc = 0;
 		vc->dt = 0x2c;
+		vc->feature = VC_RAW_DATA;
+		vc->out_pad = PAD_SRC_RAW0;
+		vc->group = 0;
+		break;
+	case MEDIA_BUS_FMT_YUYV8_2X8:
+		dev_info(ctx->dev, "Set to MEDIA_BUS_FMT_YUYV8_2X8\n");
+		vc = &vcinfo->vc[vcinfo->cnt++];
+		vc->vc = 0;
+		vc->dt = 0x1e;
 		vc->feature = VC_RAW_DATA;
 		vc->out_pad = PAD_SRC_RAW0;
 		vc->group = 0;
@@ -492,6 +506,10 @@ int mtk_cam_seninf_get_vcinfo(struct seninf_ctx *ctx)
 				++raw_cnt;
 				vc->feature = VC_RAW_DATA;
 				vc->group = grp++;
+			} else if (vc->dt == 0x1e) {
+				dev_info(ctx->dev, "Set vcinfo\n");
+				vc->feature = VC_RAW_DATA;
+				vc->out_pad = PAD_SRC_RAW0;
 			} else {
 				dev_info(ctx->dev, "unknown desc %d, dt 0x%x\n",
 					desc, vc->dt);

@@ -909,6 +909,10 @@ unsigned int mtk_cam_get_img_fmt(unsigned int fourcc)
 		return MTKCAM_IPI_IMG_FMT_YUYV;
 	case V4L2_PIX_FMT_YVYU:
 		return MTKCAM_IPI_IMG_FMT_YVYU;
+	case V4L2_PIX_FMT_UYVY:
+		return MTKCAM_IPI_IMG_FMT_UYVY;
+	case V4L2_PIX_FMT_VYUY:
+		return MTKCAM_IPI_IMG_FMT_VYUY;
 	case V4L2_PIX_FMT_NV16:
 		return MTKCAM_IPI_IMG_FMT_YUV_422_2P;
 	case V4L2_PIX_FMT_NV61:
