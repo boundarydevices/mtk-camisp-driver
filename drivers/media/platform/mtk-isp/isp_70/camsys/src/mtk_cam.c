@@ -3972,6 +3972,10 @@ static int isp_composer_handle_ack(struct mtk_cam_device *cam,
 	bool is_m2m_apply_cq = false;
 	bool is_mux_change_with_apply_cq = false;
 	struct mtk_raw_device *raw_dev;
+
+	if (ipi_msg->cookie.session_id >= cam->max_stream_num)
+		return -EINVAL;
+
 	ctx = &cam->ctxs[ipi_msg->cookie.session_id];
 
 	if (mtk_cam_is_m2m(ctx)) {
@@ -4170,6 +4174,9 @@ static int isp_composer_handler(struct rpmsg_device *rpdev, void *data,
 		return ret;
 
 	} else if (ipi_msg->ack_data.ack_cmd_id == CAM_CMD_DESTROY_SESSION) {
+		if (ipi_msg->cookie.session_id >= cam->max_stream_num)
+			return -EINVAL;
+
 		ctx = &cam->ctxs[ipi_msg->cookie.session_id];
 		complete(&ctx->session_complete);
 		dev_info(dev, "%s:ctx(%d): session destroyed",
@@ -5569,6 +5576,8 @@ struct mtk_cam_ctx *mtk_cam_start_ctx(struct mtk_cam_device *cam,
 
 		if (is_media_entity_v4l2_subdev(entity))
 			*target_sd = media_entity_to_v4l2_subdev(entity);
+		else
+			*target_sd = NULL;
 	}
 
 	return ctx;
