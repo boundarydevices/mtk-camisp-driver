@@ -1627,10 +1627,10 @@ static int allocate_working_buffer_helper(struct platform_device *pdev)
 					return -EFAULT;
 				}
 				mblock[id].start_virt = mblock[id].map.vaddr;
+				get_dma_buf(mblock[id].d_buf);
 				mblock[id].fd =
 				dma_buf_fd(mblock[id].d_buf,
 				O_RDWR | O_CLOEXEC);
-				dma_buf_get(mblock[id].fd);
 				break;
 			default:
 
@@ -1678,10 +1678,10 @@ static int allocate_working_buffer_helper(struct platform_device *pdev)
 					return -EFAULT;
 				}
 				mblock[id].start_virt = mblock[id].map.vaddr;
+				get_dma_buf(mblock[id].d_buf);
 				mblock[id].fd =
 				dma_buf_fd(mblock[id].d_buf,
 				O_RDWR | O_CLOEXEC);
-				dma_buf_get(mblock[id].fd);
 				break;
 			}
 		} else {

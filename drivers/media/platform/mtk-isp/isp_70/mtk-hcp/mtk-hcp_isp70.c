@@ -474,10 +474,10 @@ int isp70_allocate_working_buffer(struct mtk_hcp *hcp_dev, unsigned int mode)
 					return -EFAULT;
 				}
 				mblock[id].start_virt = mblock[id].map.vaddr;
+				get_dma_buf(mblock[id].d_buf);
 				mblock[id].fd =
 				dma_buf_fd(mblock[id].d_buf,
 				O_RDWR | O_CLOEXEC);
-				dma_buf_get(mblock[id].fd);
 				dma_buf_begin_cpu_access(mblock[id].d_buf, DMA_BIDIRECTIONAL);
 				kref_init(&mblock[id].kref);
 				pr_info("%s:[HCP][%s] phys:0x%llx, virt:%p, dma:0x%llx, size:0x%llx, is_dma_buf:%d, fd:%d, d_buf:%p\n",
@@ -537,10 +537,10 @@ int isp70_allocate_working_buffer(struct mtk_hcp *hcp_dev, unsigned int mode)
 					return -EFAULT;
 				}
 				mblock[id].start_virt = mblock[id].map.vaddr;
+				get_dma_buf(mblock[id].d_buf);
 				mblock[id].fd =
 				dma_buf_fd(mblock[id].d_buf,
 				O_RDWR | O_CLOEXEC);
-				dma_buf_get(mblock[id].fd);
 				break;
 			}
 		} else {
