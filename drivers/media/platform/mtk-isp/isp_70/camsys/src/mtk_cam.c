@@ -2880,7 +2880,7 @@ static int mtk_cam_req_update(struct mtk_cam_device *cam,
 	struct mtk_cam_video_device *node;
 	struct mtk_cam_ctx *ctx;
 	struct mtk_cam_request_stream_data *req_stream_data, *req_stream_data_mstream;
-	struct mtk_cam_req_raw_pipe_data *raw_pipe_data;
+	int res_feature;
 	int i, ctx_cnt;
 	int raw_feature;
 	int ret;
@@ -2985,15 +2985,16 @@ static int mtk_cam_req_update(struct mtk_cam_device *cam,
 	for (i = 0; i < cam->max_stream_num; i++) {
 		if (!(1 << i & req->ctx_used))
 			continue;
-
 		/* TODO: user fs */
 		ctx_cnt++;
-
 		ctx = &cam->ctxs[i];
 		req_stream_data = mtk_cam_req_get_s_data(req, ctx->stream_id, 0);
-		raw_pipe_data = mtk_cam_s_data_get_raw_pipe_data(req_stream_data);
 
-		if (mtk_cam_feature_is_time_shared(raw_pipe_data->res.raw_res.feature))
+		if (!req_stream_data)
+			continue;
+
+		res_feature = mtk_cam_s_data_get_res_feature(req_stream_data);
+		if (mtk_cam_feature_is_time_shared(res_feature))
 			check_timeshared_buffer(cam, ctx, req);
 
 		if (mtk_cam_feature_is_mstream(req_stream_data->feature.raw_feature) ||
