@@ -16,7 +16,8 @@
 #define _CAMERA_IF_H_
 
 enum camera_get_param_type {
-	GET_PARAM = 0
+	GET_PARAM_SUPPORTED_FORMATS,
+	GET_PARAM_FRAME_SIZES,
 };
 
 enum camera_set_param_type {
@@ -47,6 +48,34 @@ enum camera_set_param_type {
 	SET_PARAM_ISO,
 	SET_PARAM_FRAME_DURATION,
 	SET_PARAM_HDR,
+};
+
+/**
+ * struct camera_fmt_info - Used for GET_PARAM_SUPPORTED_FORMATS
+ * @index: index of the v4l2 format
+ * @v4l2_format: v4l2 format fourcc
+ * @valid: whether the information is valid
+ */
+struct camera_fmt_info {
+	unsigned int index;
+	unsigned int v4l2_format;
+	unsigned int valid;
+};
+
+/**
+ * struct camera_res_info - Used for GET_PARAM_FRAME_SIZES
+ * @index: index of the v4l2 format
+ * @v4l2_format: v4l2 format fourcc
+ * @width: resolution width
+ * @height: resolution height
+ * @valid: whether the information is valid
+ */
+struct camera_res_info {
+	unsigned int index;
+	unsigned int v4l2_format;
+	unsigned int width;
+	unsigned int height;
+	unsigned int valid;
 };
 
 int  camera_if_init(void *ctx);

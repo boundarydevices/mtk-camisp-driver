@@ -80,6 +80,20 @@ struct fb_info_out {
 	uint32_t status;
 };
 
+struct fmt_info {
+	uint32_t index;
+	uint32_t v4l2_format;
+	uint32_t valid;
+};
+
+struct res_info {
+	uint32_t index;
+	uint32_t v4l2_format;
+	uint32_t width;
+	uint32_t height;
+	uint32_t valid;
+};
+
 /**
  * struct cam_ap_ipi_cmd - generic AP to VCU ipi command format
  * @msg_id		: camera_ipi_msgid
@@ -103,9 +117,15 @@ struct cam_ap_ipi_cmd {
 struct cam_vcu_ipi_ack {
 	uint32_t msg_id;
 	uint32_t ipi_id;
+	uint32_t param_id;
 	uint64_t vcu_inst_addr;
 	uint64_t ap_inst_addr;
 	struct fb_info_out info;
+	union {
+		struct fmt_info fmt;
+		struct res_info res;
+	} data;
+	uint64_t data_addr;
 	int32_t  status;
 	uint32_t stream_id;
 };
@@ -124,11 +144,12 @@ struct cam_ap_ipi_init {
 };
 
 /**
- * struct cam_ap_ipi_set_param - for AP_IPIMSG_CAPTURE_SET_PARAM
- * @msg_id		: AP_IPIMSG_DEC_SET_PARAM
+ * struct cam_ap_ipi_set_param - for AP_IPIMSG_CAM_SET_PARAM
+ * @msg_id		: AP_IPIMSG_CAM_SET_PARAM
  * @vcu_inst_addr	: VCU decoder instance address
  * @id			: set param  type
  * @data		: param data
+ * @stream_id		: stream id
  */
 struct cam_ap_ipi_set_param {
 	uint32_t msg_id;
@@ -140,6 +161,28 @@ struct cam_ap_ipi_set_param {
 	uint32_t stream_id;
 };
 
+/**
+ * struct cam_ap_ipi_get_param - for AP_IPIMSG_CAM_GET_PARAM
+ * @msg_id		: AP_IPIMSG_CAM_GET_PARAM
+ * @vcu_inst_addr	: VCU decoder instance address
+ * @id			: get param type
+ * @data		: param data
+ * @data_addr		: data address to return
+ * @stream_id		: stream id
+ */
+struct cam_ap_ipi_get_param {
+	uint32_t msg_id;
+	uint32_t ipi_id;
+	uint32_t id;
+	uint64_t vcu_inst_addr;
+	uint64_t ap_inst_addr;
+	union {
+		struct fmt_info fmt;
+		struct res_info res;
+	} data;
+	uint64_t data_addr;
+	uint32_t stream_id;
+};
 
 #pragma pack(pop)
 

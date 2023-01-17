@@ -51,6 +51,36 @@ static void handle_capture_ack_msg(struct cam_vcu_ipi_ack *m)
 	}
 	dev_err(ctx->dev, "invalid buffer handle %llx\n", info->dma_addr);
 }
+
+static void handle_get_param_ack_msg(struct cam_vcu_ipi_ack *m)
+{
+	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)(unsigned long)m->ap_inst_addr;
+	struct mtk_camera_ctx *ctx = inst->ctx;
+
+	switch (m->param_id) {
+	case GET_PARAM_SUPPORTED_FORMATS:
+	{
+		struct fmt_info *fmt = (struct fmt_info *)m->data_addr;
+
+		fmt->v4l2_format = m->data.fmt.v4l2_format;
+		fmt->valid = m->data.fmt.valid;
+		break;
+	}
+	case GET_PARAM_FRAME_SIZES:
+	{
+		struct res_info *res = (struct res_info *)m->data_addr;
+
+		res->width = m->data.res.width;
+		res->height = m->data.res.height;
+		res->valid = m->data.res.valid;
+		break;
+	}
+	default:
+		dev_err(ctx->dev, "Unknown get_param id=%d", m->param_id);
+		break;
+	}
+}
+
 /*
  * This function runs in interrupt context and it means there's a IPI MSG
  * from VCU.
@@ -78,7 +108,9 @@ int vcu_ipi_handler(void *data, unsigned int len, void *priv)
 		case VCU_IPIMSG_CAM_START_ACK:
 		case VCU_IPIMSG_CAM_DEINIT_ACK:
 		case VCU_IPIMSG_CAM_SET_PARAM_ACK:
-		case AP_IPIMSG_CAM_GET_PARAM:
+			break;
+		case VCU_IPIMSG_CAM_GET_PARAM_ACK:
+			handle_get_param_ack_msg(data);
 			break;
 		case VCU_IPIMSG_CAM_END_ACK:
 			handle_capture_ack_msg(data);
@@ -159,6 +191,47 @@ static int camera_vcu_set_param(struct cam_vcu_inst *inst,
 	return camera_vcu_send_msg(inst, &msg, sizeof(msg));
 }
 
+static int camera_vcu_get_fmt(struct cam_vcu_inst *inst,
+		unsigned int id, void *param)
+{
+	struct cam_ap_ipi_get_param msg;
+	struct mtk_camera_ctx *ctx = inst->ctx;
+
+	dev_dbg(ctx->dev, "+ id=%x\n", AP_IPIMSG_CAM_GET_PARAM);
+
+	memset(&msg, 0, sizeof(msg));
+	msg.msg_id = AP_IPIMSG_CAM_GET_PARAM;
+	msg.ipi_id = inst->id;
+	msg.id = id;
+	msg.vcu_inst_addr = inst->inst_addr;
+	msg.ap_inst_addr = (uint64_t)(unsigned long)inst;
+
+	switch (id) {
+	case GET_PARAM_SUPPORTED_FORMATS:
+	{
+		struct camera_fmt_info *fmt = (struct camera_fmt_info *)param;
+
+		msg.data.fmt.index = fmt->index;
+		break;
+	}
+	case GET_PARAM_FRAME_SIZES:
+	{
+		struct camera_res_info *res = (struct camera_res_info *)param;
+
+		msg.data.res.index = res->index;
+		msg.data.res.v4l2_format = res->v4l2_format;
+		break;
+	}
+	default:
+		dev_err(ctx->dev, "Unknown get_param id=%d", id);
+		break;
+	}
+
+	msg.data_addr = (uint64_t)(unsigned long)param;
+	msg.stream_id = (uint32_t)inst->ctx->stream_id;
+
+	return camera_vcu_send_msg(inst, &msg, sizeof(msg));
+}
 
 static int camera_init(void *ctx, unsigned long *handle)
 {
@@ -305,7 +378,22 @@ int camera_capture(unsigned long handle, void *fb)
 int camera_get_param(unsigned long handle,
 		 enum camera_get_param_type type, void *out)
 {
-	return 0;
+	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)handle;
+	struct mtk_camera_ctx *ctx = inst->ctx;
+	int ret = 0;
+
+	switch (type) {
+	case GET_PARAM_SUPPORTED_FORMATS:
+	case GET_PARAM_FRAME_SIZES:
+		camera_vcu_get_fmt(inst, (unsigned int)type, out);
+		break;
+	default:
+		dev_err(ctx->dev, "invalid get parameter type=%d\n", (int)type);
+		ret = -EINVAL;
+		break;
+	}
+
+	return ret;
 }
 
 int camera_set_param(unsigned long handle,

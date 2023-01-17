@@ -28,15 +28,13 @@ int  camera_if_init(void *ctx)
 	struct mtk_camera_ctx *contex = (struct mtk_camera_ctx *)ctx;
 	int ret = 0;
 
-	if (contex->cam_if_rdy)
-		return ret;
-
-	contex->cam_if = get_camera_if();
-
 	mtk_camera_lock(contex);
-	ret = contex->cam_if->init((void *)contex, &contex->drv_handle);
-	if (ret == 0)
-		contex->cam_if_rdy = true;
+	if (!contex->cam_if_rdy) {
+		contex->cam_if = get_camera_if();
+		ret = contex->cam_if->init((void *)contex, &contex->drv_handle);
+		if (ret == 0)
+			contex->cam_if_rdy = true;
+	}
 	mtk_camera_unlock(contex);
 
 	return ret;

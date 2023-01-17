@@ -32,90 +32,7 @@
 #define MTK_VIDEO_CAPTURE_MIN_HEIGHT        2U
 #define MTK_VIDEO_CAPTURE_MAX_HEIGHT        8192U
 
-static struct v4l2_frmsize_discrete mtk_camera_sizes_yuyv[] = {
-	{ 640, 360   },
-	{ 576, 432   },
-	{ 640, 480   },
-	{ 960, 540   },
-	{ 928, 696   },
-	{ 1024, 768  },
-	{ 1280, 720  },
-	{ 1440, 1080 },
-	{ 1920, 1080 },
-	{ 1856, 1392 },
-	{ 2048, 1536 },
-	{ 2104, 1560 },
-	{ 3840, 2160 },
-	{ 4000, 3000 },
-};
-
-static struct v4l2_frmsize_discrete mtk_camera_sizes_ym21[] = {
-	{ 640, 360   },
-	{ 576, 432   },
-	{ 640, 480   },
-	{ 960, 540   },
-	{ 928, 696   },
-	{ 1024, 768  },
-	{ 1280, 720  },
-	{ 1440, 1080 },
-	{ 1920, 1080 },
-	{ 1856, 1392 },
-	{ 2048, 1536 },
-	{ 2104, 1560 },
-	{ 3840, 2160 },
-	{ 4000, 3000 },
-};
-
-static struct v4l2_frmsize_discrete mtk_camera_sizes_nm12[] = {
-	{ 640, 360   },
-	{ 576, 432   },
-	{ 640, 480   },
-	{ 960, 540   },
-	{ 928, 696   },
-	{ 1024, 768  },
-	{ 1280, 720  },
-	{ 1440, 1080 },
-	{ 1920, 1080 },
-	{ 1856, 1392 },
-	{ 2048, 1536 },
-	{ 2104, 1560 },
-	{ 3840, 2160 },
-	{ 4000, 3000 },
-};
-
-static struct v4l2_frmsize_discrete mtk_camera_sizes_rgb3[] = {
-	{ 640, 360   },
-	{ 576, 432   },
-	{ 640, 480   },
-	{ 960, 540   },
-	{ 928, 696   },
-	{ 1024, 768  },
-	{ 1280, 720  },
-	{ 1440, 1080 },
-	{ 1920, 1080 },
-	{ 1856, 1392 },
-	{ 2048, 1536 },
-	{ 2104, 1560 },
-	{ 3840, 2160 },
-	{ 4000, 3000 },
-};
-
-static struct v4l2_frmsize_discrete mtk_camera_sizes_jpeg[] = {
-	{ 320, 240   },
-	{ 640, 480   },
-	{ 1280, 720  },
-	{ 1280, 960  },
-	{ 1440, 1088 },
-	{ 1920, 1080 },
-	{ 1920, 1088 },
-	{ 1920, 1440 },
-	{ 2560, 1920 },
-	{ 3840, 2160 },
-	{ 4096, 2304 },
-	{ 4000, 3000 },
-};
-
-static struct mtk_camera_fmt mtk_camera_formats_video[] = {
+static struct mtk_camera_fmt mtk_camera_formats[] = {
 	{
 		.name   = "YUYV",
 		.fourcc = V4L2_PIX_FMT_YUYV,
@@ -123,8 +40,6 @@ static struct mtk_camera_fmt mtk_camera_formats_video[] = {
 		.row_depth = {16},
 		.mplane = false,
 		.num_planes = 1,
-		.sizes  = mtk_camera_sizes_yuyv,
-		.num_sizes = ARRAY_SIZE(mtk_camera_sizes_yuyv),
 		.colorspace = V4L2_COLORSPACE_SMPTE170M,
 	},
 	{
@@ -134,8 +49,6 @@ static struct mtk_camera_fmt mtk_camera_formats_video[] = {
 		.row_depth = {8, 4, 4},
 		.mplane = true,
 		.num_planes = 3,
-		.sizes	= mtk_camera_sizes_ym21,
-		.num_sizes = ARRAY_SIZE(mtk_camera_sizes_ym21),
 		.colorspace = V4L2_COLORSPACE_SMPTE170M,
 	},
 	{
@@ -145,8 +58,6 @@ static struct mtk_camera_fmt mtk_camera_formats_video[] = {
 		.row_depth = {8, 8},
 		.mplane = true,
 		.num_planes = 2,
-		.sizes	= mtk_camera_sizes_nm12,
-		.num_sizes = ARRAY_SIZE(mtk_camera_sizes_nm12),
 		.colorspace = V4L2_COLORSPACE_SMPTE170M,
 	},
 	{
@@ -156,20 +67,13 @@ static struct mtk_camera_fmt mtk_camera_formats_video[] = {
 		.row_depth = {24},
 		.mplane = false,
 		.num_planes = 1,
-		.sizes	= mtk_camera_sizes_rgb3,
-		.num_sizes = ARRAY_SIZE(mtk_camera_sizes_rgb3),
 		.colorspace = V4L2_COLORSPACE_SRGB,
 	},
-};
-
-static struct mtk_camera_fmt mtk_camera_formats_capture[] = {
 	{
 		.name	= "JPEG",
 		.fourcc = V4L2_PIX_FMT_JPEG,
 		.mplane = false,
 		.num_planes = 1,
-		.sizes  = mtk_camera_sizes_jpeg,
-		.num_sizes = ARRAY_SIZE(mtk_camera_sizes_jpeg),
 		.colorspace = V4L2_COLORSPACE_JPEG,
 	},
 };
@@ -251,6 +155,11 @@ static int vb2ops_camera_queue_setup(struct vb2_queue *vq,
 
 	if (q_data == NULL) {
 		dev_err(ctx->dev, "q_data is NULL\n");
+		return -EINVAL;
+	}
+
+	if (q_data->fmt == NULL) {
+		dev_err(ctx->dev, "q_data->fmt is NULL\n");
 		return -EINVAL;
 	}
 
@@ -343,6 +252,11 @@ static int vb2ops_camera_buf_init(struct vb2_buffer *vb)
 	dev_dbg(ctx->dev, "cam%d:[%d] (%d) id=%d, state=%d, vb=%p vb->num_planes:%d\n",
 		ctx->camera_id, ctx->id, vb->vb2_queue->type,
 		vb->index, vb->state, vb, vb->num_planes);
+
+	if (q_data->fmt == NULL) {
+		dev_err(ctx->dev, "q_data->fmt is NULL\n");
+		return -EINVAL;
+	}
 
 	fb->size = 0;
 	fb->index = vb->index;
@@ -642,6 +556,11 @@ camera_get_format_mplane(struct file *file, void *fh,
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d]\n", ctx->camera_id, __func__, ctx->id);
 
+	if (q_data->fmt == NULL) {
+		dev_err(ctx->dev, "q_data->fmt is NULL\n");
+		return -EINVAL;
+	}
+
 	pix_fmt_mp->field = V4L2_FIELD_NONE;
 	pix_fmt_mp->colorspace = ctx->colorspace;
 	pix_fmt_mp->ycbcr_enc = ctx->ycbcr_enc;
@@ -692,6 +611,11 @@ camera_set_format_mplane(struct file *file, void *fh,
 		return -EINVAL;
 	}
 	pix_mp = &format->fmt.pix_mp;
+
+	if (q_data->num_formats == 0) {
+		dev_err(ctx->dev, "number of formats is 0\n");
+		return -EINVAL;
+	}
 
 	fmt = mtk_camera_find_format(format, q_data->formats, q_data->num_formats);
 	if (fmt == NULL) {
@@ -1113,22 +1037,90 @@ static void mtk_camera_release(struct mtk_camera_ctx *ctx)
 	ctx->state = MTK_STATE_FREE;
 }
 
-void mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
+int mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 {
 	struct mtk_q_data *q_data = &ctx->q_data;
 	unsigned int bytesperline = 0;
 	unsigned int sizeimage = 0;
-	unsigned int i;
+	struct camera_fmt_info fmt = {0};
+	struct camera_res_info res = {0};
+	unsigned int i, p, fmt_idx, res_idx;
+	int ret = 0;
 
 	memset(q_data, 0, sizeof(struct mtk_q_data));
 	q_data->width  = MTK_VIDEO_CAPTURE_DEF_WIDTH;
 	q_data->height = MTK_VIDEO_CAPTURE_DEF_HEIGHT;
 
-	/* TODO: Use VCU to query supported format instead of fixed */
+	if (!ctx->cam_if_rdy) {
+		ret = camera_if_init(ctx);
+		if (ret) {
+			dev_err(ctx->dev, "cam%d:[%d]: camera_if_init() fail ret=%d\n",
+				ctx->camera_id, ctx->id, ret);
+			return ret;
+		}
+	}
+
+	// Query formats and framesizes
+	for (i = 0, fmt_idx = 0; i < MTK_CAMERA_MAX_FORMATS; fmt_idx++) {
+		fmt.index = fmt_idx;
+		fmt.valid = 0;
+		ret = camera_if_get_param(ctx, GET_PARAM_SUPPORTED_FORMATS, &fmt);
+		if (ret)
+			return ret;
+
+		dev_dbg(ctx->dev, "index=%u fmt=0x%x valid=%u\n",
+			fmt.index, fmt.v4l2_format, fmt.valid);
+
+		if (fmt.valid) {
+			for (p = 0; p < ARRAY_SIZE(mtk_camera_formats); p++) {
+				if (mtk_camera_formats[p].fourcc == fmt.v4l2_format) {
+					memcpy(&q_data->formats[i], &mtk_camera_formats[p],
+						sizeof(q_data->formats[i]));
+					break;
+				}
+			}
+
+			if (p == ARRAY_SIZE(mtk_camera_formats)) {
+				dev_warn(ctx->dev, "non-supported fourcc(0x%x)\n",
+					fmt.v4l2_format);
+				continue;
+			}
+
+			for (res_idx = 0; res_idx < MTK_CAMERA_MAX_SIZES; res_idx++) {
+				res.index = res_idx;
+				res.v4l2_format = q_data->formats[i].fourcc;
+				res.valid = 0;
+				ret = camera_if_get_param(ctx, GET_PARAM_FRAME_SIZES, &res);
+				if (ret)
+					return ret;
+
+				dev_dbg(ctx->dev, "index=%u fmt=0x%x res=%u*%u valid=%u\n",
+					res.index, res.v4l2_format,
+					res.width, res.height, res.valid);
+
+				if (res.valid) {
+					q_data->formats[i].sizes[res_idx].width = res.width;
+					q_data->formats[i].sizes[res_idx].height = res.height;
+				} else {
+					break;
+				}
+			}
+			q_data->formats[i].num_sizes = res_idx;
+			i++;
+		} else {
+			break;
+		}
+	}
+	q_data->num_formats = i;
+
+	if (q_data->num_formats == 0) {
+		dev_err(ctx->dev, "Cannot find any formats\n");
+		q_data->fmt = NULL;
+		return -EINVAL;
+	}
+
+	q_data->fmt = &q_data->formats[0];
 	if (ctx->stream_id == STREAM_PREVIEW || ctx->stream_id == STREAM_VIDEO) {
-		q_data->fmt = mtk_camera_formats_video;
-		q_data->formats = mtk_camera_formats_video;
-		q_data->num_formats = ARRAY_SIZE(mtk_camera_formats_video);
 		for (i = 0; i < q_data->fmt->num_planes; ++i) {
 			bytesperline = q_data->width * q_data->fmt->row_depth[i] / 8;
 			sizeimage = q_data->height * q_data->width * q_data->fmt->depth[i] / 8;
@@ -1136,9 +1128,6 @@ void mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 			q_data->sizeimage[i] = sizeimage;
 		}
 	} else if (ctx->stream_id == STREAM_CAPTURE) {
-		q_data->fmt = mtk_camera_formats_capture;
-		q_data->formats = mtk_camera_formats_capture;
-		q_data->num_formats = ARRAY_SIZE(mtk_camera_formats_capture);
 		q_data->bytesperline[0] = 0;
 		q_data->sizeimage[0] = MTK_CAMERA_JPEG_DEFAULT_SIZEIMAGE;
 	}
@@ -1149,6 +1138,8 @@ void mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 	ctx->ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
 	ctx->quantization = V4L2_QUANTIZATION_DEFAULT;
 	ctx->xfer_func = V4L2_XFER_FUNC_DEFAULT;
+
+	return 0;
 }
 
 /* -----------------------------------------------------------------------------
@@ -1158,6 +1149,7 @@ void mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 static int fops_camera_open(struct file *file)
 {
 	struct mtk_camera_stream *stream = video_drvdata(file);
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
 	struct mtk_camera_fh *handle;
 	int ret = 0;
 
@@ -1167,15 +1159,42 @@ static int fops_camera_open(struct file *file)
 		return -ENOMEM;
 
 	mutex_lock(&stream->dev_mutex);
-	stream->users++;
-	mutex_unlock(&stream->dev_mutex);
+	/* Initialize format and ctrl once */
+	mutex_lock(&stream->init_mutex);
+	if (stream->is_init == 0) {
+		ret = mtk_camera_set_default_params(ctx);
+		if (ret) {
+			dev_err(ctx->dev, "Failed to setup default parameters\n");
+			goto err_init;
+		}
+
+		ret = mtk_camera_ctrls_setup(ctx);
+		if (ret) {
+			dev_err(ctx->dev, "Failed to setup video capture controls\n");
+			goto err_init;
+		}
+
+		stream->is_init = 1;
+	}
+	mutex_unlock(&stream->init_mutex);
 
 	v4l2_fh_init(&handle->vfh, &stream->video);
 	v4l2_fh_add(&handle->vfh);
 	handle->state = MTK_HANDLE_PASSIVE;
 	handle->stream = stream;
 	file->private_data = handle;
+
+	stream->users++;
+	mutex_unlock(&stream->dev_mutex);
+
 	return 0;
+
+err_init:
+	mutex_unlock(&stream->init_mutex);
+	mutex_unlock(&stream->dev_mutex);
+	kfree(handle);
+
+	return -EAGAIN;
 }
 
 static int fops_camera_release(struct file *file)
@@ -1194,13 +1213,14 @@ static int fops_camera_release(struct file *file)
 
 	v4l2_fh_del(&handle->vfh);
 	v4l2_fh_exit(&handle->vfh);
-	kfree(handle);
-	file->private_data = NULL;
 
 	if (--stream->users == 0)
 		mtk_camera_release(stream->curr_ctx);
 
 	mutex_unlock(&stream->dev_mutex);
+
+	kfree(handle);
+	file->private_data = NULL;
 
 	return 0;
 }
@@ -1262,12 +1282,6 @@ int mtk_camera_stream_create_context(struct mtk_camera_stream *stream)
 	ctx->stream = stream;
 	ctx->cam_if_rdy = false;
 
-	ret = mtk_camera_ctrls_setup(ctx);
-	if (ret) {
-		dev_err(ctx->dev, "Failed to setup video capture controls\n");
-		goto err_ctrls_setup;
-	}
-
 	queue = &ctx->queue;
 	queue->type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 	queue->io_modes	= VB2_DMABUF | VB2_MMAP;
@@ -1289,21 +1303,33 @@ int mtk_camera_stream_create_context(struct mtk_camera_stream *stream)
 	stream->queue = &ctx->queue;
 	stream->curr_ctx = ctx;
 
-	mtk_camera_set_default_params(ctx);
-
 	ctx->callback = mtk_handle_buffer;
 
 	mutex_unlock(&stream->dev_mutex);
 	dev_dbg(ctx->dev, "cam%d:%s capture [%d]\n", ctx->camera_id,
 		dev_name(&stream->plat_dev->dev), ctx->id);
-	return ret;
+
+	return 0;
 
 err_vb2_init:
 	v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
-err_ctrls_setup:
+	devm_kfree(&stream->plat_dev->dev, ctx);
 	mutex_unlock(&stream->dev_mutex);
 
 	return ret;
+}
+
+void mtk_camera_stream_destroy_context(struct mtk_camera_stream *stream)
+{
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+
+	mutex_lock(&stream->dev_mutex);
+	vb2_queue_release(&ctx->queue);
+	v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
+	mutex_unlock(&stream->dev_mutex);
+
+	devm_kfree(&stream->plat_dev->dev, ctx);
+	stream->curr_ctx = NULL;
 }
 
 int mtk_camera_register_video_device(struct mtk_camera_dev *dev,
@@ -1364,6 +1390,7 @@ int mtk_camera_create_stream(struct mtk_camera_dev *dev)
 
 		mutex_init(&stream->capture_mutex);
 		mutex_init(&stream->dev_mutex);
+		mutex_init(&stream->init_mutex);
 
 		stream->stream_id = stream_id;
 		stream->camera_id = dev->camera_id;
@@ -1379,6 +1406,7 @@ int mtk_camera_create_stream(struct mtk_camera_dev *dev)
 		if (ret) {
 			dev_err(device, "failed to register video device stream_id=%d ret=%d\n",
 				stream_id, ret);
+			mtk_camera_stream_destroy_context(stream);
 			return ret;
 		}
 
@@ -1431,6 +1459,7 @@ static int mtk_camera_probe(struct platform_device *pdev)
 	}
 
 	platform_set_drvdata(pdev, dev);
+	dev_info(device, "%s success\n", __func__);
 	return 0;
 }
 
@@ -1457,6 +1486,7 @@ static int mtk_camera_remove(struct platform_device *pdev)
 
 		mutex_destroy(&stream->capture_mutex);
 		mutex_destroy(&stream->dev_mutex);
+		mutex_destroy(&stream->init_mutex);
 	}
 
 	v4l2_device_unregister(&dev->v4l2_dev);

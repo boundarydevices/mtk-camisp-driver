@@ -30,6 +30,15 @@
 #define MTK_CAMERA_NAME		"mtk-v4l2-camera"
 #define MTK_CAMERA_DEVICE	"mtk-camera"
 
+/**
+ * MTK_CAMERA_MAX_[FORMATS|SIZES] define
+ * the maximum number of formats and the
+ * maximum number of framesizes for each
+ * format. Adjust them by requirement.
+ */
+#define MTK_CAMERA_MAX_FORMATS  10
+#define MTK_CAMERA_MAX_SIZES	20
+
 #define MTK_CAMERA_MAX_PLANES   3
 #define MTK_CAMERA_PREVIEW_MIN_BUFFERS  9
 #define MTK_CAMERA_CAPTURE_MIN_BUFFERS  1
@@ -47,7 +56,7 @@ struct mtk_camera_fmt {
 	u8   row_depth[MTK_CAMERA_MAX_PLANES];
 	bool mplane;
 	u32  num_planes;
-	struct v4l2_frmsize_discrete *sizes;
+	struct v4l2_frmsize_discrete sizes[MTK_CAMERA_MAX_SIZES];
 	u32  num_sizes;
 	u32  colorspace;
 };
@@ -99,7 +108,7 @@ struct mtk_q_data {
 	unsigned int    height;
 	enum v4l2_field field;
 	struct mtk_camera_fmt *fmt;
-	struct mtk_camera_fmt *formats;
+	struct mtk_camera_fmt formats[MTK_CAMERA_MAX_FORMATS];
 	int num_formats;
 	unsigned int    sizeimage[MTK_CAMERA_MAX_PLANES];
 	unsigned int    bytesperline[MTK_CAMERA_MAX_PLANES];
@@ -170,8 +179,10 @@ struct mtk_camera_stream {
 
 	struct mutex dev_mutex;
 	struct mutex capture_mutex;
+	struct mutex init_mutex;
 	int users;
 	atomic_t active;
+	int is_init;
 };
 
 struct mtk_camera_fh {
