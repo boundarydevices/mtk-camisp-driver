@@ -35,6 +35,8 @@
 #define LOG_DBG(format, args...)\
 	pr_debug(PFX "[%s] " format, __func__, ##args)
 
+#define IMX214_SUPPORTED_SENSOR_MODE_NUMBER 5
+
 static struct imgsensor_info_struct imgsensor_info = {
 	.sensor_id = IMX214_SENSOR_ID,
 	.checksum_value = 0xf61b7b7c,
@@ -144,7 +146,7 @@ static struct imgsensor_info_struct imgsensor_info = {
 	.ae_ispGain_delay_frame = 2,
 	.ihdr_support = 0,    //1, support; 0,not support
 	.ihdr_le_firstline = 0,  //1,le first ; 0, se first
-	.sensor_mode_num = 5,    //support sensor mode num
+	.sensor_mode_num = IMX214_SUPPORTED_SENSOR_MODE_NUMBER,    //support sensor mode num
 
 	.cap_delay_frame = 3,
 	.pre_delay_frame = 3,
@@ -165,7 +167,7 @@ static struct imgsensor_info_struct imgsensor_info = {
 };
 
 /* Sensor output window information */
-static struct SENSOR_WINSIZE_INFO_STRUCT imgsensor_winsize_info[5] = {
+static struct SENSOR_WINSIZE_INFO_STRUCT imgsensor_winsize_info[IMX214_SUPPORTED_SENSOR_MODE_NUMBER] = {
 	/* Preview */
 	{4208, 3120, 0000, 0000, 4208, 3120, 2104, 1560,
 	 0000, 0000, 2104, 1560, 0000, 0000, 2104, 1560},
@@ -2044,7 +2046,7 @@ static int get_resolution(struct subdrv_ctx *ctx,
 	int i = 0;
 
 	for (i = SENSOR_SCENARIO_ID_MIN; i < SENSOR_SCENARIO_ID_MAX; i++) {
-		if (i < imgsensor_info.sensor_mode_num) {
+		if (i < ARRAY_SIZE(imgsensor_winsize_info)) {
 			sensor_resolution->SensorWidth[i] = imgsensor_winsize_info[i].w2_tg_size;
 			sensor_resolution->SensorHeight[i] = imgsensor_winsize_info[i].h2_tg_size;
 		} else {
