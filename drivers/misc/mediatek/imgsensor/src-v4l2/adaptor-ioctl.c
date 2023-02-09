@@ -619,7 +619,7 @@ static int g_binning_type(struct adaptor_ctx *ctx, void *arg)
 static int g_test_pattern_checksum(struct adaptor_ctx *ctx, void *arg)
 {
 	u32 *info = arg;
-	union feature_para para;
+	union feature_para para = {0};
 	u32 len;
 
 	subdrv_call(ctx, feature_control,
