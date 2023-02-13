@@ -23,6 +23,7 @@
 #include <media/videobuf2-core.h>
 #include <media/videobuf2-v4l2.h>
 #include <linux/delay.h>
+#include <dt-bindings/media/mtk-camera.h>
 
 #include "mtk_camera_util.h"
 #include "mtk_camera_drv_base.h"
@@ -197,6 +198,7 @@ struct mtk_camera_dev {
 	struct list_head streams;
 	int camera_id;
 	const char *platform;
+	unsigned int stream_en[STREAM_NUM];
 };
 
 static inline struct mtk_camera_ctx *fh_to_ctx(struct v4l2_fh *fh)

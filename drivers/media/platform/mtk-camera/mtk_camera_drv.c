@@ -1377,6 +1377,9 @@ int mtk_camera_create_stream(struct mtk_camera_dev *dev)
 	for (stream_id = STREAM_PREVIEW; stream_id < STREAM_NUM; ++stream_id) {
 		struct mtk_camera_stream *stream;
 
+		if (dev->stream_en[stream_id] == 0)
+			continue;
+
 		stream = devm_kzalloc(device, sizeof(*stream), GFP_KERNEL);
 		if (!stream)
 			return -ENOMEM;
@@ -1420,7 +1423,8 @@ static int mtk_camera_probe(struct platform_device *pdev)
 	struct mtk_camera_dev *dev;
 	struct device *device;
 	int camera_id;
-	int ret;
+	unsigned int val;
+	int i, cnt, ret;
 
 	device = &pdev->dev;
 	dev = devm_kzalloc(device, sizeof(*dev), GFP_KERNEL);
@@ -1442,6 +1446,36 @@ static int mtk_camera_probe(struct platform_device *pdev)
 	if (ret) {
 		dev_err(device, "failed to find mediatek,platform\n");
 		return ret;
+	}
+
+	cnt = of_property_count_u32_elems(device->of_node, "mediatek,stream-enable");
+	if (cnt > 0) {
+		for (i = 0; i < cnt; i++) {
+			ret = of_property_read_u32_index(device->of_node,
+						"mediatek,stream-enable", i, &val);
+			if (ret)
+				continue;
+
+			dev_dbg(device, "enable stream %u\n", val);
+
+			switch (val) {
+			case MTK_CAMERA_PREVIEW:
+				dev->stream_en[STREAM_PREVIEW] = 1;
+				break;
+			case MTK_CAMERA_VIDEO:
+				dev->stream_en[STREAM_VIDEO] = 1;
+				break;
+			case MTK_CAMERA_CAPTURE:
+				dev->stream_en[STREAM_CAPTURE] = 1;
+				break;
+			default:
+				break;
+			}
+		}
+	} else {
+		dev_dbg(device, "failed to find mediatek,stream-enable. enable all by default\n");
+		for (i = 0; i < ARRAY_SIZE(dev->stream_en); i++)
+			dev->stream_en[i] = 1;
 	}
 
 	ret = v4l2_device_register(device, &dev->v4l2_dev);

@@ -14,6 +14,7 @@
 
 ccflags-y += -I$(src)/external_include/mtk-vcu-mt8395/
 ccflags-y += -I$(src)/external_include/uapi/
+ccflags-y += -I$(top)/include/
 
 mtk_camera-objs += mtk_camera_drv.o \
 		 mtk_camera_util.o \
