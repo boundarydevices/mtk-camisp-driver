@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+# Copyright (c) 2023 MediaTek Inc.
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/media/mediatek,camera.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Mediatek V4L2 Camera
+
+maintainers:
+  - Andy.Hsieh <andy.hsieh@mediatek.com>
+
+description:
+  V4L2 Camera is used for exporting Camera ISP feature as V4L2 device.
+
+properties:
+  compatible:
+    const: mediatek,camera
+
+  mediatek,vcu:
+    description: The node of vcu
+    maxItems: 1
+
+  mediatek,cameraid:
+    description: The camera id
+    maxItems: 1
+
+  mediatek,platform:
+    description: The platform name
+    maxItems: 1
+
+  iommus:
+    items:
+      - const: M4U_PORT_L23_VDEC_UFO_ENC_EXT
+
+  mediatek,stream-enable:
+    description: By default, the node exports three V4L2 devices for
+      PREVIEW, VIDEO, and CAPTURE streams. This property is to let
+      the user specifically list which stream to enable.
+    enum:
+      - 1 # PREVIEW Stream
+      - 2 # VIDEO Stream
+      - 3 # CAPTURE Stream
+
+required:
+  - compatible
+  - mediatek,vcu
+  - mediatek,cameraid
+  - mediatek,platform
+  - iommus
+
+examples:
+  - |
+	mtkcam0: mtkcam@0 {
+		compatible = "mediatek,camera";
+		mediatek,vcu = <&cam_vcu>;
+		mediatek,cameraid = <0>;
+		mediatek,platform = "platform:mtkcam0";
+		iommus = <&iommu_vpp M4U_PORT_L23_VDEC_UFO_ENC_EXT>;
+		mediatek,stream-enable = <MTK_CAMERA_PREVIEW>,
+					 <MTK_CAMERA_VIDEO>,
+					 <MTK_CAMERA_CAPTURE>;
+		status = "disabled";
+	};
+...
