@@ -386,6 +386,9 @@ static int mtk_camera_try_fmt_mplane(struct v4l2_format *f, struct mtk_camera_fm
 	u32 memory_type = 0;
 	u32 org_w, org_h;
 
+	if (fmt == NULL)
+		return -EINVAL;
+
 	pix_fmt_mp->field = V4L2_FIELD_NONE;
 	/* Clamp the width and height. */
 	pix_fmt_mp->width = clamp(pix_fmt_mp->width,
@@ -595,7 +598,11 @@ camera_set_format_mplane(struct file *file, void *fh,
 	}
 	q_data->fmt = fmt;
 
-	mtk_camera_try_fmt_mplane(format, q_data->fmt);
+	ret = mtk_camera_try_fmt_mplane(format, q_data->fmt);
+	if (ret) {
+		dev_err(ctx->dev, "try format failed\n");
+		return ret;
+	}
 
 	for (i = 0; i < fmt->num_planes; i++) {
 		q_data->bytesperline[i] = pix_mp->plane_fmt[i].bytesperline;
