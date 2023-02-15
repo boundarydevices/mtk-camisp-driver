@@ -32,52 +32,6 @@
 #define MTK_VIDEO_CAPTURE_MIN_HEIGHT        2U
 #define MTK_VIDEO_CAPTURE_MAX_HEIGHT        8192U
 
-static struct mtk_camera_fmt mtk_camera_formats[] = {
-	{
-		.name   = "YUYV",
-		.fourcc = V4L2_PIX_FMT_YUYV,
-		.depth	= {16},
-		.row_depth = {16},
-		.mplane = false,
-		.num_planes = 1,
-		.colorspace = V4L2_COLORSPACE_SMPTE170M,
-	},
-	{
-		.name   = "YM21",
-		.fourcc = V4L2_PIX_FMT_YVU420M,
-		.depth	= {8, 2, 2},
-		.row_depth = {8, 4, 4},
-		.mplane = true,
-		.num_planes = 3,
-		.colorspace = V4L2_COLORSPACE_SMPTE170M,
-	},
-	{
-		.name	= "NM12",
-		.fourcc = V4L2_PIX_FMT_NV12M,
-		.depth	= {8, 4},
-		.row_depth = {8, 8},
-		.mplane = true,
-		.num_planes = 2,
-		.colorspace = V4L2_COLORSPACE_SMPTE170M,
-	},
-	{
-		.name	= "RGB3",
-		.fourcc = V4L2_PIX_FMT_RGB24,
-		.depth	= {24},
-		.row_depth = {24},
-		.mplane = false,
-		.num_planes = 1,
-		.colorspace = V4L2_COLORSPACE_SRGB,
-	},
-	{
-		.name	= "JPEG",
-		.fourcc = V4L2_PIX_FMT_JPEG,
-		.mplane = false,
-		.num_planes = 1,
-		.colorspace = V4L2_COLORSPACE_JPEG,
-	},
-};
-
 static const char * const stream_type[] = {"Preview", "Video", "Capture"};
 
 /* ------------------------------------------------------------------------
