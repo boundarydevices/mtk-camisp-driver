@@ -60,16 +60,19 @@ static void handle_get_param_ack_msg(struct cam_vcu_ipi_ack *m)
 	switch (m->param_id) {
 	case GET_PARAM_SUPPORTED_FORMATS:
 	{
-		struct fmt_info *fmt = (struct fmt_info *)m->data_addr;
+		struct camera_fmt_info *fmt = (struct camera_fmt_info *)m->data_addr;
 
+		fmt->index = m->data.fmt.index;
 		fmt->v4l2_format = m->data.fmt.v4l2_format;
 		fmt->valid = m->data.fmt.valid;
 		break;
 	}
 	case GET_PARAM_FRAME_SIZES:
 	{
-		struct res_info *res = (struct res_info *)m->data_addr;
+		struct camera_res_info *res = (struct camera_res_info *)m->data_addr;
 
+		res->index = m->data.res.index;
+		res->v4l2_format = m->data.res.v4l2_format;
 		res->width = m->data.res.width;
 		res->height = m->data.res.height;
 		res->valid = m->data.res.valid;

@@ -93,6 +93,8 @@ static int mtk_camera_has_privileges(struct mtk_camera_fh *handle)
 	return handle->state == MTK_HANDLE_ACTIVE;
 }
 
+int mtk_camera_init_stream(struct mtk_camera_stream *stream);
+
 /* -----------------------------------------------------------------------------
  * Video queue operations
  */
@@ -479,10 +481,15 @@ camera_enum_format(struct file *file, void *fh,
 					struct v4l2_fmtdesc *f)
 {
 	struct mtk_camera_fh *handle = fh;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
 	const struct mtk_camera_fmt *fmt;
 	struct mtk_camera_fmt *formats;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
-	int num_formats;
+	int num_formats, ret;
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
 
 	formats = ctx->q_data.formats;
 	num_formats = ctx->q_data.num_formats;
@@ -503,10 +510,15 @@ camera_get_format_mplane(struct file *file, void *fh,
 					struct v4l2_format *format)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
 	struct v4l2_pix_format_mplane *pix_fmt_mp = &format->fmt.pix_mp;
 	struct mtk_q_data *q_data = &ctx->q_data;
-	int i;
+	int i, ret;
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d]\n", ctx->camera_id, __func__, ctx->id);
 
@@ -541,13 +553,18 @@ camera_set_format_mplane(struct file *file, void *fh,
 					struct v4l2_format *format)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
 	struct v4l2_pix_format_mplane *pix_mp;
 	struct mtk_q_data *q_data = &ctx->q_data;
 	struct mtk_camera_fmt *fmt;
 	struct v4l2_frmsize_discrete *frmsize;
 	uint32_t size[3];
 	int i, ret = 0;
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
 
 	ret = mtk_camera_acquire_privileges(handle);
 	if (ret < 0)
@@ -637,10 +654,15 @@ camera_try_format_mplane(struct file *file, void *fh,
 					struct v4l2_format *format)
 {
 	struct mtk_camera_fh *handle = fh;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
 	struct mtk_camera_fmt *fmt;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
 	struct mtk_camera_fmt *formats;
-	int num_formats;
+	int num_formats, ret;
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
 
 	formats = ctx->q_data.formats;
 	num_formats = ctx->q_data.num_formats;
@@ -679,11 +701,16 @@ camera_enum_framesizes(struct file *file, void *fh,
 					struct v4l2_frmsizeenum *fsize)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
 	struct mtk_camera_fmt *formats;
 	int num_formats;
 	struct v4l2_frmsize_discrete *sizes;
-	int i;
+	int i, ret;
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
 
 	formats = ctx->q_data.formats;
 	num_formats = ctx->q_data.num_formats;
@@ -712,11 +739,16 @@ camera_enum_frameintervals(struct file *file, void *fh,
 					struct v4l2_frmivalenum *fival)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
 	struct mtk_camera_fmt *formats;
 	struct mtk_camera_fmt *fmt;
 	int num_formats;
-	int i;
+	int i, ret;
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
 
 	formats = ctx->q_data.formats;
 	num_formats = ctx->q_data.num_formats;
@@ -753,12 +785,18 @@ static int
 camera_reqbufs(struct file *file, void *fh, struct v4l2_requestbuffers *rb)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d], cnt[%d] mem[%d] type[%d, %d] point[0x%p]\n",
 		ctx->camera_id, __func__, ctx->id, rb->count, rb->memory, rb->type,
 		ctx->queue.type, &ctx->queue);
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
+
 	ret = mtk_camera_acquire_privileges(handle);
 	if (ret < 0)
 		return ret;
@@ -996,8 +1034,8 @@ int mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 	struct mtk_q_data *q_data = &ctx->q_data;
 	unsigned int bytesperline = 0;
 	unsigned int sizeimage = 0;
-	struct camera_fmt_info fmt = {0};
-	struct camera_res_info res = {0};
+	struct camera_fmt_info fmt = {};
+	struct camera_res_info res = {};
 	unsigned int i, p, fmt_idx, res_idx;
 	int ret = 0;
 
@@ -1096,6 +1134,32 @@ int mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 	return 0;
 }
 
+int mtk_camera_init_stream(struct mtk_camera_stream *stream)
+{
+	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	int ret = 0;
+
+	mutex_lock(&stream->init_mutex);
+	if (stream->is_init == 0) {
+		ret = mtk_camera_set_default_params(ctx);
+		if (ret) {
+			dev_err(ctx->dev, "Failed to setup default parameters\n");
+			goto err_init;
+		}
+
+		ret = mtk_camera_ctrls_setup(ctx);
+		if (ret) {
+			dev_err(ctx->dev, "Failed to setup video capture controls\n");
+			goto err_init;
+		}
+
+		stream->is_init = 1;
+	}
+err_init:
+	mutex_unlock(&stream->init_mutex);
+	return ret;
+}
+
 /* -----------------------------------------------------------------------------
  * V4L2 file operations
  */
@@ -1113,25 +1177,6 @@ static int fops_camera_open(struct file *file)
 		return -ENOMEM;
 
 	mutex_lock(&stream->dev_mutex);
-	/* Initialize format and ctrl once */
-	mutex_lock(&stream->init_mutex);
-	if (stream->is_init == 0) {
-		ret = mtk_camera_set_default_params(ctx);
-		if (ret) {
-			dev_err(ctx->dev, "Failed to setup default parameters\n");
-			goto err_init;
-		}
-
-		ret = mtk_camera_ctrls_setup(ctx);
-		if (ret) {
-			dev_err(ctx->dev, "Failed to setup video capture controls\n");
-			goto err_init;
-		}
-
-		stream->is_init = 1;
-	}
-	mutex_unlock(&stream->init_mutex);
-
 	v4l2_fh_init(&handle->vfh, &stream->video);
 	v4l2_fh_add(&handle->vfh);
 	handle->state = MTK_HANDLE_PASSIVE;
@@ -1142,13 +1187,6 @@ static int fops_camera_open(struct file *file)
 	mutex_unlock(&stream->dev_mutex);
 
 	return 0;
-
-err_init:
-	mutex_unlock(&stream->init_mutex);
-	mutex_unlock(&stream->dev_mutex);
-	kfree(handle);
-
-	return -EAGAIN;
 }
 
 static int fops_camera_release(struct file *file)
