@@ -2544,7 +2544,7 @@ static irqreturn_t mtk_irq_camsv(int irq, void *data)
 	imgo_overr_status = irq_status & CAMSV_INT_IMGO_OVERR_ST;
 	drop_status = irq_status & CAMSV_INT_IMGO_DROP_ST;
 
-	dev_info(dev,
+	dev_dbg(dev,
 		"%i status:0x%x(err:0x%x) drop:0x%x imgo_dma_err:0x%x_%x fbc:0x%x (imgo:0x%x) ",
 		camsv_dev->id,
 		irq_status, err_status,

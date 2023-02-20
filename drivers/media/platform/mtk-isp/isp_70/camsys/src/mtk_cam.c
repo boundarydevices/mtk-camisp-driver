@@ -4583,7 +4583,7 @@ static void handle_immediate_switch(struct mtk_cam_ctx *ctx,
 	req = mtk_cam_s_data_get_req(s_data);
 
 	if (!is_raw_subdev(stream_id)) {
-		dev_info(ctx->cam->dev,
+		dev_dbg(ctx->cam->dev,
 			 "%s:%s:pipe(%d): switch op seq(%d), flags(0x%x), ctx_link_update(0x%x), stream_id(%d)\n",
 			 __func__, req->req.debug_str, s_data->pipe_id, s_data->frame_seq_no,
 			 req->flags, req->ctx_link_update, stream_id);
