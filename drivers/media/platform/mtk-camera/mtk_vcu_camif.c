@@ -43,6 +43,7 @@ static void handle_capture_ack_msg(struct cam_vcu_ipi_ack *m)
 				mem->status = BUFFER_FILLED;
 			else
 				mem->status = BUFFER_ERROR;
+			mem->timestamp = info->timestamp;
 			ctx->callback(mem);
 			dev_dbg(ctx->dev, "- vcu_inst_addr: 0x%llx, buffer handle 0x%llx\n",
 				inst->inst_addr, info->dma_addr);

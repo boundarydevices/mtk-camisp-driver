@@ -1001,8 +1001,7 @@ static void mtk_handle_buffer(struct mtk_camera_mem *fb)
 	for (i = 0; i < fb->num_planes; i++)
 		vb2_set_plane_payload(vb, i, fb->planes[i].size);
 
-	/* TODO: Use sensor expose time instead of ktime_get_ns() */
-	vb->timestamp = ktime_get_ns();
+	vb->timestamp = fb->timestamp;
 	vb2_v4l2->sequence = ctx->sequence;
 
 	if (fb->status == BUFFER_FILLED)

@@ -78,6 +78,7 @@ struct fb_info_out {
 	uint64_t dma_addr;
 	uint32_t dma_size;
 	uint32_t status;
+	uint64_t timestamp;
 };
 
 struct fmt_info {

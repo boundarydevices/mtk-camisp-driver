@@ -60,6 +60,7 @@ struct mtk_camera_mem {
 	struct list_head list;
 	enum camera_buffer_type type;
 	struct plane_buffer planes[VIDEO_MAX_PLANES];
+	unsigned long long timestamp;
 };
 
 #define DEBUG	1
