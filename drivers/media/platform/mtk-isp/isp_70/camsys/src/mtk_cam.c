@@ -3272,6 +3272,11 @@ void mtk_cam_dev_req_try_queue(struct mtk_cam_device *cam)
 			s_data->frame_seq_no = atomic_inc_return(&ctx->enqueued_frame_seq_no);
 			mtk_cam_req_update_seq(ctx, req,
 					       ++(ctx->enqueued_request_cnt));
+			if (is_camsv_subdev(i)) {
+				stream_ctx = mtk_cam_find_ctx(cam,
+				&cam->sv.pipelines[i -
+					MTKCAM_SUBDEV_CAMSV_START].subdev.entity);
+			}
 			if (is_raw_subdev(i) && ctx->sensor) {
 				previous_feature = ctx->pipe->feature_pending;
 
@@ -3341,10 +3346,32 @@ void mtk_cam_dev_req_try_queue(struct mtk_cam_device *cam)
 						 "%s:req(%s): undefined s_data_1, raw_feature(%lld)\n",
 						 __func__, req->req.debug_str,
 						 ctx->pipe->feature_pending);
-			} else if (is_camsv_subdev(i)) {
-				stream_ctx = mtk_cam_find_ctx(cam,
-					&cam->sv.pipelines[i -
-					MTKCAM_SUBDEV_CAMSV_START].subdev.entity);
+			} else if (is_camsv_subdev(i) && stream_ctx &&
+					i == stream_ctx->stream_id) {
+				if (!(req->ctx_link_update & (1 << i)))
+					s_data->sensor = stream_ctx->sensor;
+				spin_lock_irqsave(&req->req.lock, flags);
+				list_for_each_entry(obj, &req->req.objects, list) {
+					if (vb2_request_object_is_buffer(obj))
+						continue;
+					hdl = (struct v4l2_ctrl_handler *)obj->priv;
+					if (stream_ctx->sensor && hdl ==
+						stream_ctx->sensor->ctrl_handler)
+						sensor_hdl_obj = obj;
+				}
+				spin_unlock_irqrestore(&req->req.lock, flags);
+				if (s_data->sensor && s_data->sensor->ctrl_handler &&
+					sensor_hdl_obj) {
+					s_data->sensor_hdl_obj = sensor_hdl_obj;
+					dev_dbg(cam->dev,
+						"%s:%s:ctx(%d): find sensor(%s) hdl\n",
+						__func__, req->req.debug_str, i,
+						s_data->sensor->name);
+					s_data->flags |=
+						MTK_CAM_REQ_S_DATA_FLAG_SENSOR_HDL_EN;
+				}
+			} else if (is_camsv_subdev(i) && stream_ctx &&
+					i != stream_ctx->stream_id) {
 				/* copy s_data content for mstream case */
 				if (mtk_cam_is_mstream(stream_ctx)) {
 					req->p_data[i].s_data_num = 2;
