@@ -6,7 +6,7 @@
 #ifndef __MTK_CAM_PLAT_UTIL_H
 #define __MTK_CAM_PLAT_UTIL_H
 
-#define PDAF_READY 1
+#define PDAF_READY 0
 
 enum MMQOS_PORT {
 	AAO = 0,
