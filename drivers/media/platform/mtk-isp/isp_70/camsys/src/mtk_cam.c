@@ -377,6 +377,9 @@ mtk_cam_get_req_s_data(struct mtk_cam_ctx *ctx, unsigned int pipe_id,
 	struct mtk_cam_request_stream_data *req_stream_data;
 	int i;
 
+	if (pipe_id >= MTKCAM_SUBDEV_MAX)
+		return NULL;
+
 	spin_lock(&cam->running_job_lock);
 	list_for_each_entry_safe(req, req_prev, &cam->running_job_list, list) {
 		if (req->pipe_used & (1 << pipe_id)) {
