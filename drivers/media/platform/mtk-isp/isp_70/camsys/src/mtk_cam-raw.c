@@ -26,7 +26,11 @@
 #include "mtk_cam.h"
 #include "mtk_cam-feature.h"
 #include "mtk_cam-raw.h"
-#include "mtk_cam-regs.h"
+#ifdef ISP7_1
+#include "mtk_cam-regs-mt8188.h"
+#else
+#include "mtk_cam-regs-mt8195.h"
+#endif
 #include "mtk_cam-video.h"
 #include "mtk_cam-seninf-if.h"
 #include "mtk_cam-tg-flash.h"
@@ -1232,7 +1236,7 @@ bool is_dma_idle(struct mtk_raw_device *dev)
 			& DC_CAMSV_STAGER_EN) &&
 		 (readl(dev->base + REG_CTL_MOD6_EN) & 0x1))
 			? true:false;
-		dev_info(dev->dev, "%s: chasing_stat: 0x%llx ret=%d\n",
+		dev_info(dev->dev, "%s: chasing_stat: 0x%x ret=%d\n",
 				__func__, chasing_stat, ret);
 	}
 	if (~raw_rst_stat & RST_STAT_RAWI_R3) {
@@ -1242,7 +1246,7 @@ bool is_dma_idle(struct mtk_raw_device *dev)
 			& DC_CAMSV_STAGER_EN) &&
 		 (readl(dev->base + REG_CTL_MOD6_EN) & 0x80))
 			? true:false;
-		dev_info(dev->dev, "%s: chasing_stat: 0x%llx, ret=%d\n",
+		dev_info(dev->dev, "%s: chasing_stat: 0x%x, ret=%d\n",
 				__func__, chasing_stat, ret);
 	}
 	if (~raw_rst_stat & RST_STAT_RAWI_R5) {
@@ -1252,7 +1256,7 @@ bool is_dma_idle(struct mtk_raw_device *dev)
 			& DC_CAMSV_STAGER_EN) &&
 		 (readl(dev->base + REG_CTL_MOD6_EN) & 0x1000))
 			? true:false;
-		dev_info(dev->dev, "%s: chasing_stat: 0x%llx, ret=%d\n",
+		dev_info(dev->dev, "%s: chasing_stat: 0x%x, ret=%d\n",
 				__func__, chasing_stat, ret);
 	}
 

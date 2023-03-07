@@ -3,7 +3,11 @@
 // Copyright (c) 2022 MediaTek Inc.
 
 #include "mtk_cam-tg-flash.h"
-#include "mtk_cam-regs.h"
+#ifdef ISP7_1
+#include "mtk_cam-regs-mt8188.h"
+#else
+#include "mtk_cam-regs-mt8195.h"
+#endif
 
 static void
 mtk_cam_tg_flash_common_config(struct mtk_raw_device *raw,

@@ -1827,8 +1827,10 @@ static int runtime_resume(struct device *dev)
 
 	if (core->refcnt == 1) {
 #ifdef ISP7_1
-		if (ctx->core->dfs.reg)
-			regulator_enable(ctx->core->dfs.reg);
+		if (ctx->core->dfs.reg) {
+			if (regulator_enable(ctx->core->dfs.reg))
+				dev_info(core->dev, "regulator_enable fail\n");
+		}
 #endif
 		seninf_core_pm_runtime_get_sync(core);
 		for (i = 0; i < CLK_TOP_SENINF_END; i++) {

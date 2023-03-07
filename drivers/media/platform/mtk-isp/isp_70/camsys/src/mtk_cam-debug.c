@@ -9,7 +9,11 @@
 #include <media/v4l2-event.h>
 #include "mtk_cam.h"
 #include "mtk_cam-raw.h"
-#include "mtk_cam-regs.h"
+#ifdef ISP7_1
+#include "mtk_cam-regs-mt8188.h"
+#else
+#include "mtk_cam-regs-mt8195.h"
+#endif
 #include "mtk_cam-debug.h"
 #include "mtk_camera-v4l2-controls.h"
 #include "mtk_camera-videodev2.h"

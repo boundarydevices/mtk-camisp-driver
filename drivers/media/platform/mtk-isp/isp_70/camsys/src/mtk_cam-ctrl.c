@@ -18,10 +18,11 @@
 #include "mtk_cam-hsf.h"
 #include "mtk_cam-pool.h"
 #include "mtk_cam-raw.h"
-#include "mtk_cam-regs.h"
 #ifdef ISP7_1
+#include "mtk_cam-regs-mt8188.h"
 #include "mtk_cam-sv-regs-mt8188.h"
 #else
+#include "mtk_cam-regs-mt8195.h"
 #include "mtk_cam-sv-regs-mt8195.h"
 #endif
 #include "mtk_cam-tg-flash.h"
@@ -2147,7 +2148,11 @@ static void mtk_camsys_ts_frame_start(struct mtk_cam_ctx *ctx,
 		}
 		req_stream_data->timestamp = ktime_get_boottime_ns();
 		dev_dbg(cam->dev,
+#ifdef ISP7_1
+		"TS-SOF[ctx:%d-#%d], SV-ENQ req:%d is update, composed:%d, iova:0x%llx, time:%lld\n",
+#else
 		"TS-SOF[ctx:%d-#%d], SV-ENQ req:%d is update, composed:%d, iova:0x%x, time:%lld\n",
+#endif
 		ctx->stream_id, dequeued_frame_seq_no, req_stream_data->frame_seq_no,
 		ctx->composed_frame_seq_no, req_stream_data->frame_params.img_ins[0].buf[0].iova,
 		req_stream_data->timestamp);
@@ -2502,7 +2507,7 @@ static void mtk_camsys_raw_frame_start(struct mtk_raw_device *raw_dev,
 							buf_entry->img_buffer.iova,
 							dequeued_frame_seq_no);
 						dev_info(camsv_dev->dev,
-						"[%s] dcif stagger workaround camsv id:%d/iova:0x%x\n",
+						"[%s] dcif stagger workaround camsv id:%d/iova:0x%llx\n",
 						__func__, camsv_dev->id,
 						buf_entry->img_buffer.iova);
 						mtk_cam_img_working_buf_put(buf_entry);
@@ -4021,7 +4026,7 @@ static int mtk_camsys_event_handle_camsv(struct mtk_cam_device *cam,
 #ifdef ISP7_1
 				if (ctx->pipe->stagger_path == STAGGER_DCIF) {
 					raw_dev->sof_count = irq_info->frame_idx_inner;
-					dev_dbg(camsv_dev->dev, "dcif/offline stagger raw sof:%d\n",
+					dev_dbg(camsv_dev->dev, "dcif/offline stagger raw sof:%llu\n",
 						raw_dev->sof_count);
 					if (raw_dev->sof_count == 1) {
 						struct mtk_camsv_device *camsv_dev_s;

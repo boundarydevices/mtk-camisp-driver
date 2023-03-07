@@ -12,7 +12,11 @@
 #include "mtk_cam-video.h"
 
 #define PDAF_READY 0
+#ifdef ISP7_1
+#define CAMSV_PIPELINE_NUM 8
+#else
 #define CAMSV_PIPELINE_NUM 6
+#endif
 
 #define SV_IMG_MAX_WIDTH		8192
 #define SV_IMG_MAX_HEIGHT		6144

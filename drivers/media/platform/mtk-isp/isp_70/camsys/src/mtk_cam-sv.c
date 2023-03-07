@@ -1276,7 +1276,9 @@ int mtk_cam_sv_top_config(
 	/* dma performance */
 	CAMSV_WRITE_REG(dev->base + REG_CAMSV_SPECIAL_FUN_EN, 0x4000000);
 
+#ifndef ISP7_1
 EXIT:
+#endif
 	return ret;
 }
 
@@ -1288,8 +1290,10 @@ int mtk_cam_sv_dmao_config(
 	int raw_imgo_stride)
 {
 	int ret = 0;
+#ifndef ISP7_1
 	unsigned int stride;
 	union CAMSV_FMT_SEL fmt;
+#endif
 
 	/* imgo dma setting */
 	CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_XSIZE,
@@ -1413,7 +1417,9 @@ int mtk_cam_sv_dmao_config(
 	}
 #endif //#ifdef ISP7_1
 
+#ifndef ISP7_1
 EXIT:
+#endif
 	return ret;
 }
 

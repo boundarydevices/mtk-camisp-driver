@@ -27,7 +27,11 @@
 #include "mtk_cam_pm.h"
 #include "mtk_cam-dvfs_qos.h"
 #include "mtk_cam-pool.h"
-#include "mtk_cam-regs.h"
+#ifdef ISP7_1
+#include "mtk_cam-regs-mt8188.h"
+#else
+#include "mtk_cam-regs-mt8195.h"
+#endif
 #include "mtk_cam-smem.h"
 #include "mtk_cam-tg-flash.h"
 #include "mtk_camera-v4l2-controls.h"
@@ -1191,7 +1195,11 @@ static void config_img_in_fmt_mstream(struct mtk_cam_device *cam,
 			in_fmt->fmt.stride[0] =
 				cfg_fmt->fmt.pix_mp.plane_fmt[0].bytesperline;
 			dev_dbg(cam->dev,
+#ifdef ISP7_1
+				"[m-stream] ctx: %d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (0x%llx/0x%llx)\n",
+#else
 				"[m-stream] ctx: %d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (0x%x/0x%x)\n",
+#endif
 				ctx->stream_id, input_node, in_fmt->fmt.s.w,
 				in_fmt->fmt.s.h, in_fmt->fmt.stride[0],
 				in_fmt->fmt.format, in_fmt->buf[0].iova,
@@ -1210,7 +1218,11 @@ static void config_img_in_fmt_mstream(struct mtk_cam_device *cam,
 		in_fmt->fmt.stride[0] =
 			cfg_fmt->fmt.pix_mp.plane_fmt[0].bytesperline;
 		dev_dbg(cam->dev,
+#ifdef ISP7_1
+			"[m-stream] ctx: %d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (0x%llx/0x%llx)\n",
+#else
 			"[m-stream] ctx: %d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (0x%x/0x%x)\n",
+#endif
 			ctx->stream_id, input_node, in_fmt->fmt.s.w,
 			in_fmt->fmt.s.h, in_fmt->fmt.stride[0],
 			in_fmt->fmt.format, in_fmt->buf[0].iova,
@@ -1299,7 +1311,11 @@ static void config_img_in_fmt_stagger(struct mtk_cam_device *cam,
 		in_fmt->fmt.stride[0] = cfg_fmt->fmt.pix_mp.plane_fmt[0].bytesperline;
 
 		dev_dbg(cam->dev,
+#ifdef ISP7_1
+		"[stagger-%d] ctx: %d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (iova:0x%llx)\n",
+#else
 		"[stagger-%d] ctx: %d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (iova:0x%x)\n",
+#endif
 		rawi_idx, req->ctx->stream_id, input_node, in_fmt->fmt.s.w,
 		in_fmt->fmt.s.h, in_fmt->fmt.stride[0], in_fmt->fmt.format,
 		in_fmt->buf[0].iova);
@@ -1347,7 +1363,11 @@ config_img_in_fmt_time_shared(struct mtk_cam_device *cam,
 	in_fmt->buf[0].iova = buf_entry->img_buffer.iova;
 	in_fmt->buf[0].size = cfg_fmt->fmt.pix_mp.plane_fmt[0].sizeimage;
 	dev_info(cam->dev,
+#ifdef ISP7_1
+	"[%s:%d] ctx:%d dma_port:%d size=%dx%d %d, stride:%d, fmt:0x%x (iova:0x%llx)\n",
+#else
 	"[%s:%d] ctx:%d dma_port:%d size=%dx%d %d, stride:%d, fmt:0x%x (iova:0x%x)\n",
+#endif
 	__func__, req->frame_seq_no, ctx->stream_id, input_node, in_fmt->fmt.s.w,
 	in_fmt->fmt.s.h, in_fmt->buf[0].size, in_fmt->fmt.stride[0],
 	in_fmt->fmt.format, in_fmt->buf[0].iova);
@@ -1488,7 +1508,11 @@ static void check_stagger_buffer(struct mtk_cam_device *cam,
 			finish_img_buf(s_data);
 		}
 		dev_dbg(cam->dev,
+#ifdef ISP7_1
+			"[%s:%d] ctx:%d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (in/out:0x%llx/0x%llx)\n",
+#else
 			"[%s:%d] ctx:%d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (in/out:0x%x/0x%x)\n",
+#endif
 			__func__, s_data->frame_seq_no, ctx->stream_id,
 			input_node, in_fmt->fmt.s.w, in_fmt->fmt.s.h,
 			in_fmt->fmt.stride[0], in_fmt->fmt.format,
@@ -1570,7 +1594,11 @@ static void check_timeshared_buffer(struct mtk_cam_device *cam,
 		in_fmt->buf[0].iova = buf_entry->img_buffer.iova;
 	}
 	dev_dbg(cam->dev,
+#ifdef ISP7_1
+		"[%s:%d] ctx:%d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (iova:0x%llx)\n",
+#else
 		"[%s:%d] ctx:%d dma_port:%d size=%dx%d, stride:%d, fmt:0x%x (iova:0x%x)\n",
+#endif
 		__func__, req->frame_seq_no, ctx->stream_id, input_node,
 		in_fmt->fmt.s.w, in_fmt->fmt.s.h, in_fmt->fmt.stride[0],
 		in_fmt->fmt.format, in_fmt->buf[0].iova);
@@ -1767,7 +1795,11 @@ static void check_mstream_buffer(struct mtk_cam_device *cam,
 			MTKCAM_IPI_HW_PATH_ON_THE_FLY_MSTREAM_NE_SE;
 
 			dev_dbg(cam->dev,
+#ifdef ISP7_1
+				"%s: mstream (m2m %d) ne_se ne imgo:0x%llx se rawi:0x%llx\n",
+#else
 				"%s: mstream (m2m %d) ne_se ne imgo:0x%x se rawi:0x%x\n",
+#endif
 				__func__, is_m2m, out_fmt->buf[0][0].iova,
 				in_fmt->buf[0].iova);
 		} else {
@@ -1776,7 +1808,11 @@ static void check_mstream_buffer(struct mtk_cam_device *cam,
 			MTKCAM_IPI_HW_PATH_ON_THE_FLY_MSTREAM_SE_NE;
 
 			dev_dbg(cam->dev,
+#ifdef ISP7_1
+				"%s: mstream (m2m %d) se_ne se imgo:0x%llx ne rawi:0x%llx\n",
+#else
 				"%s: mstream (m2m %d) se_ne se imgo:0x%x ne rawi:0x%x\n",
+#endif
 				__func__, is_m2m, out_fmt->buf[0][0].iova,
 				in_fmt->buf[0].iova);
 		}
@@ -2063,7 +2099,11 @@ static int mtk_cam_fill_img_buf(struct mtkcam_ipi_img_output *img_out,
 							   / 2;
 				img_out->buf[0][0].size += sizeof(struct UfbcBufferHeader);
 
+#ifdef ISP7_1
+				pr_debug("plane:%d stride:%d plane_size:%d addr:0x%llx\n",
+#else
 				pr_debug("plane:%d stride:%d plane_size:%d addr:0x%x\n",
+#endif
 					0, img_out->fmt.stride[0], img_out->buf[0][0].size,
 					img_out->buf[0][0].iova);
 			} else if (is_raw_ufo(pixelformat)) {
@@ -2075,7 +2115,11 @@ static int mtk_cam_fill_img_buf(struct mtkcam_ipi_img_output *img_out,
 				img_out->buf[0][0].size += ALIGN((aligned_width / 64), 8) * height;
 				img_out->buf[0][0].size += sizeof(struct UfbcBufferHeader);
 
+#ifdef ISP7_1
+				pr_debug("plane:%d stride:%d plane_size:%d addr:0x%llx\n",
+#else
 				pr_debug("plane:%d stride:%d plane_size:%d addr:0x%x\n",
+#endif
 					0, img_out->fmt.stride[0], img_out->buf[0][0].size,
 					img_out->buf[0][0].iova);
 			} else {
@@ -2089,7 +2133,11 @@ static int mtk_cam_fill_img_buf(struct mtkcam_ipi_img_output *img_out,
 					img_out->buf[0][i].size = img_out->fmt.stride[i]
 						* DIV_ROUND_UP(height, vdiv);
 					addr_offset += img_out->buf[0][i].size;
+#ifdef ISP7_1
+					pr_debug("plane:%d stride:%d plane_size:%d addr:0x%llx\n",
+#else
 					pr_debug("plane:%d stride:%d plane_size:%d addr:0x%x\n",
+#endif
 						i, img_out->fmt.stride[i], img_out->buf[0][i].size,
 						img_out->buf[0][i].iova);
 				}
@@ -2116,7 +2164,11 @@ static int mtk_cam_fill_img_buf(struct mtkcam_ipi_img_output *img_out,
 				img_out->buf[0][i].size = img_out->fmt.stride[i]
 					* DIV_ROUND_UP(height, vdiv);
 				addr_offset += img_out->buf[0][i].size;
+#ifdef ISP7_1
+				pr_debug("stride:%d plane_size:%d addr:0x%llx\n",
+#else
 				pr_debug("stride:%d plane_size:%d addr:0x%x\n",
+#endif
 					img_out->fmt.stride[i], img_out->buf[0][i].size,
 					img_out->buf[0][i].iova);
 			}
@@ -2193,7 +2245,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 					frame_param->img_outs[desc_id].buf[0][0].size =
 						f->fmt.pix_mp.plane_fmt[0].sizeimage;
 
+#ifdef ISP7_1
+					pr_debug("mstream ne_se m2m ne imgo:0x%llx size:%d se imgo:0x%llx size:%d\n",
+#else
 					pr_debug("mstream ne_se m2m ne imgo:0x%x size:%d se imgo:0x%x size:%d\n",
+#endif
 					mstream_frame_param->img_outs[desc_id].buf[0][0].iova,
 					mstream_frame_param->img_outs[desc_id].buf[0][0].size,
 					frame_param->img_outs[desc_id].buf[0][0].iova,
@@ -2212,7 +2268,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 						MTKCAM_IPI_RAW_RAWI_2].buf[0].size =
 						f->fmt.pix_mp.plane_fmt[i].sizeimage;
 
+#ifdef ISP7_1
+					pr_debug("mstream ne_se m2m se rawi2:0x%llx size:%d\n",
+#else
 					pr_debug("mstream ne_se m2m se rawi2:0x%x size:%d\n",
+#endif
 						frame_param->img_ins[in_node -
 						MTKCAM_IPI_RAW_RAWI_2].
 						buf[0].iova, frame_param->img_ins[in_node -
@@ -2228,7 +2288,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 						MTKCAM_IPI_RAW_RAWI_2].buf[0].size =
 						f->fmt.pix_mp.plane_fmt[0].sizeimage;
 
+#ifdef ISP7_1
+					pr_debug("mstream ne_se m2m ne rawi2:0x%llx size:%d\n",
+#else
 					pr_debug("mstream ne_se m2m ne rawi2:0x%x size:%d\n",
+#endif
 						mstream_frame_param->img_ins[
 						in_node -
 						MTKCAM_IPI_RAW_RAWI_2].buf[0].iova,
@@ -2249,7 +2313,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 						MTKCAM_IPI_RAW_RAWI_2].buf[0].size =
 						f->fmt.pix_mp.plane_fmt[i].sizeimage;
 
+#ifdef ISP7_1
+					pr_debug("mstream ne_se m2m se rawi6:0x%llx size:%d\n",
+#else
 					pr_debug("mstream ne_se m2m se rawi6:0x%x size:%d\n",
+#endif
 						frame_param->img_ins[in_node -
 						MTKCAM_IPI_RAW_RAWI_2].
 						buf[0].iova, frame_param->img_ins[in_node -
@@ -2276,7 +2344,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 					frame_param->img_outs[desc_id].buf[0][0].size =
 						f->fmt.pix_mp.plane_fmt[i].sizeimage;
 
+#ifdef ISP7_1
+					pr_debug("mstream se_ne m2m se imgo:0x%llx size:%d ne imgo:0x%llx size:%d\n",
+#else
 					pr_debug("mstream se_ne m2m se imgo:0x%x size:%d ne imgo:0x%x size:%d\n",
+#endif
 					mstream_frame_param->img_outs[desc_id].buf[0][0].iova,
 					mstream_frame_param->img_outs[desc_id].buf[0][0].size,
 					frame_param->img_outs[desc_id].buf[0][0].iova,
@@ -2295,7 +2367,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 						MTKCAM_IPI_RAW_RAWI_2].buf[0].size =
 						f->fmt.pix_mp.plane_fmt[i].sizeimage;
 
+#ifdef ISP7_1
+					pr_debug("mstream se_ne m2m ne rawi2:0x%llx size:%d\n",
+#else
 					pr_debug("mstream se_ne m2m ne rawi2:0x%x size:%d\n",
+#endif
 						frame_param->img_ins[in_node -
 						MTKCAM_IPI_RAW_RAWI_2].buf[0].iova,
 						frame_param->img_ins[in_node -
@@ -2311,7 +2387,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 						MTKCAM_IPI_RAW_RAWI_2].buf[0].size =
 						f->fmt.pix_mp.plane_fmt[i].sizeimage;
 
+#ifdef ISP7_1
+					pr_debug("mstream se_ne m2m se rawi2:0x%llx size:%d\n",
+#else
 					pr_debug("mstream se_ne m2m se rawi2:0x%x size:%d\n",
+#endif
 						mstream_frame_param->img_ins[
 						in_node - MTKCAM_IPI_RAW_RAWI_2].buf[0].iova,
 						mstream_frame_param->img_ins[in_node -
@@ -2330,7 +2410,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 						MTKCAM_IPI_RAW_RAWI_2].buf[0].size =
 						f->fmt.pix_mp.plane_fmt[i].sizeimage;
 
+#ifdef ISP7_1
+					pr_debug("mstream se_ne m2m ne rawi6:0x%llx size:%d\n",
+#else
 					pr_debug("mstream se_ne m2m ne rawi6:0x%x size:%d\n",
+#endif
 						frame_param->img_ins[in_node -
 						MTKCAM_IPI_RAW_RAWI_2].buf[0].iova,
 						frame_param->img_ins[in_node -
@@ -2355,7 +2439,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 				mstream_frame_param->img_outs[desc_id].buf[0][0].size =
 					f->fmt.pix_mp.plane_fmt[i].sizeimage;
 
+#ifdef ISP7_1
+				pr_debug("mstream ne_se ne imgo:0x%llx size:%d\n",
+#else
 				pr_debug("mstream ne_se ne imgo:0x%x size:%d\n",
+#endif
 				mstream_frame_param->img_outs[desc_id].buf[0][0].iova,
 				mstream_frame_param->img_outs[desc_id].buf[0][0].size);
 			} else if (i == 1) { // then SE
@@ -2372,7 +2460,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 					buf->daddr + f->fmt.pix_mp.plane_fmt[i].sizeimage;
 				frame_param->img_outs[desc_id].buf[0][0].size =
 					f->fmt.pix_mp.plane_fmt[i].sizeimage;
+#ifdef ISP7_1
+				pr_debug("mstream ne_se se rawi:0x%llx size:%d, imgo:0x%llx size:%d\n",
+#else
 				pr_debug("mstream ne_se se rawi:0x%x size:%d, imgo:0x%x size:%d\n",
+#endif
 					frame_param->img_ins[in_node -
 					MTKCAM_IPI_RAW_RAWI_2].buf[0].iova,
 					frame_param->img_ins[in_node -
@@ -2386,7 +2478,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 					buf->daddr + f->fmt.pix_mp.plane_fmt[i].sizeimage;
 				mstream_frame_param->img_outs[desc_id].buf[0][0].size =
 					f->fmt.pix_mp.plane_fmt[i].sizeimage;
+#ifdef ISP7_1
+				pr_debug("mstream se_ne se imgo:0x%llx size:%d\n",
+#else
 				pr_debug("mstream se_ne se imgo:0x%x size:%d\n",
+#endif
 				mstream_frame_param->img_outs[desc_id].buf[0][0].iova,
 				mstream_frame_param->img_outs[desc_id].buf[0][0].size);
 			} else if (i == 1) { // then NE
@@ -2403,7 +2499,11 @@ static void mtk_cam_mstream_buf_update(struct mtk_cam_request *req,
 					buf->daddr;
 				frame_param->img_outs[desc_id].buf[0][0].size =
 					f->fmt.pix_mp.plane_fmt[i].sizeimage;
+#ifdef ISP7_1
+				pr_debug("mstream se_ne ne rawi:0x%llx size:%d, imgo:0x%llx size:%d\n",
+#else
 				pr_debug("mstream se_ne ne rawi:0x%x size:%d, imgo:0x%x size:%d\n",
+#endif
 					frame_param->img_ins[in_node -
 					MTKCAM_IPI_RAW_RAWI_2].buf[0].iova,
 					frame_param->img_ins[in_node -
@@ -3815,7 +3915,11 @@ void mstream_seamless_buf_update(struct mtk_cam_ctx *ctx,
 		// NE as normal 1 exposure flow, get iova from frame_param
 		mstream_frame_param->img_outs[desc_id].buf[0][0].iova =
 				frame_param->img_outs[desc_id].buf[0][0].iova;
+#ifdef ISP7_1
+		pr_debug("%s mstream ne_se ne imgo:0x%llx\n",
+#else
 		pr_debug("%s mstream ne_se ne imgo:0x%x\n",
+#endif
 			__func__,
 			mstream_frame_param->img_outs[desc_id].buf[0][0].iova);
 
@@ -3829,7 +3933,11 @@ void mstream_seamless_buf_update(struct mtk_cam_ctx *ctx,
 			main_stream_size;
 		frame_param->img_outs[desc_id].buf[0][0].size =
 			main_stream_size;
+#ifdef ISP7_1
+		pr_debug("%s mstream ne_se se rawi:0x%llx imgo:0x%llx size:%d\n",
+#else
 		pr_debug("%s mstream ne_se se rawi:0x%x imgo:0x%x size:%d\n",
+#endif
 			__func__,
 			frame_param->img_ins[in_node - MTKCAM_IPI_RAW_RAWI_2].buf[0].iova,
 			frame_param->img_outs[desc_id].buf[0][0].iova,
@@ -3842,7 +3950,11 @@ void mstream_seamless_buf_update(struct mtk_cam_ctx *ctx,
 			main_stream_size;
 		mstream_frame_param->img_outs[desc_id].buf[0][0].size =
 			main_stream_size;
+#ifdef ISP7_1
+		pr_debug("%s mstream se_ne se imgo:0x%llx size:%d\n",
+#else
 		pr_debug("%s mstream se_ne se imgo:0x%x size:%d\n",
+#endif
 			__func__,
 			mstream_frame_param->img_outs[desc_id].buf[0][0].iova,
 			mstream_frame_param->img_outs[desc_id].buf[0][0].size);
@@ -3854,7 +3966,11 @@ void mstream_seamless_buf_update(struct mtk_cam_ctx *ctx,
 			.size = main_stream_size;
 		// out = NE out, already configured in normal single exposure
 
+#ifdef ISP7_1
+		pr_debug("%s mstream se_ne ne rawi:0x%llx imgo:0x%llx size:%d\n",
+#else
 		pr_debug("%s mstream se_ne ne rawi:0x%x imgo:0x%x size:%d\n",
+#endif
 			__func__,
 			frame_param->img_ins[in_node - MTKCAM_IPI_RAW_RAWI_2].buf[0].iova,
 			frame_param->img_outs[desc_id].buf[0][0].iova,
@@ -3881,7 +3997,11 @@ void mstream_seamless_buf_update(struct mtk_cam_ctx *ctx,
 		frame_param->img_ins[in_node - MTKCAM_IPI_RAW_RAWI_2].buf[0]
 			.size = 0;
 
+#ifdef ISP7_1
+		pr_debug("%s normal imgo:0x%llx\n", __func__,
+#else
 		pr_debug("%s normal imgo:0x%x\n", __func__,
+#endif
 			frame_param->img_outs[desc_id].buf[0][0].iova);
 	}
 }
@@ -5433,8 +5553,10 @@ static int mtk_cam_runtime_resume(struct device *dev)
 	struct mtk_camsys_dvfs *dvfs_info =
 				&cam_dev->camsys_ctrl.dvfs_info;
 
-	if (dvfs_info->reg_vmm)
-		regulator_enable(dvfs_info->reg_vmm);
+	if (dvfs_info->reg_vmm) {
+		if (regulator_enable(dvfs_info->reg_vmm))
+			dev_info(dev, "regulator_enable fail\n");
+	}
 #endif
 
 	dev_dbg(dev, "- %s\n", __func__);

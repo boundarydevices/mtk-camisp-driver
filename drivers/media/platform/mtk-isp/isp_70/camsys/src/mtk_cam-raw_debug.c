@@ -5,7 +5,11 @@
 #include <linux/device.h>
 #include <linux/io.h>
 
-#include "mtk_cam-regs.h"
+#ifdef ISP7_1
+#include "mtk_cam-regs-mt8188.h"
+#else
+#include "mtk_cam-regs-mt8195.h"
+#endif
 #include "mtk_cam-raw_debug.h"
 
 #define ADD_FBC_DMA(name)	 #name
