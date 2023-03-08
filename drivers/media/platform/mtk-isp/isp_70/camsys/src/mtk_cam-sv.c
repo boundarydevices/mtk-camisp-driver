@@ -1097,7 +1097,6 @@ int mtk_cam_sv_top_config(
 							SV_INT_EN_TG_SOF_INT_EN |
 							SV_INT_EN_SW_PASS1_DON_INT_EN |
 							SV_INT_EN_DMA_ERR_INT_EN);
-	union CAMSV_PAK pak;
 #else //MT8195
 	unsigned int int_en = (SV_INT_EN_VS1_INT_EN |
 							SV_INT_EN_TG_ERR_INT_EN |
@@ -1108,6 +1107,7 @@ int mtk_cam_sv_top_config(
 							SV_INT_EN_DMA_ERR_INT_EN |
 							SV_INT_EN_IMGO_OVERR_INT_EN);
 #endif
+	union CAMSV_PAK pak;
 	union CAMSV_FMT_SEL fmt;
 	int ret = 0;
 
@@ -1186,99 +1186,33 @@ int mtk_cam_sv_top_config(
 	/* pak */
 	fmt.Raw = cfg_in_param->fmt;
 
-#ifdef ISP7_1
-	pak.Raw = mtk_cam_sv_pak_sel(fmt.Bits.TG1_FMT, cfg_in_param->pixel_mode);
-	CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
-		CAMSV_MODULE_EN, PAK_EN, 1);
-	CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
-		CAMSV_MODULE_EN, PAK_SEL, 0);
-	CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK_CON,
-		CAMSV_PAK_CON, PAK_IN_BIT, 14);
-	CAMSV_WRITE_REG(dev->base + REG_CAMSV_PAK, pak.Raw);
-#else //MT8195
-	switch (fmt.Bits.TG1_FMT) {
-	case SV_TG_FMT_RAW8:
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
-			CAMSV_MODULE_EN, PAK_EN, 1);
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
-			CAMSV_MODULE_EN, PAK_SEL, 0);
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
-			CAMSV_PAK, PAK_MODE, 128);
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK_CON,
-			CAMSV_PAK_CON, PAK_IN_BIT, 14);
-		break;
-	case SV_TG_FMT_RAW10:
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
-			CAMSV_MODULE_EN, PAK_EN, 1);
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
-			CAMSV_MODULE_EN, PAK_SEL, 0);
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
-			CAMSV_PAK, PAK_MODE, 129);
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK_CON,
-			CAMSV_PAK_CON, PAK_IN_BIT, 14);
-		break;
-	case SV_TG_FMT_RAW12:
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
-			CAMSV_MODULE_EN, PAK_EN, 1);
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
-			CAMSV_MODULE_EN, PAK_SEL, 0);
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
-			CAMSV_PAK, PAK_MODE, 130);
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK_CON,
-			CAMSV_PAK_CON, PAK_IN_BIT, 14);
-		break;
-	case SV_TG_FMT_YUV422:
+	if (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422) {
 		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
 			CAMSV_MODULE_EN, PAK_EN, 0);
 		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
 			CAMSV_MODULE_EN, PAK_SEL, 1);
 		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
 			CAMSV_PAK, PAK_MODE, 0);
-		break;
-	default:
-		dev_dbg(dev->dev, "unknown tg format(%d)", fmt.Bits.TG1_FMT);
-		ret = -1;
-		goto EXIT;
+		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
+			CAMSV_PAK, PAK_DBL_MODE, 0);
+	} else {
+		pak.Raw = mtk_cam_sv_pak_sel(fmt.Bits.TG1_FMT, cfg_in_param->pixel_mode);
+		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
+			CAMSV_MODULE_EN, PAK_EN, 1);
+		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
+			CAMSV_MODULE_EN, PAK_SEL, 0);
+		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK_CON,
+			CAMSV_PAK_CON, PAK_IN_BIT, 14);
+		CAMSV_WRITE_REG(dev->base + REG_CAMSV_PAK, pak.Raw);
 	}
-#endif //#ifdef ISP7_1
 
 	/* ufe disable */
 	CAMSV_WRITE_BITS(dev->base + REG_CAMSV_MODULE_EN,
 		CAMSV_MODULE_EN, UFE_EN, 0);
 
-#ifdef ISP7_1
-#else //MT8195
-	/* pixel mode */
-	switch (cfg_in_param->pixel_mode) {
-	case 0:
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
-			CAMSV_PAK, PAK_DBL_MODE, 0);
-		break;
-	case 1:
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
-			CAMSV_PAK, PAK_DBL_MODE, 1);
-		break;
-	case 2:
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
-			CAMSV_PAK, PAK_DBL_MODE, 2);
-		break;
-	case 3:
-		CAMSV_WRITE_BITS(dev->base + REG_CAMSV_PAK,
-			CAMSV_PAK, PAK_DBL_MODE, 3);
-		break;
-	default:
-		dev_dbg(dev->dev, "unknown pixel mode(%d)", cfg_in_param->pixel_mode);
-		ret = -1;
-		goto EXIT;
-	}
-#endif //#ifdef ISP7_1
-
 	/* dma performance */
 	CAMSV_WRITE_REG(dev->base + REG_CAMSV_SPECIAL_FUN_EN, 0x4000000);
 
-#ifndef ISP7_1
-EXIT:
-#endif
 	return ret;
 }
 
@@ -1290,9 +1224,10 @@ int mtk_cam_sv_dmao_config(
 	int raw_imgo_stride)
 {
 	int ret = 0;
+	int bus_size = 0;
+	union CAMSV_FMT_SEL fmt;
 #ifndef ISP7_1
 	unsigned int stride;
-	union CAMSV_FMT_SEL fmt;
 #endif
 
 	/* imgo dma setting */
@@ -1311,6 +1246,34 @@ int mtk_cam_sv_dmao_config(
 	/* imgo crop */
 	CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_CROP, 0);
 
+	/* bus size */
+	fmt.Raw = cfg_in_param->fmt;
+
+	switch (cfg_in_param->pixel_mode) {
+	case 0:
+		bus_size = 1;
+		break;
+	case 1:
+		bus_size = (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422) ? 1 : 3;
+		break;
+	case 2:
+		bus_size = (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422) ? 3 : 7;
+		break;
+	case 3:
+		if (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422) {
+			dev_dbg(sub_dev->dev, "not support pixel mode(%d) for YUV format",
+				cfg_in_param->pixel_mode);
+			ret = -1;
+			goto EXIT;
+		}
+		bus_size = 15;
+		break;
+	default:
+		dev_dbg(sub_dev->dev, "unknown pixel mode(%d)", cfg_in_param->pixel_mode);
+		ret = -1;
+		goto EXIT;
+	}
+
 #ifdef ISP7_1
 	/* check raw's imgo stride */
 	if (hw_scen & MTK_CAMSV_SUPPORTED_SPECIAL_HW_SCENARIO) {
@@ -1321,6 +1284,12 @@ int mtk_cam_sv_dmao_config(
 				raw_imgo_stride);
 		}
 	}
+
+	/* imgo stride */
+	CAMSV_WRITE_BITS(sub_dev->base + REG_CAMSV_IMGO_BASIC,
+		CAMSV_IMGO_BASIC, BUS_SIZE_EN, 1);
+	CAMSV_WRITE_BITS(sub_dev->base + REG_CAMSV_IMGO_BASIC,
+		CAMSV_IMGO_BASIC, BUS_SIZE, bus_size);
 
 	/* imgo con */
 	if (sub_dev->id >= 0 && sub_dev->id < 10) {
@@ -1339,42 +1308,9 @@ int mtk_cam_sv_dmao_config(
 
 #else //MT8195
 	/* imgo stride */
-	stride = CAMSV_READ_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE);
-	fmt.Raw = cfg_in_param->fmt;
+	stride = CAMSV_READ_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE) | (1<<27) | (bus_size<<16);
 
-	switch (cfg_in_param->pixel_mode) {
-	case 0:
-		stride = stride | (1<<27) | (1<<16);
-		CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE, stride);
-		break;
-	case 1:
-		if (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422)
-			stride = stride | (1<<27) | (1<<16);
-		else
-			stride = stride | (1<<27) | (3<<16);
-		CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE, stride);
-		break;
-	case 2:
-		if (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422)
-			stride = stride | (1<<27) | (3<<16);
-		else
-			stride = stride | (1<<27) | (7<<16);
-		CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE, stride);
-		break;
-	case 3:
-		if (fmt.Bits.TG1_FMT == SV_TG_FMT_YUV422) {
-			dev_dbg(sub_dev->dev, "not support pixel mode(%d) for YUV format", cfg_in_param->pixel_mode);
-			ret = -1;
-			goto EXIT;
-		}
-		stride = stride | (1<<27) | (15<<16);
-		CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE, stride);
-		break;
-	default:
-		dev_dbg(sub_dev->dev, "unknown pixel mode(%d)", cfg_in_param->pixel_mode);
-		ret = -1;
-		goto EXIT;
-	}
+	CAMSV_WRITE_REG(sub_dev->base + REG_CAMSV_IMGO_STRIDE, stride);
 
 	/* imgo con */
 	switch (top_dev->id) {
@@ -1417,9 +1353,7 @@ int mtk_cam_sv_dmao_config(
 	}
 #endif //#ifdef ISP7_1
 
-#ifndef ISP7_1
 EXIT:
-#endif
 	return ret;
 }
 
@@ -2046,16 +1980,11 @@ int mtk_cam_sv_dev_config(
 	cfg_in_param.data_pattern = 0x0;
 	cfg_in_param.in_crop.p.x = 0;
 	cfg_in_param.in_crop.p.y = 0;
-#ifdef ISP7_1 //TODO: why?
-	cfg_in_param.in_crop.s.w = img_fmt->fmt.pix_mp.width;
-	cfg_in_param.in_crop.s.h = img_fmt->fmt.pix_mp.height;
-#else
 	cfg_in_param.in_crop.s.w =
 		(mtk_camsv_is_yuv_format(img_fmt->fmt.pix_mp.pixelformat)) ?
 		ALIGN(img_fmt->fmt.pix_mp.width, 4) * 2 :
 		ALIGN(img_fmt->fmt.pix_mp.width, 4);
 	cfg_in_param.in_crop.s.h = img_fmt->fmt.pix_mp.height;
-#endif //#ifdef ISP7_1
 	dev_info(dev, "sink pad code:0x%x camsv's imgo  w/h/stride:%d/%d/%d\n", mf->code,
 		cfg_in_param.in_crop.s.w, cfg_in_param.in_crop.s.h,
 		img_fmt->fmt.pix_mp.plane_fmt[0].bytesperline);
