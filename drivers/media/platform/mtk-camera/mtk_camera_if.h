@@ -18,6 +18,7 @@
 enum camera_get_param_type {
 	GET_PARAM_SUPPORTED_FORMATS,
 	GET_PARAM_FRAME_SIZES,
+	GET_PARAM_SENSOR_INFO,
 };
 
 enum camera_set_param_type {
@@ -52,9 +53,9 @@ enum camera_set_param_type {
 
 /**
  * struct camera_fmt_info - Used for GET_PARAM_SUPPORTED_FORMATS
- * @index: index of the v4l2 format
- * @v4l2_format: v4l2 format fourcc
- * @valid: whether the information is valid
+ * @index: index of the v4l2 format, set by the driver
+ * @v4l2_format: v4l2 format fourcc, set by the daemon
+ * @valid: whether the information is valid, set by the daemon
  */
 struct camera_fmt_info {
 	unsigned int index;
@@ -64,17 +65,27 @@ struct camera_fmt_info {
 
 /**
  * struct camera_res_info - Used for GET_PARAM_FRAME_SIZES
- * @index: index of the v4l2 format
- * @v4l2_format: v4l2 format fourcc
- * @width: resolution width
- * @height: resolution height
- * @valid: whether the information is valid
+ * @index: index of the v4l2 format, set by the driver
+ * @v4l2_format: v4l2 format fourcc, set by the driver
+ * @width: resolution width, set by the daemon
+ * @height: resolution height, set by the daemon
+ * @valid: whether the information is valid, set by the daemon
  */
 struct camera_res_info {
 	unsigned int index;
 	unsigned int v4l2_format;
 	unsigned int width;
 	unsigned int height;
+	unsigned int valid;
+};
+
+/**
+ * struct camera_sensor_info - Used for GET_PARAM_SENSOR_INFO
+ * @type: sensor type (e.g. RAW, YUV), set by the daemon
+ * @valid: whether the information is valid, set by the daemon
+ */
+struct camera_sensor_info {
+	unsigned int type;
 	unsigned int valid;
 };
 

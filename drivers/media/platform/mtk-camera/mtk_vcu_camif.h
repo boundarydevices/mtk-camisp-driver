@@ -81,17 +81,41 @@ struct fb_info_out {
 	uint64_t timestamp;
 };
 
+/**
+ * struct fmt_info - Used for GET_PARAM_SUPPORTED_FORMATS
+ * @index: index of the v4l2 format, set by the driver
+ * @v4l2_format: v4l2 format fourcc, set by the daemon
+ * @valid: whether the information is valid, set by the daemon
+ */
 struct fmt_info {
 	uint32_t index;
 	uint32_t v4l2_format;
 	uint32_t valid;
 };
 
+/**
+ * struct res_info - Used for GET_PARAM_FRAME_SIZES
+ * @index: index of the v4l2 format, set by the driver
+ * @v4l2_format: v4l2 format fourcc, set by the driver
+ * @width: resolution width, set by the daemon
+ * @height: resolution height, set by the daemon
+ * @valid: whether the information is valid, set by the daemon
+ */
 struct res_info {
 	uint32_t index;
 	uint32_t v4l2_format;
 	uint32_t width;
 	uint32_t height;
+	uint32_t valid;
+};
+
+/**
+ * struct sensor_info - Used for GET_PARAM_SENSOR_INFO
+ * @type: sensor type (e.g. RAW, YUV), set by the daemon
+ * @valid: whether the information is valid, set by the daemon
+ */
+struct sensor_info {
+	uint32_t type;
 	uint32_t valid;
 };
 
@@ -125,6 +149,7 @@ struct cam_vcu_ipi_ack {
 	union {
 		struct fmt_info fmt;
 		struct res_info res;
+		struct sensor_info sensor;
 	} data;
 	uint64_t data_addr;
 	int32_t  status;
@@ -180,6 +205,7 @@ struct cam_ap_ipi_get_param {
 	union {
 		struct fmt_info fmt;
 		struct res_info res;
+		struct sensor_info sensor;
 	} data;
 	uint64_t data_addr;
 	uint32_t stream_id;

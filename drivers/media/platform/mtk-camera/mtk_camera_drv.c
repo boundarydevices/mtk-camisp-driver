@@ -135,13 +135,6 @@ static int vb2ops_camera_queue_setup(struct vb2_queue *vq,
 		}
 	}
 
-	if (q_data->fmt->fourcc == V4L2_PIX_FMT_JPEG)
-		*nbuffers = max_t(unsigned int, *nbuffers, MTK_CAMERA_CAPTURE_MIN_BUFFERS);
-	else
-		*nbuffers = max_t(unsigned int, *nbuffers, MTK_CAMERA_PREVIEW_MIN_BUFFERS);
-
-	vq->min_buffers_needed = *nbuffers;
-
 	dev_dbg(ctx->dev, "cam%d:[%d]\t type = %d, get %d plane(s), %d buffer(s) of size %d %d\n",
 		ctx->camera_id, ctx->id, vq->type, *nplanes, *nbuffers,
 		sizes[0], sizes[1]);
@@ -1140,6 +1133,59 @@ int mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 	return 0;
 }
 
+int mtk_camera_set_needed_buffers(struct mtk_camera_ctx *ctx)
+{
+	struct vb2_queue *queue = &ctx->queue;
+	struct mtk_camera_stream *stream = ctx->stream;
+	struct camera_sensor_info sensor = {};
+	int stream_id = stream->stream_id;
+	int ret = 0;
+
+	if (!ctx->cam_if_rdy) {
+		ret = camera_if_init(ctx);
+		if (ret) {
+			dev_err(ctx->dev, "cam%d:[%d]: camera_if_init() fail ret=%d\n",
+				ctx->camera_id, ctx->id, ret);
+			return ret;
+		}
+	}
+
+	ret = camera_if_get_param(ctx, GET_PARAM_SENSOR_INFO, &sensor);
+	if (ret)
+		return ret;
+
+	if (sensor.valid == 0) {
+		dev_err(ctx->dev, "Cannot get sensor info\n");
+		return -EINVAL;
+	}
+
+	switch (sensor.type) {
+	case SENSOR_TYPE_RAW:
+		if (stream_id == STREAM_PREVIEW ||
+		    stream_id == STREAM_VIDEO) {
+			queue->min_buffers_needed = MTK_CAMERA_RAW_PREVIEW_MIN_BUFFERS;
+		} else if (stream_id == STREAM_CAPTURE) {
+			queue->min_buffers_needed = MTK_CAMERA_RAW_CAPTURE_MIN_BUFFERS;
+		}
+		break;
+	case SENSOR_TYPE_YUV:
+		if (stream_id == STREAM_PREVIEW ||
+		    stream_id == STREAM_VIDEO) {
+			queue->min_buffers_needed = MTK_CAMERA_YUV_MIN_BUFFERS;
+		}
+		break;
+	default:
+		dev_warn(ctx->dev, "Invalid sensor type=%d, set min_buffers_needed to 0\n",
+			sensor.type);
+		queue->min_buffers_needed = 0;
+		break;
+	}
+
+	dev_dbg(ctx->dev, "Set min_buffers_needed=%u", queue->min_buffers_needed);
+
+	return 0;
+}
+
 int mtk_camera_init_stream(struct mtk_camera_stream *stream)
 {
 	struct mtk_camera_ctx *ctx = stream->curr_ctx;
@@ -1156,6 +1202,12 @@ int mtk_camera_init_stream(struct mtk_camera_stream *stream)
 		ret = mtk_camera_ctrls_setup(ctx);
 		if (ret) {
 			dev_err(ctx->dev, "Failed to setup video capture controls\n");
+			goto err_init;
+		}
+
+		ret = mtk_camera_set_needed_buffers(ctx);
+		if (ret) {
+			dev_err(ctx->dev, "Failed to setup needed buffer\n");
 			goto err_init;
 		}
 

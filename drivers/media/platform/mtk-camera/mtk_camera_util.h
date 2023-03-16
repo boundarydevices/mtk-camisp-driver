@@ -42,6 +42,12 @@ enum camera_id {
 	CAMERA_NUM = 4,
 };
 
+enum sensor_type {
+	SENSOR_TYPE_UNKNOWN = 0,
+	SENSOR_TYPE_RAW     = 1,
+	SENSOR_TYPE_YUV     = 2,
+};
+
 struct plane_buffer {
 	unsigned long size;
 	unsigned long payload;

@@ -79,6 +79,14 @@ static void handle_get_param_ack_msg(struct cam_vcu_ipi_ack *m)
 		res->valid = m->data.res.valid;
 		break;
 	}
+	case GET_PARAM_SENSOR_INFO:
+	{
+		struct camera_sensor_info *sensor = (struct camera_sensor_info *)m->data_addr;
+
+		sensor->type = m->data.sensor.type;
+		sensor->valid = m->data.sensor.valid;
+		break;
+	}
 	default:
 		dev_err(ctx->dev, "Unknown get_param id=%d", m->param_id);
 		break;
@@ -224,6 +232,11 @@ static int camera_vcu_get_fmt(struct cam_vcu_inst *inst,
 
 		msg.data.res.index = res->index;
 		msg.data.res.v4l2_format = res->v4l2_format;
+		break;
+	}
+	case GET_PARAM_SENSOR_INFO:
+	{
+		/* Sensor info query doesn't need extra argument */
 		break;
 	}
 	default:
@@ -389,6 +402,7 @@ int camera_get_param(unsigned long handle,
 	switch (type) {
 	case GET_PARAM_SUPPORTED_FORMATS:
 	case GET_PARAM_FRAME_SIZES:
+	case GET_PARAM_SENSOR_INFO:
 		camera_vcu_get_fmt(inst, (unsigned int)type, out);
 		break;
 	default:
