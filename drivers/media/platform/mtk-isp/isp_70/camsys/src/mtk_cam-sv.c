@@ -2487,7 +2487,7 @@ static irqreturn_t mtk_irq_camsv(int irq, void *data)
 		fbc_imgo_status, imgo_addr);
 
 #ifdef ISP7_1
-	dev_info(dev,
+	dev_dbg(dev,
 		"imgo_msb:0x%x, in:%d tg_sen/dcif_set/tg_vf/tg_path:0x%x_%x_%x_%x\n",
 		imgo_addr_msb, dequeued_imgo_seq_no_inner,
 		tg_sen_mode, dcif_set, tg_vf_con, tg_path_cfg);
