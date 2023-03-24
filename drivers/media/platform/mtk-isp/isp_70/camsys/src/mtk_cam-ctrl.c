@@ -3777,7 +3777,11 @@ static int mtk_camsys_camsv_state_handle(
 	if (que_cnt >= STATE_NUM_AT_SOF && state_rec[1] && state_rec[2]) {
 		state_transition(state_rec[2], E_STATE_INNER, E_STATE_INNER_HW_DELAY);
 		state_transition(state_rec[1], E_STATE_OUTER, E_STATE_OUTER_HW_DELAY);
-		dev_dbg(camsv_dev->dev, "[SOF] HW_DELAY state\n");
+		req = mtk_cam_ctrl_state_get_req(state_rec[1]);
+		req_stream_data = mtk_cam_ctrl_state_to_req_s_data(state_rec[1]);
+		dev_dbg(camsv_dev->dev, "[SOF] HW_DELAY state, increase seq no to %d\n",
+			req_stream_data->frame_seq_no);
+		atomic_set(&sensor_ctrl->isp_request_seq_no, req_stream_data->frame_seq_no);
 		return STATE_RESULT_PASS_CQ_HW_DELAY;
 	}
 
