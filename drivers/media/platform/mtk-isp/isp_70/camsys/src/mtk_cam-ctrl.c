@@ -4280,11 +4280,14 @@ int mtk_camsys_ctrl_start(struct mtk_cam_ctx *ctx)
 	struct v4l2_subdev_frame_interval fi = {0};
 	int fps_factor = 1, sub_ratio = 0;
 
-	if (ctx->used_raw_num) {
+	if (ctx->used_raw_num || ctx->used_sv_num) {
 		fi.pad = 0;
 		v4l2_subdev_call(ctx->sensor, video, g_frame_interval, &fi);
 		fps_factor = (fi.interval.numerator > 0) ?
 				(fi.interval.denominator / fi.interval.numerator / 30) : 1;
+	}
+
+	if (ctx->used_raw_num) {
 		sub_ratio =
 			mtk_cam_get_subsample_ratio(ctx->pipe->res_config.raw_feature);
 	}
