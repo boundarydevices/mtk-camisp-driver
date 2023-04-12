@@ -13,7 +13,4 @@
  */
 
 #include <linux/module.h>
-
-#include "mtk_camera_drv.h"
 #include "mtk_camera_util.h"
-#include "mtk_vcu.h"

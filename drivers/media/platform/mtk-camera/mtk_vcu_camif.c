@@ -12,10 +12,21 @@
  * GNU General Public License for more details.
  */
 
-#include "mtk_camera_drv_base.h"
-#include "mtk_camera_drv.h"
-#include "mtk_camera_util.h"
 #include "mtk_vcu_camif.h"
+#include "mtk_camera_if.h"
+#include "mtk_camera_drv.h"
+#include "mtk_vcu.h"
+#include "camera_ipi_msg.h"
+
+struct cam_vcu_inst {
+	struct mtk_camera_ctx *ctx;
+	struct platform_device *dev;
+	struct list_head queue;
+	enum   ipi_id id;
+	uint64_t inst_addr;//take care of it
+	int32_t  signaled;
+	int32_t  failure;
+};
 
 static void handle_init_ack_msg(struct cam_vcu_ipi_ack *m)
 {

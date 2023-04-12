@@ -15,6 +15,9 @@
 #ifndef _MTK_CAMERA_CTRL_H_
 #define _MTK_CAMERA_CTRL_H_
 
+#include <linux/v4l2-controls.h>
+#include "mtk_camera_drv.h"
+
 #define V4L2_CID_USER_MTK_CAMERA_BASE	 (V4L2_CID_USER_BASE + 0x10a0)
 #define V4L2_CID_CAMERA_MIN_FPS          (V4L2_CID_USER_MTK_CAMERA_BASE + 0)
 #define V4L2_CID_CAMERA_MAX_FPS          (V4L2_CID_USER_MTK_CAMERA_BASE + 1)

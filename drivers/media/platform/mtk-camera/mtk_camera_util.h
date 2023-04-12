@@ -15,37 +15,12 @@
 #ifndef _MTK_CAMERA_UTIL_H_
 #define _MTK_CAMERA_UTIL_H_
 
+#include <linux/videodev2.h>
+
 enum camera_buffer_type {
 	BUFFER_STEREO = 0,
 	BUFFER_MAIN1  = 1,
 	BUFFER_MAIN2  = 2,
-};
-
-enum camera_buffer_status {
-	BUFFER_FILLED = 0,
-	BUFFER_EMPTY  = 1,
-	BUFFER_ERROR  = 2,
-};
-
-enum camera_stream_id {
-	STREAM_PREVIEW = 0,
-	STREAM_VIDEO   = 1,
-	STREAM_CAPTURE = 2,
-	STREAM_NUM     = 3,
-};
-
-enum camera_id {
-	CAMERA_0   = 0,
-	CAMERA_1   = 1,
-	CAMERA_2   = 2,
-	CAMERA_3   = 3,
-	CAMERA_NUM = 4,
-};
-
-enum sensor_type {
-	SENSOR_TYPE_UNKNOWN = 0,
-	SENSOR_TYPE_RAW     = 1,
-	SENSOR_TYPE_YUV     = 2,
 };
 
 struct plane_buffer {
@@ -68,8 +43,6 @@ struct mtk_camera_mem {
 	struct plane_buffer planes[VIDEO_MAX_PLANES];
 	unsigned long long timestamp;
 };
-
-#define DEBUG	1
 
 #define ALIGN_CEIL(value, align)     (((value) + (align) - 1L) & ~((align) - 1L))
 

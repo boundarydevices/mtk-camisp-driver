@@ -18,10 +18,7 @@
 
 #include "mtk_camera_if.h"
 #include "mtk_camera_drv.h"
-#include "mtk_camera_drv_base.h"
-#include "mtk_vcu.h"
-
-struct mtk_camera_if *get_camera_if(void);
+#include "mtk_vcu_camif.h"
 
 int  camera_if_init(void *ctx)
 {

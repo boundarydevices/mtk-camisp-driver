@@ -19,14 +19,12 @@
 #include <linux/videodev2.h>
 #include <media/v4l2-ctrls.h>
 #include <media/v4l2-device.h>
-#include <media/v4l2-ioctl.h>
-#include <media/videobuf2-core.h>
 #include <media/videobuf2-v4l2.h>
-#include <linux/delay.h>
 #include <dt-bindings/media/mtk-camera.h>
 
 #include "mtk_camera_util.h"
 #include "mtk_camera_drv_base.h"
+#include "camera_ipi_msg.h"
 
 #define MTK_CAMERA_NAME		"mtk-v4l2-camera"
 #define MTK_CAMERA_DEVICE	"mtk-camera"
@@ -116,14 +114,6 @@ struct mtk_q_data {
 	unsigned int    bytesperline[MTK_CAMERA_MAX_PLANES];
 };
 
-enum mtk_instance_state {
-	MTK_STATE_FREE = 0,
-	MTK_STATE_INIT = 1,
-	MTK_STATE_START = 2,
-	MTK_STATE_FLUSH = 3,
-	MTK_STATE_ABORT = 4,
-};
-
 enum mtk_camera_handle_state {
 	MTK_HANDLE_PASSIVE = 0,
 	MTK_HANDLE_ACTIVE  = 1,
@@ -200,216 +190,6 @@ struct mtk_camera_dev {
 	int camera_id;
 	const char *platform;
 	unsigned int stream_en[STREAM_NUM];
-};
-
-static struct mtk_camera_fmt mtk_camera_formats[] = {
-	{
-		.name	= "GREY",
-		.fourcc = V4L2_PIX_FMT_GREY,
-		.depth		= { 8 },
-		.row_depth	= { 8 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "RGBR",
-		.fourcc = V4L2_PIX_FMT_RGB565X,
-		.depth		= { 16 },
-		.row_depth	= { 16 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-	}, {
-		.name	= "RGBP",
-		.fourcc = V4L2_PIX_FMT_RGB565,
-		.depth		= { 16 },
-		.row_depth	= { 16 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-	}, {
-		.name	= "RGB3",
-		.fourcc = V4L2_PIX_FMT_RGB24,
-		.depth		= { 24 },
-		.row_depth	= { 24 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-	}, {
-		.name	= "BGR3",
-		.fourcc = V4L2_PIX_FMT_BGR24,
-		.depth		= { 24 },
-		.row_depth	= { 24 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "AR24",
-		.fourcc = V4L2_PIX_FMT_ABGR32,
-		.depth		= { 32 },
-		.row_depth	= { 32 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "BA24",
-		.fourcc = V4L2_PIX_FMT_ARGB32,
-		.depth		= { 32 },
-		.row_depth	= { 32 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SRGB,
-	}, {
-		.name	= "UYVY",
-		.fourcc = V4L2_PIX_FMT_UYVY,
-		.depth		= { 16 },
-		.row_depth	= { 16 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "VYUY",
-		.fourcc = V4L2_PIX_FMT_VYUY,
-		.depth		= { 16 },
-		.row_depth	= { 16 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "YUYV",
-		.fourcc = V4L2_PIX_FMT_YUYV,
-		.depth		= { 16 },
-		.row_depth	= { 16 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "YVYU",
-		.fourcc = V4L2_PIX_FMT_YVYU,
-		.depth		= { 16 },
-		.row_depth	= { 16 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "YU12",
-		.fourcc = V4L2_PIX_FMT_YUV420,
-		.depth		= { 12 },
-		.row_depth	= { 8 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "YV12",
-		.fourcc = V4L2_PIX_FMT_YVU420,
-		.depth		= { 12 },
-		.row_depth	= { 8 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "NV12",
-		.fourcc = V4L2_PIX_FMT_NV12,
-		.depth		= { 12 },
-		.row_depth	= { 8 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "NV21",
-		.fourcc = V4L2_PIX_FMT_NV21,
-		.depth		= { 12 },
-		.row_depth	= { 8 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "NV16",
-		.fourcc = V4L2_PIX_FMT_NV16,
-		.depth		= { 16 },
-		.row_depth	= { 8 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "NV61",
-		.fourcc = V4L2_PIX_FMT_NV61,
-		.depth		= { 16 },
-		.row_depth	= { 8 },
-		.mplane	= false,
-		.num_planes	= 1,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "NM12",
-		.fourcc = V4L2_PIX_FMT_NV12M,
-		.depth		= { 8, 4 },
-		.row_depth	= { 8, 8 },
-		.mplane	= true,
-		.num_planes	= 2,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "NM21",
-		.fourcc = V4L2_PIX_FMT_NV21M,
-		.depth		= { 8, 4 },
-		.row_depth	= { 8, 8 },
-		.mplane	= true,
-		.num_planes	= 2,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "NM16",
-		.fourcc = V4L2_PIX_FMT_NV16M,
-		.depth		= { 8, 8 },
-		.row_depth	= { 8, 8 },
-		.mplane	= true,
-		.num_planes	= 2,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "NM61",
-		.fourcc = V4L2_PIX_FMT_NV61M,
-		.depth		= { 8, 8 },
-		.row_depth	= { 8, 8 },
-		.mplane	= true,
-		.num_planes	= 2,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "YM12",
-		.fourcc = V4L2_PIX_FMT_YUV420M,
-		.depth		= { 8, 2, 2 },
-		.row_depth	= { 8, 4, 4 },
-		.mplane	= true,
-		.num_planes	= 3,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "YM21",
-		.fourcc = V4L2_PIX_FMT_YVU420M,
-		.depth		= { 8, 2, 2 },
-		.row_depth	= { 8, 4, 4 },
-		.mplane	= true,
-		.num_planes	= 3,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "YM16",
-		.fourcc = V4L2_PIX_FMT_YUV422M,
-		.depth		= { 8, 4, 4 },
-		.row_depth	= { 8, 4, 4 },
-		.mplane	= true,
-		.num_planes	= 3,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "YM61",
-		.fourcc = V4L2_PIX_FMT_YVU422M,
-		.depth		= { 8, 4, 4 },
-		.row_depth	= { 8, 4, 4 },
-		.mplane	= true,
-		.num_planes	= 3,
-		.colorspace	= V4L2_COLORSPACE_SMPTE170M,
-	}, {
-		.name	= "JPEG",
-		.fourcc = V4L2_PIX_FMT_JPEG,
-		.mplane	= false,
-		.num_planes = 1,
-		.colorspace	= V4L2_COLORSPACE_JPEG,
-	}
 };
 
 static inline struct mtk_camera_ctx *fh_to_ctx(struct v4l2_fh *fh)

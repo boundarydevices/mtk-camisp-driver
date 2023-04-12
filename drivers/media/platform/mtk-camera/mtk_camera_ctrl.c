@@ -12,8 +12,8 @@
  * GNU General Public License for more details.
  */
 
-#include "mtk_camera_drv.h"
 #include "mtk_camera_ctrl.h"
+#include "mtk_camera_if.h"
 
 static int camera_set_ctrl(struct mtk_camera_ctx *ctx,
 			  enum camera_set_param_type type, uint32_t value)

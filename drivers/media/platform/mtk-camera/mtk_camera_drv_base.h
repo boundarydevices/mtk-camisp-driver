@@ -15,7 +15,7 @@
 #ifndef _CAMERA_DRV_BASE_
 #define _CAMERA_DRV_BASE_
 
-#include "mtk_camera_if.h"
+#include "camera_ipi_msg.h"
 
 struct mtk_camera_if {
 	int (*init)(void *ctx, unsigned long *handle);

@@ -16,14 +16,15 @@
 #include <linux/module.h>
 #include <linux/of_device.h>
 #include <linux/of.h>
+#include <linux/delay.h>
 #include <media/v4l2-event.h>
+#include <media/v4l2-ioctl.h>
 #include <media/videobuf2-dma-contig.h>
 
 #include "mtk_camera_drv.h"
-#include "mtk_camera_util.h"
 #include "mtk_camera_if.h"
 #include "mtk_camera_ctrl.h"
-#include "mtk_vcu.h"
+#include "mtk_camera_format.h"
 
 #define MTK_VIDEO_CAPTURE_DEF_WIDTH         1920U
 #define MTK_VIDEO_CAPTURE_DEF_HEIGHT        1080U
