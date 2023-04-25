@@ -300,6 +300,7 @@ static void vb2ops_camera_stop_streaming(struct vb2_queue *q)
 {
 	struct mtk_camera_ctx *ctx = vb2_get_drv_priv(q);
 	int ret = 0;
+	int i;
 
 	dev_dbg(ctx->dev, "cam%d:[%d] (%d) state=(%x)\n",
 		ctx->camera_id, ctx->id, q->type, ctx->state);
@@ -309,7 +310,11 @@ static void vb2ops_camera_stop_streaming(struct vb2_queue *q)
 		if (ret) {
 			dev_err(ctx->dev, "cam%d:[%d]: camera_if_stop_stream() fail ret=%d\n",
 				ctx->camera_id, ctx->id, ret);
-			return;
+
+			for (i = 0; i < q->num_buffers; ++i) {
+				if (q->bufs[i]->state == VB2_BUF_STATE_ACTIVE)
+					vb2_buffer_done(q->bufs[i], VB2_BUF_STATE_ERROR);
+			}
 		}
 		ctx->state = MTK_STATE_FLUSH;
 
