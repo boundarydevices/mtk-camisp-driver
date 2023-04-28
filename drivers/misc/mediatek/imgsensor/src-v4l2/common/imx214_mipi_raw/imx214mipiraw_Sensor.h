@@ -30,7 +30,7 @@ enum{
 	IMGSENSOR_MODE_SLIM_VIDEO,
 	IMGSENSOR_MODE_CUSTOM1,
 	IMGSENSOR_MODE_CUSTOM2,
-} IMGSENSOR_MODE;
+};
 
 struct imgsensor_mode_struct {
 	kal_uint32 pclk;//record different mode's pclk
@@ -54,7 +54,7 @@ struct imgsensor_mode_struct {
 
 	/*  following for GetDefaultFramerateByScenario() */
 	kal_uint16 max_framerate;
-} imgsensor_mode_struct;
+};
 
 /* SENSOR PRIVATE STRUCT FOR VARIABLES*/
 struct imgsensor_struct {
@@ -149,7 +149,7 @@ struct imgsensor_info_struct {
 	//record sensor support all write id addr,
 	//only supprt 4must end with 0xff
 	kal_uint8  i2c_addr_table[5];
-} imgsensor_info_struct;
+};
 
 /* SENSOR READ/WRITE ID */
 //#define IMGSENSOR_WRITE_ID_1 (0x6c)

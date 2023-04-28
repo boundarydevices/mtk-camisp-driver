@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (c) 2019 MediaTek Inc.
-
 #include <linux/videodev2.h>
 #include <linux/i2c.h>
 #include <linux/platform_device.h>
@@ -185,7 +184,7 @@ static struct SENSOR_WINSIZE_INFO_STRUCT imgsensor_winsize_info[IMX214_SUPPORTED
 	 0000, 0376, 2104, 1184, 0000, 0000, 2104, 1184},
 };
 
-struct SENSOR_VC_INFO_STRUCT SENSOR_VC_INFO[3] = {
+static struct SENSOR_VC_INFO_STRUCT SENSOR_VC_INFO[3] = {
 	/* Preview mode setting */
 	{0x02, 0x0a, 0x0000, 0x0008, 0x40, 0x00,
 	 0x00, 0x2b, 0x0838, 0x0618, 0x01, 0x35, 0x0200, 0x0001,
@@ -209,7 +208,7 @@ struct SENSOR_ATR_INFO {
 	MUINT16 OverExp_Max_L;
 };
 
-struct SENSOR_ATR_INFO sensorATR_Info[4] = {
+static struct SENSOR_ATR_INFO sensorATR_Info[4] = {
 	/* Strength Range Min */
 	{0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 	/* Strength Range Std */
