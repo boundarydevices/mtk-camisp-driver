@@ -1455,7 +1455,9 @@ int mtk_camera_create_stream(struct mtk_camera_dev *camdev)
 			return ret;
 		}
 
+		mutex_lock(&camdev->stream_mutex);
 		list_add_tail(&stream->list, &camdev->streams);
+		mutex_unlock(&camdev->stream_mutex);
 	}
 	return 0;
 }
@@ -1526,6 +1528,7 @@ static int mtk_camera_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+	mutex_init(&camdev->stream_mutex);
 	INIT_LIST_HEAD(&camdev->streams);
 	ret = mtk_camera_create_stream(camdev);
 	if (ret) {
@@ -1554,6 +1557,7 @@ static int mtk_camera_remove(struct platform_device *pdev)
 	camdev = platform_get_drvdata(pdev);
 
 	dev_dbg(&pdev->dev, "%s dev %p\n", __func__, camdev);
+	mutex_lock(&camdev->stream_mutex);
 	list_for_each_entry(stream, &camdev->streams, list) {
 		if (!video_is_registered(&stream->video))
 			continue;
@@ -1564,6 +1568,8 @@ static int mtk_camera_remove(struct platform_device *pdev)
 		mutex_destroy(&stream->dev_mutex);
 		mutex_destroy(&stream->init_mutex);
 	}
+	mutex_unlock(&camdev->stream_mutex);
+	mutex_destroy(&camdev->stream_mutex);
 
 	v4l2_device_unregister(&camdev->v4l2_dev);
 

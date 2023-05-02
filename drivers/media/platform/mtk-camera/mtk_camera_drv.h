@@ -184,7 +184,10 @@ struct mtk_camera_fh {
 struct mtk_camera_dev {
 	struct v4l2_device v4l2_dev;
 	struct device *dev;
+
 	struct list_head streams;
+	struct mutex stream_mutex;
+
 	int camera_id;
 	const char *platform;
 	unsigned int stream_en[STREAM_NUM];

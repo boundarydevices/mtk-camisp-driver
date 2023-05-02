@@ -28,9 +28,8 @@ struct cam_vcu_inst {
 	int32_t  failure;
 };
 
-static void handle_init_ack_msg(struct cam_vcu_ipi_ack *m)
+static void handle_init_ack_msg(struct cam_vcu_inst *inst, struct cam_vcu_ipi_ack *m)
 {
-	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)(unsigned long)m->ap_inst_addr;
 	struct mtk_camera_ctx *ctx = inst->ctx;
 
 	dev_dbg(ctx->dev, "+ ap_inst_addr = 0x%llx\n", (uint64_t)m->ap_inst_addr);
@@ -38,9 +37,8 @@ static void handle_init_ack_msg(struct cam_vcu_ipi_ack *m)
 	dev_dbg(ctx->dev, "- vcu_inst_addr = 0x%llx\n", (uint64_t)inst->inst_addr);
 }
 
-static void handle_capture_ack_msg(struct cam_vcu_ipi_ack *m)
+static void handle_capture_ack_msg(struct cam_vcu_inst *inst, struct cam_vcu_ipi_ack *m)
 {
-	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)(unsigned long)m->ap_inst_addr;
 	struct mtk_camera_ctx *ctx = inst->ctx;
 	struct fb_info_out *info = &m->info;
 	struct mtk_camera_mem *mem = NULL;
@@ -64,9 +62,8 @@ static void handle_capture_ack_msg(struct cam_vcu_ipi_ack *m)
 	dev_err(ctx->dev, "invalid buffer handle %llx\n", info->dma_addr);
 }
 
-static void handle_get_param_ack_msg(struct cam_vcu_ipi_ack *m)
+static void handle_get_param_ack_msg(struct cam_vcu_inst *inst, struct cam_vcu_ipi_ack *m)
 {
-	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)(unsigned long)m->ap_inst_addr;
 	struct mtk_camera_ctx *ctx = inst->ctx;
 
 	switch (m->param_id) {
@@ -104,6 +101,35 @@ static void handle_get_param_ack_msg(struct cam_vcu_ipi_ack *m)
 	}
 }
 
+struct cam_vcu_inst *get_inst_by_stream_id(struct mtk_camera_dev *camdev, uint64_t stream_id)
+{
+	struct mtk_camera_stream *stream;
+	struct mtk_camera_ctx *ctx;
+	struct cam_vcu_inst *inst = NULL;
+
+	if (camdev == NULL) {
+		pr_err("%s: camdev is NULL\n", __func__);
+		return NULL;
+	}
+
+	mutex_lock(&camdev->stream_mutex);
+	list_for_each_entry(stream, &camdev->streams, list) {
+		ctx = stream->ctx;
+		if (ctx && (uint64_t)ctx->stream_id == stream_id) {
+			inst = (struct cam_vcu_inst *)ctx->drv_handle;
+			break;
+		}
+	}
+	mutex_unlock(&camdev->stream_mutex);
+
+	if (inst == NULL) {
+		pr_err("%s: cannot find vcu inst\n", __func__);
+		return NULL;
+	}
+
+	return inst;
+}
+
 /*
  * This function runs in interrupt context and it means there's a IPI MSG
  * from VCU.
@@ -111,9 +137,15 @@ static void handle_get_param_ack_msg(struct cam_vcu_ipi_ack *m)
 int vcu_ipi_handler(void *data, unsigned int len, void *priv)
 {
 	struct cam_vcu_ipi_ack *m = data;
-	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)((unsigned long)m->ap_inst_addr);
-	struct mtk_camera_ctx *ctx = inst->ctx;
+	struct mtk_camera_dev *camdev = (struct mtk_camera_dev *)priv;
+	struct cam_vcu_inst *inst;
+	struct mtk_camera_ctx *ctx;
 	int ret = 0;
+
+	inst = get_inst_by_stream_id(camdev, m->ap_inst_addr);
+	if (inst == NULL)
+		return -EINVAL;
+	ctx = inst->ctx;
 
 	dev_dbg(ctx->dev, "+ id=%x status = %d\n", m->msg_id, m->status);
 
@@ -122,7 +154,7 @@ int vcu_ipi_handler(void *data, unsigned int len, void *priv)
 	if (m->status == 0) {
 		switch (m->msg_id) {
 		case VCU_IPIMSG_CAM_INIT_ACK:
-			handle_init_ack_msg(data);
+			handle_init_ack_msg(inst, data);
 			break;
 		case VCU_IPIMSG_CAM_START_STREAM_ACK:
 		case VCU_IPIMSG_CAM_STOP_STREAM_ACK:
@@ -133,10 +165,10 @@ int vcu_ipi_handler(void *data, unsigned int len, void *priv)
 		case VCU_IPIMSG_CAM_SET_PARAM_ACK:
 			break;
 		case VCU_IPIMSG_CAM_GET_PARAM_ACK:
-			handle_get_param_ack_msg(data);
+			handle_get_param_ack_msg(inst, data);
 			break;
 		case VCU_IPIMSG_CAM_END_ACK:
-			handle_capture_ack_msg(data);
+			handle_capture_ack_msg(inst, data);
 			ret = 1;
 			break;
 		default:
@@ -163,7 +195,7 @@ static int camera_vcu_send_msg(struct cam_vcu_inst *inst, void *m, int l)
 	inst->failure  = 0;
 	inst->signaled = 0;
 
-	err = vcu_ipi_send(inst->dev, inst->id, m, l, NULL);
+	err = vcu_ipi_send(inst->dev, inst->id, m, l, ctx->stream->camdev);
 	if (err) {
 		dev_err(ctx->dev, "send fail vcu_id=%d msg_id=%x status=%d\n",
 			       inst->id, msg_id, err);
@@ -182,7 +214,7 @@ static int camera_send_ap_ipi(struct cam_vcu_inst *inst,
 	m.msg_id = id;
 	m.ipi_id = inst->id;
 	m.vcu_inst_addr = inst->inst_addr;
-	m.ap_inst_addr = (uint64_t)(unsigned long)inst;
+	m.ap_inst_addr = (uint64_t)inst->ctx->stream_id;
 	m.stream_id = (uint32_t)inst->ctx->stream_id;
 	if (n != NULL)
 		m.info = *n;
@@ -205,7 +237,7 @@ static int camera_vcu_set_param(struct cam_vcu_inst *inst,
 	msg.ipi_id = inst->id;
 	msg.id = id;
 	msg.vcu_inst_addr = inst->inst_addr;
-	msg.ap_inst_addr = (uint64_t)(unsigned long)inst;
+	msg.ap_inst_addr = (uint64_t)inst->ctx->stream_id;
 	msg.stream_id = (uint32_t)inst->ctx->stream_id;
 
 	for (i = 0; i < size; ++i)
@@ -227,7 +259,7 @@ static int camera_vcu_get_fmt(struct cam_vcu_inst *inst,
 	msg.ipi_id = inst->id;
 	msg.id = id;
 	msg.vcu_inst_addr = inst->inst_addr;
-	msg.ap_inst_addr = (uint64_t)(unsigned long)inst;
+	msg.ap_inst_addr = (uint64_t)inst->ctx->stream_id;
 
 	switch (id) {
 	case GET_PARAM_SUPPORTED_FORMATS:
@@ -297,27 +329,27 @@ static int camera_init(void *ctx, unsigned long *handle)
 		return -EINVAL;
 	}
 
-	ret = vcu_ipi_register(inst->dev, inst->id, vcu_ipi_handler, NULL, NULL);
+	ret = vcu_ipi_register(inst->dev, inst->id, vcu_ipi_handler, NULL, contex->stream->camdev);
 	if (ret != 0) {
 		dev_err(contex->dev, "camera_vcu_ipi_register fail status=%d\n", ret);
 		kfree(inst);
 		return ret;
 	}
+	*handle = (unsigned long)inst;
 
 	memset(&msg, 0, sizeof(msg));
 	msg.msg_id = AP_IPIMSG_CAM_INIT;
 	msg.ipi_id = inst->id;
-	msg.ap_inst_addr = (uint64_t)(unsigned long)inst;
+	msg.ap_inst_addr = (uint64_t)inst->ctx->stream_id;
 	msg.stream_id = contex->stream_id;
 
 	ret = camera_vcu_send_msg(inst, (void *)&msg, sizeof(msg));
 	if (ret != 0) {
 		dev_err(contex->dev, "camera_vcu_send_msg %s fail status=%d\n", __func__, ret);
+		*handle = (unsigned long)NULL;
 		kfree(inst);
 		return ret;
 	}
-
-	*handle = (unsigned long)inst;
 
 	return 0;
 }
