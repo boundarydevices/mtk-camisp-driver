@@ -290,8 +290,9 @@ static int camera_init(void *ctx, unsigned long *handle)
 	dev_dbg(contex->dev, "camera_id:%d ipi:%d\n", contex->camera_id, inst->id);
 
 	INIT_LIST_HEAD(&inst->queue);
-	inst->dev = vcu_get_plat_device(contex->stream->plat_dev);
+	inst->dev = vcu_get_plat_device(to_platform_device(contex->dev));
 	if (inst->dev == NULL) {
+		dev_err(contex->dev, "[VCU] vcu device in not ready\n");
 		kfree(inst);
 		return -EINVAL;
 	}

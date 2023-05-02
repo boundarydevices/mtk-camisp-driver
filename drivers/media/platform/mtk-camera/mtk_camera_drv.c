@@ -479,7 +479,7 @@ camera_enum_format(struct file *file, void *fh,
 {
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_stream *stream = handle->stream;
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	const struct mtk_camera_fmt *fmt;
 	struct mtk_camera_fmt *formats;
 	int num_formats, ret;
@@ -508,7 +508,7 @@ camera_get_format_mplane(struct file *file, void *fh,
 {
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_stream *stream = handle->stream;
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	struct v4l2_pix_format_mplane *pix_fmt_mp = &format->fmt.pix_mp;
 	struct mtk_q_data *q_data = &ctx->q_data;
 	int i, ret;
@@ -551,7 +551,7 @@ camera_set_format_mplane(struct file *file, void *fh,
 {
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_stream *stream = handle->stream;
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	struct v4l2_pix_format_mplane *pix_mp;
 	struct mtk_q_data *q_data = &ctx->q_data;
 	struct mtk_camera_fmt *fmt;
@@ -656,7 +656,7 @@ camera_try_format_mplane(struct file *file, void *fh,
 {
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_stream *stream = handle->stream;
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	struct mtk_camera_fmt *fmt;
 	struct mtk_camera_fmt *formats;
 	int num_formats, ret;
@@ -703,7 +703,7 @@ camera_enum_framesizes(struct file *file, void *fh,
 {
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_stream *stream = handle->stream;
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	struct mtk_camera_fmt *formats;
 	int num_formats;
 	struct v4l2_frmsize_discrete *sizes;
@@ -741,7 +741,7 @@ camera_enum_frameintervals(struct file *file, void *fh,
 {
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_stream *stream = handle->stream;
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	struct mtk_camera_fmt *formats;
 	struct mtk_camera_fmt *fmt;
 	int num_formats;
@@ -787,7 +787,7 @@ camera_reqbufs(struct file *file, void *fh, struct v4l2_requestbuffers *rb)
 {
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_stream *stream = handle->stream;
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d], cnt[%d] mem[%d] type[%d, %d] point[0x%p]\n",
@@ -815,7 +815,7 @@ static int
 camera_querybuf(struct file *file, void *fh, struct v4l2_buffer *b)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = handle->stream->ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d], queue %p\n",
@@ -835,7 +835,7 @@ static int
 camera_expbuf(struct file *file, void *fh, struct v4l2_exportbuffer *p)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = handle->stream->ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d], fd[%d], flag[%d], idx[%d], plane[%d]\n",
@@ -855,7 +855,7 @@ static int
 camera_qbuf(struct file *file, void *fh, struct v4l2_buffer *b)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = handle->stream->ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d], length[%d], bytes[%d]\n",
@@ -881,7 +881,7 @@ static int
 camera_dqbuf(struct file *file, void *fh, struct v4l2_buffer *b)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = handle->stream->ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d], length[%d], bytes[%d]\n",
@@ -900,7 +900,7 @@ camera_dqbuf(struct file *file, void *fh, struct v4l2_buffer *b)
 int camera_streamon(struct file *file, void *fh, enum v4l2_buf_type type)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = handle->stream->ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d], queue %p\n",
@@ -919,7 +919,7 @@ int camera_streamon(struct file *file, void *fh, enum v4l2_buf_type type)
 int camera_streamoff(struct file *file, void *fh, enum v4l2_buf_type type)
 {
 	struct mtk_camera_fh *handle = fh;
-	struct mtk_camera_ctx *ctx = handle->stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = handle->stream->ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d:%s [%d], queue %p\n",
@@ -1189,7 +1189,7 @@ int mtk_camera_set_needed_buffers(struct mtk_camera_ctx *ctx)
 
 int mtk_camera_init_stream(struct mtk_camera_stream *stream)
 {
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	int ret = 0;
 
 	mutex_lock(&stream->init_mutex);
@@ -1266,7 +1266,7 @@ static int fops_camera_release(struct file *file)
 	v4l2_fh_exit(&handle->vfh);
 
 	if (--stream->users == 0)
-		mtk_camera_release(stream->curr_ctx);
+		mtk_camera_release(stream->ctx);
 
 	mutex_unlock(&stream->dev_mutex);
 
@@ -1279,7 +1279,7 @@ static int fops_camera_release(struct file *file)
 static unsigned int fops_camera_poll(struct file *file, poll_table *wait)
 {
 	struct mtk_camera_stream *stream = video_drvdata(file);
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d,[%d] video capture\n", ctx->camera_id, ctx->id);
@@ -1295,7 +1295,7 @@ static unsigned int fops_camera_poll(struct file *file, poll_table *wait)
 static int fops_camera_mmap(struct file *file, struct vm_area_struct *vma)
 {
 	struct mtk_camera_stream *stream = video_drvdata(file);
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 	int ret;
 
 	dev_dbg(ctx->dev, "cam%d:[%d] video capture\n", ctx->camera_id, ctx->id);
@@ -1318,15 +1318,17 @@ static const struct v4l2_file_operations mtk_camera_fops = {
 int mtk_camera_stream_create_context(struct mtk_camera_stream *stream)
 {
 	struct mtk_camera_ctx *ctx = NULL;
+	struct mtk_camera_dev *camdev = stream->camdev;
+	struct device *dev = camdev->dev;
 	struct vb2_queue *queue;
 	int ret = 0;
 
-	ctx = devm_kzalloc(&stream->plat_dev->dev, sizeof(*ctx), GFP_KERNEL);
+	ctx = devm_kzalloc(dev, sizeof(*ctx), GFP_KERNEL);
 	if (!ctx)
 		return -ENOMEM;
 
 	mutex_lock(&stream->dev_mutex);
-	ctx->dev = &stream->plat_dev->dev;
+	ctx->dev = dev;
 	ctx->camera_id = stream->camera_id;
 	ctx->stream_id = stream->stream_id;
 	INIT_LIST_HEAD(&ctx->list);
@@ -1343,28 +1345,28 @@ int mtk_camera_stream_create_context(struct mtk_camera_stream *stream)
 	queue->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC;
 	queue->lock		= &ctx->stream->dev_mutex;
 	queue->allow_zero_bytesused = 1;
-	queue->dev = &ctx->stream->plat_dev->dev;
+	queue->dev = dev;
 
 	ret = vb2_queue_init(&ctx->queue);
 	if (ret < 0) {
-		dev_err(ctx->dev, "Failed to initialize videobuf2 queue\n");
+		dev_err(dev, "Failed to initialize videobuf2 queue\n");
 		goto err_vb2_init;
 	}
 
 	stream->queue = &ctx->queue;
-	stream->curr_ctx = ctx;
+	stream->ctx = ctx;
 
 	ctx->callback = mtk_handle_buffer;
 
 	mutex_unlock(&stream->dev_mutex);
-	dev_dbg(ctx->dev, "cam%d:%s capture [%d]\n", ctx->camera_id,
-		dev_name(&stream->plat_dev->dev), ctx->id);
+	dev_dbg(dev, "cam%d:%s capture [%d]\n", ctx->camera_id,
+		dev_name(dev), ctx->id);
 
 	return 0;
 
 err_vb2_init:
 	v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
-	devm_kfree(&stream->plat_dev->dev, ctx);
+	devm_kfree(dev, ctx);
 	mutex_unlock(&stream->dev_mutex);
 
 	return ret;
@@ -1372,18 +1374,18 @@ err_vb2_init:
 
 void mtk_camera_stream_destroy_context(struct mtk_camera_stream *stream)
 {
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
+	struct mtk_camera_ctx *ctx = stream->ctx;
 
 	mutex_lock(&stream->dev_mutex);
 	vb2_queue_release(&ctx->queue);
 	v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
 	mutex_unlock(&stream->dev_mutex);
 
-	devm_kfree(&stream->plat_dev->dev, ctx);
-	stream->curr_ctx = NULL;
+	devm_kfree(ctx->dev, ctx);
+	stream->ctx = NULL;
 }
 
-int mtk_camera_register_video_device(struct mtk_camera_dev *dev,
+int mtk_camera_register_video_device(struct mtk_camera_dev *camdev,
 				    struct mtk_camera_stream *stream,
 				    struct video_device *video)
 {
@@ -1393,7 +1395,7 @@ int mtk_camera_register_video_device(struct mtk_camera_dev *dev,
 	video->ioctl_ops = &mtk_camera_ioctl_ops;
 	video->release = video_device_release;
 	video->lock = &stream->dev_mutex;
-	video->v4l2_dev  = &dev->v4l2_dev;
+	video->v4l2_dev  = &camdev->v4l2_dev;
 	video->vfl_type = VFL_TYPE_VIDEO;
 	video->device_caps = V4L2_CAP_STREAMING | V4L2_CAP_VIDEO_CAPTURE_MPLANE;
 
@@ -1404,147 +1406,138 @@ int mtk_camera_register_video_device(struct mtk_camera_dev *dev,
 
 	ret = video_register_device(video, VFL_TYPE_VIDEO, -1);
 	if (ret) {
-		dev_err(stream->curr_ctx->dev, "Failed to register video device\n");
+		dev_err(stream->ctx->dev, "Failed to register video device\n");
 		video_device_release(video);
 		return ret;
 	}
 
-	dev_dbg(stream->curr_ctx->dev, "video capture registered as /dev/video%d\n",
+	dev_dbg(stream->ctx->dev, "video capture registered as /dev/video%d\n",
 			video->num);
 
 	return 0;
 }
 
-int mtk_camera_create_stream(struct mtk_camera_dev *dev)
+int mtk_camera_create_stream(struct mtk_camera_dev *camdev)
 {
 	int stream_id;
 	int ret;
-	struct device *device;
-	struct platform_device *pdev;
-
-	pdev = dev->plat_dev;
-	device = &pdev->dev;
+	struct device *dev = camdev->dev;
 
 	for (stream_id = STREAM_PREVIEW; stream_id < STREAM_NUM; ++stream_id) {
 		struct mtk_camera_stream *stream;
 
-		if (dev->stream_en[stream_id] == 0)
+		if (camdev->stream_en[stream_id] == 0)
 			continue;
 
-		stream = devm_kzalloc(device, sizeof(*stream), GFP_KERNEL);
+		stream = devm_kzalloc(dev, sizeof(*stream), GFP_KERNEL);
 		if (!stream)
 			return -ENOMEM;
 
-		stream->plat_dev = pdev;
-		stream->vcu_plat_dev = vcu_get_plat_device(pdev);
-		if (stream->vcu_plat_dev == NULL) {
-			dev_err(device, "[VCU] vcu device in not ready\n");
-			return -EPROBE_DEFER;
-		}
+		stream->camdev = camdev;
 
 		mutex_init(&stream->capture_mutex);
 		mutex_init(&stream->dev_mutex);
 		mutex_init(&stream->init_mutex);
 
 		stream->stream_id = stream_id;
-		stream->camera_id = dev->camera_id;
+		stream->camera_id = camdev->camera_id;
 
 		ret = mtk_camera_stream_create_context(stream);
 		if (ret) {
-			dev_err(device, "failed to create context stream_id=%d ret=%d\n",
+			dev_err(dev, "failed to create context stream_id=%d ret=%d\n",
 				stream_id, ret);
 			return ret;
 		}
 
-		ret = mtk_camera_register_video_device(dev, stream, &stream->video);
+		ret = mtk_camera_register_video_device(camdev, stream, &stream->video);
 		if (ret) {
-			dev_err(device, "failed to register video device stream_id=%d ret=%d\n",
+			dev_err(dev, "failed to register video device stream_id=%d ret=%d\n",
 				stream_id, ret);
 			mtk_camera_stream_destroy_context(stream);
 			return ret;
 		}
 
-		list_add_tail(&stream->list, &dev->streams);
+		list_add_tail(&stream->list, &camdev->streams);
 	}
 	return 0;
 }
 
 static int mtk_camera_probe(struct platform_device *pdev)
 {
-	struct mtk_camera_dev *dev;
-	struct device *device;
+	struct mtk_camera_dev *camdev;
+	struct device *dev;
 	int camera_id;
 	unsigned int val;
 	int i, cnt, ret;
 
-	device = &pdev->dev;
-	dev = devm_kzalloc(device, sizeof(*dev), GFP_KERNEL);
-	if (!dev)
+	dev = &pdev->dev;
+	camdev = devm_kzalloc(dev, sizeof(*camdev), GFP_KERNEL);
+	if (!camdev)
 		return -ENOMEM;
 
-	dev->plat_dev = pdev;
+	camdev->dev = dev;
 
-	snprintf(dev->v4l2_dev.name, sizeof(dev->v4l2_dev.name), "mtk-camera");
+	snprintf(camdev->v4l2_dev.name, sizeof(camdev->v4l2_dev.name), "mtk-camera");
 
-	ret = of_property_read_u32(device->of_node, "mediatek,cameraid", &camera_id);
+	ret = of_property_read_u32(dev->of_node, "mediatek,cameraid", &camera_id);
 	if (ret) {
-		dev_err(device, "failed to find mediatek,camera-id\n");
+		dev_err(dev, "failed to find mediatek,camera-id\n");
 		return ret;
 	}
-	dev->camera_id = camera_id;
+	camdev->camera_id = camera_id;
 
-	ret = of_property_read_string(device->of_node, "mediatek,platform", &dev->platform);
+	ret = of_property_read_string(dev->of_node, "mediatek,platform", &camdev->platform);
 	if (ret) {
-		dev_err(device, "failed to find mediatek,platform\n");
+		dev_err(dev, "failed to find mediatek,platform\n");
 		return ret;
 	}
 
-	cnt = of_property_count_u32_elems(device->of_node, "mediatek,stream-enable");
+	cnt = of_property_count_u32_elems(dev->of_node, "mediatek,stream-enable");
 	if (cnt > 0) {
 		for (i = 0; i < cnt; i++) {
-			ret = of_property_read_u32_index(device->of_node,
+			ret = of_property_read_u32_index(dev->of_node,
 						"mediatek,stream-enable", i, &val);
 			if (ret)
 				continue;
 
-			dev_dbg(device, "enable stream %u\n", val);
+			dev_dbg(dev, "enable stream %u\n", val);
 
 			switch (val) {
 			case MTK_CAMERA_PREVIEW:
-				dev->stream_en[STREAM_PREVIEW] = 1;
+				camdev->stream_en[STREAM_PREVIEW] = 1;
 				break;
 			case MTK_CAMERA_VIDEO:
-				dev->stream_en[STREAM_VIDEO] = 1;
+				camdev->stream_en[STREAM_VIDEO] = 1;
 				break;
 			case MTK_CAMERA_CAPTURE:
-				dev->stream_en[STREAM_CAPTURE] = 1;
+				camdev->stream_en[STREAM_CAPTURE] = 1;
 				break;
 			default:
 				break;
 			}
 		}
 	} else {
-		dev_dbg(device, "failed to find mediatek,stream-enable. enable all by default\n");
-		for (i = 0; i < ARRAY_SIZE(dev->stream_en); i++)
-			dev->stream_en[i] = 1;
+		dev_dbg(dev, "failed to find mediatek,stream-enable. enable all by default\n");
+		for (i = 0; i < ARRAY_SIZE(camdev->stream_en); i++)
+			camdev->stream_en[i] = 1;
 	}
 
-	ret = v4l2_device_register(device, &dev->v4l2_dev);
+	ret = v4l2_device_register(dev, &camdev->v4l2_dev);
 	if (ret) {
-		dev_err(device, "v4l2_device_register err=%d\n", ret);
+		dev_err(dev, "failed to register v4l2 device ret=%d\n", ret);
 		return ret;
 	}
 
-	INIT_LIST_HEAD(&dev->streams);
-	ret = mtk_camera_create_stream(dev);
+	INIT_LIST_HEAD(&camdev->streams);
+	ret = mtk_camera_create_stream(camdev);
 	if (ret) {
-		dev_err(device, "mtk_camera_create_stream err=%d\n", ret);
-		v4l2_device_unregister(&dev->v4l2_dev);
+		dev_err(dev, "failed to create stream ret=%d\n", ret);
+		v4l2_device_unregister(&camdev->v4l2_dev);
 		return ret;
 	}
 
-	platform_set_drvdata(pdev, dev);
-	dev_info(device, "%s success\n", __func__);
+	platform_set_drvdata(pdev, camdev);
+	dev_info(dev, "%s success\n", __func__);
 	return 0;
 }
 
@@ -1557,13 +1550,13 @@ MODULE_DEVICE_TABLE(of, mtk_camera_match);
 
 static int mtk_camera_remove(struct platform_device *pdev)
 {
-	struct mtk_camera_dev *dev;
+	struct mtk_camera_dev *camdev;
 	struct mtk_camera_stream *stream;
 
-	dev = platform_get_drvdata(pdev);
+	camdev = platform_get_drvdata(pdev);
 
-	dev_dbg(&pdev->dev, "%s dev %p\n", __func__, dev);
-	list_for_each_entry(stream, &dev->streams, list) {
+	dev_dbg(&pdev->dev, "%s dev %p\n", __func__, camdev);
+	list_for_each_entry(stream, &camdev->streams, list) {
 		if (!video_is_registered(&stream->video))
 			continue;
 
@@ -1574,7 +1567,7 @@ static int mtk_camera_remove(struct platform_device *pdev)
 		mutex_destroy(&stream->init_mutex);
 	}
 
-	v4l2_device_unregister(&dev->v4l2_dev);
+	v4l2_device_unregister(&camdev->v4l2_dev);
 
 	return 0;
 }

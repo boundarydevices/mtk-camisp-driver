@@ -462,7 +462,7 @@ int mtk_camera_ctrls_setup(struct mtk_camera_ctx *ctx)
 		dev_err(ctx->dev, "adding control failed %d\n",
 			ctx->ctrl_hdl.error);
 		v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
-		dev_err(&ctx->stream->plat_dev->dev,
+		dev_err(ctx->dev,
 			"Failed to create control handlers\n");
 		return ctx->ctrl_hdl.error;
 	}

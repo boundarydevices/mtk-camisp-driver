@@ -157,11 +157,9 @@ struct camera_buffer {
 struct mtk_camera_stream {
 	struct video_device video;
 
-	struct platform_device *plat_dev;
-	struct platform_device *vcu_plat_dev;
 	struct list_head list;
-	struct list_head ctx_list;
-	struct mtk_camera_ctx *curr_ctx;
+	struct mtk_camera_dev *camdev;
+	struct mtk_camera_ctx *ctx;
 
 	unsigned long id_counter;
 	int camera_id;
@@ -185,7 +183,7 @@ struct mtk_camera_fh {
 
 struct mtk_camera_dev {
 	struct v4l2_device v4l2_dev;
-	struct platform_device *plat_dev;
+	struct device *dev;
 	struct list_head streams;
 	int camera_id;
 	const char *platform;
