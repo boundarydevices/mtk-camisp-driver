@@ -1226,9 +1226,7 @@ err_init:
 static int fops_camera_open(struct file *file)
 {
 	struct mtk_camera_stream *stream = video_drvdata(file);
-	struct mtk_camera_ctx *ctx = stream->curr_ctx;
 	struct mtk_camera_fh *handle;
-	int ret = 0;
 
 	/* Create the device handle. */
 	handle = kzalloc(sizeof(*handle), GFP_KERNEL);
