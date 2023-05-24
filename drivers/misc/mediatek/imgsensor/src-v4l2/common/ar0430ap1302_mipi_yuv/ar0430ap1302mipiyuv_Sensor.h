@@ -7,7 +7,7 @@
  *
  * Filename:
  * ---------
- *  ap1302mipi_Sensor.h
+ *  ar0430ap1302mipi_Sensor.h
  *
  * Project:
  * --------
@@ -18,15 +18,15 @@
  *  CMOS sensor header file
  *
  ****************************************************************************/
-#ifndef _AP1302MIPI_SENSOR_H
-#define _AP1302MIPI_SENSOR_H
+#ifndef _AR0430AP1302MIPI_SENSOR_H
+#define _AR0430AP1302MIPI_SENSOR_H
 
-#include "ap1302_control.h"
+#include "ar0430ap1302_control.h"
 
-#define AP1302_SLAVE_SENSOR_COUNT		(1)			/* number of slave sensors actually connected */
-#define AP1302_SLAVE_SENSOR_NUM_MAX		(2)
-#define AP1302_REG_CHIP_ID				(0x0000)
-#define AP1302_CHIP_ID					(0x0265)
+#define AR0430AP1302_SLAVE_SENSOR_COUNT		(1)			/* number of slave sensors actually connected */
+#define AR0430AP1302_SLAVE_SENSOR_NUM_MAX		(2)
+#define AR0430AP1302_REG_CHIP_ID				(0x0000)
+#define AR0430AP1302_CHIP_ID					(0x0265)
 enum IMGSENSOR_MODE {
 	IMGSENSOR_MODE_INIT,
 	IMGSENSOR_MODE_PREVIEW,
@@ -156,14 +156,14 @@ struct imgsensor_info_struct {
 	//only supprt 4must end with 0xff
 	kal_uint8  i2c_addr_table[5];
 
-	// Add for AR0430+AP1302
+	// Add for AR0430+AR0430AP1302
 	//record slave sensor id defined in Kd_imgsensor.h
 	kal_uint32 slave_sensor_id;
 	//record i2c slave addr (8bit) of slave sensors
-	kal_uint8  i2c_addr_slave_sensor[AP1302_SLAVE_SENSOR_NUM_MAX];
+	kal_uint8  i2c_addr_slave_sensor[AR0430AP1302_SLAVE_SENSOR_NUM_MAX];
 	// kal_uint8 i2c_addr_slave_sensor;
 	//
-	struct ap1302_device ap1302;
+	struct ar0430ap1302_device ar0430ap1302;
 };
 
 /* SENSOR READ/WRITE ID */

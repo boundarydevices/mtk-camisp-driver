@@ -3,14 +3,14 @@
  * Copyright (c) 2022 MediaTek Inc.
  */
 
-#ifndef _AP1302MIPI_SENSOR_CONTROL_H
-#define _AP1302MIPI_SENSOR_CONTROL_H
+#ifndef _AR0430AP1302MIPI_SENSOR_CONTROL_H
+#define _AR0430AP1302MIPI_SENSOR_CONTROL_H
 
 #include <linux/firmware.h>
 #include "adaptor-subdrv.h"
 
-struct ap1302_sensor {
-	struct ap1302_device *ap1302;
+struct ar0430ap1302_sensor {
+	struct ar0430ap1302_device *ar0430ap1302;
 	// unsigned int index;
 
 	// struct device_node *of_node;
@@ -22,7 +22,7 @@ struct ap1302_sensor {
 	// struct media_pad pad;
 };
 
-struct ap1302_device {
+struct ar0430ap1302_device {
 	struct device *dev;
 	struct i2c_client *client;
 
@@ -38,14 +38,14 @@ struct ap1302_device {
 	// struct mutex lock;	/* Protects formats */
 
 	// struct v4l2_subdev sd;
-	// struct media_pad pads[AP1302_PAD_MAX];
-	// struct ap1302_format formats[3];
+	// struct media_pad pads[AR0430AP1302_PAD_MAX];
+	// struct ar0430ap1302_format formats[3];
 	unsigned int width_factor;
 
 	// struct v4l2_ctrl_handler ctrls;
 
-	// const struct ap1302_sensor_info *sensor_info;
-	struct ap1302_sensor sensors[2];
+	// const struct ar0430ap1302_sensor_info *sensor_info;
+	struct ar0430ap1302_sensor sensors[2];
 
 	struct {
 		struct dentry *dir;
@@ -60,11 +60,11 @@ struct ap1302_device {
 };
 
 
-int ap1302_request_firmware(struct ap1302_device *ap1302);
-int ap1302_load_firmware(struct ap1302_device *ap1302);
-int ap1302_stream(struct ap1302_device *ap1302, int enable);
-int ap1302_reset(struct ap1302_device *ap1302);
-int ap1302_log_status(struct ap1302_device *ap1302);
-int ap1302_sensor_init(struct ap1302_device *ap1302);
-int ap1302_remove(struct ap1302_device *ap1302);
+int ar0430ap1302_request_firmware(struct ar0430ap1302_device *ar0430ap1302);
+int ar0430ap1302_load_firmware(struct ar0430ap1302_device *ar0430ap1302);
+int ar0430ap1302_stream(struct ar0430ap1302_device *ar0430ap1302, int enable);
+int ar0430ap1302_reset(struct ar0430ap1302_device *ar0430ap1302);
+int ar0430ap1302_log_status(struct ar0430ap1302_device *ar0430ap1302);
+int ar0430ap1302_sensor_init(struct ar0430ap1302_device *ar0430ap1302);
+int ar0430ap1302_remove(struct ar0430ap1302_device *ar0430ap1302);
 #endif

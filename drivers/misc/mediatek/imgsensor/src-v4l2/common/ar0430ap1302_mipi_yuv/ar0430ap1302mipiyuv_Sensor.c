@@ -17,8 +17,8 @@
 #include "kd_imgsensor_define_v4l2.h"
 #include "kd_imgsensor_errcode.h"
 
-#include "ap1302mipiyuv_Sensor.h"
-#include "ap1302_control.h"
+#include "ar0430ap1302mipiyuv_Sensor.h"
+#include "ar0430ap1302_control.h"
 
 #include "adaptor-subdrv.h"
 #include "adaptor-i2c.h"
@@ -28,7 +28,7 @@
 #define write_cmos_sensor_8(...) subdrv_i2c_wr_u8(__VA_ARGS__)
 #define write_cmos_sensor_16(...) subdrv_i2c_wr_u16(__VA_ARGS__)
 
-#define PFX "AP1302_camera_sensor"
+#define PFX "AR0430AP1302_camera_sensor"
 #define LOG_ERR(format, args...)\
 	pr_err(PFX "[%s] " format, __func__, ##args)
 #define LOG_WARN(format, args...)\
@@ -38,11 +38,11 @@
 #define LOG_DBG(format, args...)\
 	pr_debug(PFX "[%s] " format, __func__, ##args)
 
-#define AP1302_SUPPORTED_SENSOR_MODE_NUMBER 5
-#define AP1302_LOG_STATUS_EN 0
+#define AR0430AP1302_SUPPORTED_SENSOR_MODE_NUMBER 5
+#define AR0430AP1302_LOG_STATUS_EN 0
 
 static struct imgsensor_info_struct imgsensor_info = {
-	.sensor_id = AP1302_CHIP_ID,
+	.sensor_id = AR0430AP1302_CHIP_ID,
 	.checksum_value = 0xffffffff,  // TODO: Need modify
 
 	.pre = {
@@ -131,7 +131,7 @@ static struct imgsensor_info_struct imgsensor_info = {
 	.ae_ispGain_delay_frame = 2,
 	.ihdr_support = 0,    // 1, support; 0,not support
 	.ihdr_le_firstline = 0,  // 1,le first ; 0, se first
-	.sensor_mode_num = AP1302_SUPPORTED_SENSOR_MODE_NUMBER,    // support sensor mode num
+	.sensor_mode_num = AR0430AP1302_SUPPORTED_SENSOR_MODE_NUMBER,    // support sensor mode num
 
 	.cap_delay_frame = 4,
 	.pre_delay_frame = 4,
@@ -148,12 +148,12 @@ static struct imgsensor_info_struct imgsensor_info = {
 	.mipi_lane_num = SENSOR_MIPI_4_LANE,
 	.i2c_addr_table = {0x78, 0x7a, 0xff},
 	.i2c_addr_slave_sensor = {0x6c},
-	.ap1302 = {
-		.width_factor = AP1302_SLAVE_SENSOR_COUNT,
+	.ar0430ap1302 = {
+		.width_factor = AR0430AP1302_SLAVE_SENSOR_COUNT,
 	},
 };
 /* Sensor output window information */
-static struct SENSOR_WINSIZE_INFO_STRUCT imgsensor_winsize_info[AP1302_SUPPORTED_SENSOR_MODE_NUMBER] = {
+static struct SENSOR_WINSIZE_INFO_STRUCT imgsensor_winsize_info[AR0430AP1302_SUPPORTED_SENSOR_MODE_NUMBER] = {
 	{2316, 1746, 0, 0, 2316, 1746, 2316, 1746, 0, 0, 2316, 1746, 0, 0, 2316, 1746}, /* Preview */
 	{2316, 1746, 0, 0, 2316, 1746, 2316, 1746, 0, 0, 2316, 1746, 0, 0, 2316, 1746}, /* capture */
 	{2316, 1746, 0, 0, 2316, 1746, 2316, 1746, 0, 0, 2316, 1746, 0, 0, 2316, 1746}, /* video */
@@ -183,8 +183,8 @@ static struct SENSOR_VC_INFO_STRUCT SENSOR_VC_INFO[3] = {/* Preview mode setting
 
 static void sensor_init(struct subdrv_ctx *ctx)
 {
-	LOG_INFO("AP1302 init()");
-	// ap1302_load_firmware
+	LOG_INFO("AR0430AP1302 init()");
+	// ar0430ap1302_load_firmware
 } /* sensor_init */
 static void preview_setting(struct subdrv_ctx *ctx)
 {
@@ -238,13 +238,13 @@ static int get_imgsensor_id(struct subdrv_ctx *ctx, UINT32 *sensor_id)
 	while (imgsensor_info.i2c_addr_table[i] != 0xff) {
 		ctx->i2c_write_id = imgsensor_info.i2c_addr_table[i];
 		do {
-			*sensor_id = read_cmos_sensor_16(ctx, AP1302_REG_CHIP_ID);
+			*sensor_id = read_cmos_sensor_16(ctx, AR0430AP1302_REG_CHIP_ID);
 			if (*sensor_id == imgsensor_info.sensor_id) {
-				LOG_INFO("AP1302 i2c write id: 0x%x, sensor id: 0x%x\n",
+				LOG_INFO("AR0430AP1302 i2c write id: 0x%x, sensor id: 0x%x\n",
 					ctx->i2c_write_id, *sensor_id);
 				return ERROR_NONE;
 			}
-			LOG_DBG("AP1302 Read sensor id fail, write id:0x%x id: 0x%x\n",
+			LOG_DBG("AR0430AP1302 Read sensor id fail, write id:0x%x id: 0x%x\n",
 				ctx->i2c_write_id, *sensor_id);
 			retry--;
 		} while (retry > 0);
@@ -256,7 +256,7 @@ static int get_imgsensor_id(struct subdrv_ctx *ctx, UINT32 *sensor_id)
 	if (*sensor_id != imgsensor_info.sensor_id) {
 		// if Sensor ID is not correct,
 		// Must set *sensor_id to 0xFFFFFFFF
-		LOG_ERR("Get AP1302 sensor id fail.");
+		LOG_ERR("Get AR0430AP1302 sensor id fail.");
 		*sensor_id = 0xFFFFFFFF;
 		return ERROR_SENSOR_CONNECT_FAIL;
 	}
@@ -288,39 +288,39 @@ static int open(struct subdrv_ctx *ctx)
 	LOG_INFO("E\n");
 	//sensor have two i2c address 0x6c 0x6d & 0x21 0x20,
 	//we should detect the module used i2c address
-	// LOG_INFO("AP1302 open().");
+	// LOG_INFO("AR0430AP1302 open().");
 	if (get_imgsensor_id(ctx, &sensor_id) != ERROR_NONE) {
-		LOG_ERR("AP1302 get_imgsensor_id() return error.");
+		LOG_ERR("AR0430AP1302 get_imgsensor_id() return error.");
 		return ERROR_SENSOR_CONNECT_FAIL;
 	}
 
-	ap1302_sensor_init(&imgsensor_info.ap1302);
+	ar0430ap1302_sensor_init(&imgsensor_info.ar0430ap1302);
 	// request firmware
-	LOG_INFO("AP1302 request fw.");
-	ret = ap1302_request_firmware(&imgsensor_info.ap1302);
+	LOG_INFO("AR0430AP1302 request fw.");
+	ret = ar0430ap1302_request_firmware(&imgsensor_info.ar0430ap1302);
 	if (ret) {
-		LOG_ERR("AP1302 Request Firmware Failed.");
-		release_firmware(imgsensor_info.ap1302.fw);
+		LOG_ERR("AR0430AP1302 Request Firmware Failed.");
+		release_firmware(imgsensor_info.ar0430ap1302.fw);
 		return ret;
 	}
 	for (retries = 0; retries < 5; ++retries) {
-		LOG_DBG("Try to load f/w. AP1302 LINE = %d.", __LINE__);
-		ret = ap1302_load_firmware(&imgsensor_info.ap1302);
+		LOG_DBG("Try to load f/w. AR0430AP1302 LINE = %d.", __LINE__);
+		ret = ar0430ap1302_load_firmware(&imgsensor_info.ar0430ap1302);
 		if (!ret)
 			break;
-		//ap1302_log_status(&imgsensor_info.ap1302);
-		ap1302_reset(&imgsensor_info.ap1302);
-		LOG_DBG("Retry. AP1302 LINE = %d.", __LINE__);
+		//ar0430ap1302_log_status(&imgsensor_info.ar0430ap1302);
+		ar0430ap1302_reset(&imgsensor_info.ar0430ap1302);
+		LOG_DBG("Retry. AR0430AP1302 LINE = %d.", __LINE__);
 	}
 	if (retries == 5) {
 		LOG_DBG("Firmware load retries exceeded, aborting\n");
-		release_firmware(imgsensor_info.ap1302.fw);
+		release_firmware(imgsensor_info.ar0430ap1302.fw);
 		ret = ERROR_DRIVER_INIT_FAIL;
 		return ret;
 	}
 	/* initail sequence write in  */
 	sensor_init(ctx);
-	LOG_DBG("SensorInit. AP1302 LINE = %d.", __LINE__);
+	LOG_DBG("SensorInit. AR0430AP1302 LINE = %d.", __LINE__);
 
 	ctx->autoflicker_en = KAL_FALSE;
 	ctx->sensor_mode = IMGSENSOR_MODE_INIT;
@@ -335,8 +335,8 @@ static int open(struct subdrv_ctx *ctx)
 	ctx->ihdr_mode = 0;
 	ctx->test_pattern = KAL_FALSE;
 	ctx->current_fps = imgsensor_info.pre.max_framerate;
-	release_firmware(imgsensor_info.ap1302.fw);
-	LOG_DBG("Open() Done. AP1302 LINE = %d.", __LINE__);
+	release_firmware(imgsensor_info.ar0430ap1302.fw);
+	LOG_DBG("Open() Done. AR0430AP1302 LINE = %d.", __LINE__);
 	return ERROR_NONE;
 } /* open  */
 
@@ -362,9 +362,9 @@ static int close(struct subdrv_ctx *ctx)
 
 	/*No Need to implement this function*/
 
-	// Add for AR0430+AP1302
-	//release_firmware(imgsensor_info.ap1302.fw);
-	ap1302_remove(&imgsensor_info.ap1302);
+	// Add for AR0430AP1302
+	//release_firmware(imgsensor_info.ar0430ap1302.fw);
+	ar0430ap1302_remove(&imgsensor_info.ar0430ap1302);
 	return ERROR_NONE;
 } /* close  */
 
@@ -777,15 +777,15 @@ static kal_uint32 streaming_control(struct subdrv_ctx *ctx, kal_bool enable)
 {
 	LOG_INFO("streaming_enable(0=Sw Standby,1=streaming): %d\n", enable);
 	if (enable) {
-		ap1302_stream(&imgsensor_info.ap1302, enable);
-#if AP1302_LOG_STATUS_EN
-		ap1302_log_status(&imgsensor_info.ap1302);
-		ap1302_log_status(&imgsensor_info.ap1302);
-		ap1302_log_status(&imgsensor_info.ap1302);
-		ap1302_log_status(&imgsensor_info.ap1302);
+		ar0430ap1302_stream(&imgsensor_info.ar0430ap1302, enable);
+#if AR0430AP1302_LOG_STATUS_EN
+		ar0430ap1302_log_status(&imgsensor_info.ar0430ap1302);
+		ar0430ap1302_log_status(&imgsensor_info.ar0430ap1302);
+		ar0430ap1302_log_status(&imgsensor_info.ar0430ap1302);
+		ar0430ap1302_log_status(&imgsensor_info.ar0430ap1302);
 #endif
 	} else {
-		ap1302_stream(&imgsensor_info.ap1302, enable);
+		ar0430ap1302_stream(&imgsensor_info.ar0430ap1302, enable);
 	}
 	mdelay(10);
 	return ERROR_NONE;
@@ -1160,10 +1160,10 @@ static int init_ctx(struct subdrv_ctx *ctx,
 	ctx->i2c_client = i2c_client;
 	ctx->i2c_write_id = i2c_write_id;
 
-	// add for AR0430+AP1302
-	imgsensor_info.ap1302.dev = &i2c_client->dev;
-	imgsensor_info.ap1302.client = i2c_client;
-	imgsensor_info.ap1302.ctx = ctx;
+	// add for AR0430AP1302
+	imgsensor_info.ar0430ap1302.dev = &i2c_client->dev;
+	imgsensor_info.ar0430ap1302.client = i2c_client;
+	imgsensor_info.ar0430ap1302.ctx = ctx;
 	return 0;
 }
 
@@ -1195,9 +1195,9 @@ static struct subdrv_pw_seq_entry pw_seq[] = {
 	{HW_ID_RST, 1, 10},
 };
 
-const struct subdrv_entry ap1302_mipi_yuv_entry = {
-	.name = "ap1302_mipi_yuv",
-	.id = AP1302_SENSOR_ID,
+const struct subdrv_entry ar0430ap1302_mipi_yuv_entry = {
+	.name = "ar0430ap1302_mipi_yuv",
+	.id = AR0430AP1302_SENSOR_ID,
 	.pw_seq = pw_seq,
 	.pw_seq_cnt = ARRAY_SIZE(pw_seq),
 	.ops = &ops,
