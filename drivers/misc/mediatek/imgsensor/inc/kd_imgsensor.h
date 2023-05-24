@@ -316,6 +316,8 @@
 /*AR*/
 #define AR0833_SENSOR_ID                        0x4B03
 #define AR0430AP1302_SENSOR_ID                  0x0265
+#define AR0830AP1302_SENSOR_ID                  0x0265
+#define AR0830AP1302D2L_SENSOR_ID               0x0265
 /*SIV*/
 #define SID020A_SENSOR_ID                       0x12B4
 #define SIV100B_SENSOR_ID                       0x0C11
@@ -526,6 +528,8 @@
 /*AR*/
 #define SENSOR_DRVNAME_AR0833_MIPI_RAW          "ar0833_mipi_raw"
 #define SENSOR_DRVNAME_AR0430AP1302_MIPI_YUV    "ar0430ap1302_mipi_yuv"
+#define SENSOR_DRVNAME_AR0830AP1302_MIPI_YUV    "ar0830ap1302_mipi_yuv"
+#define SENSOR_DRVNAME_AR0830AP1302D2L_MIPI_YUV "ar0830ap1302d2l_mipi_yuv"
 /*SIV*/
 #define SENSOR_DRVNAME_SIV121D_YUV              "siv121d_yuv"
 #define SENSOR_DRVNAME_SIV120B_YUV              "siv120b_yuv"
