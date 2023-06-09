@@ -235,7 +235,7 @@ static int vb2ops_camera_buf_init(struct vb2_buffer *vb)
 	if (ctx->state == MTK_STATE_INIT) {
 		ret = camera_if_init_buffer(ctx, fb);
 		if (ret) {
-			dev_err(ctx->dev, "cam%d:[%d]: camera_if_use_buffer() fail ret=%d\n",
+			dev_err(ctx->dev, "cam%d:[%d]: camera_if_init_buffer() fail ret=%d\n",
 				ctx->camera_id, ctx->id, ret);
 			return -EINVAL;
 		}
@@ -263,7 +263,7 @@ static void vb2ops_camera_buf_deinit(struct vb2_buffer *vb)
 	if (ctx->state == MTK_STATE_INIT) {
 		ret = camera_if_deinit_buffer(ctx, fb);
 		if (ret) {
-			dev_err(ctx->dev, "cam%d:[%d]: camera_if_use_buffer() fail ret=%d\n",
+			dev_err(ctx->dev, "cam%d:[%d]: camera_if_deinit_buffer() fail ret=%d\n",
 				ctx->camera_id, ctx->id, ret);
 			return;
 		}
