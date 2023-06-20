@@ -1800,7 +1800,7 @@ static int mtk_camsys_raw_state_handle(struct mtk_raw_device *raw_dev,
 					* 256 + irq_info->write_cnt;
 		if (frame_idx_inner > atomic_read(&sensor_ctrl->isp_request_seq_no) ||
 			atomic_read(&req_stream_data->frame_done_work.is_queued) == 1) {
-			dev_info_ratelimited(raw_dev->dev, "[SOF] frame done work too late frames. req(%d),ts(%llu)\n",
+			dev_dbg_ratelimited(raw_dev->dev, "[SOF] frame done work too late frames. req(%d),ts(%llu)\n",
 				req_stream_data->frame_seq_no, irq_info->ts_ns / 1000);
 		} else if (mtk_cam_is_stagger(ctx)) {
 			dev_dbg(raw_dev->dev, "[SOF:%d] HDR SWD over SOF case\n", frame_idx_inner);
