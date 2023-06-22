@@ -376,17 +376,33 @@ static struct v4l2_frmsize_discrete *mtk_camera_find_sizes(u32 width, u32 height
 	return NULL;
 }
 
-static int mtk_camera_try_fmt_mplane(struct v4l2_format *f, struct mtk_camera_fmt *fmt)
+static int mtk_camera_try_fmt_mplane(struct v4l2_format *f, struct mtk_camera_fmt *formats,
+				    int num_formats)
 {
 	struct v4l2_pix_format_mplane *pix_fmt_mp = &f->fmt.pix_mp;
+	struct v4l2_frmsize_discrete *frmsize;
+	struct mtk_camera_fmt *fmt;
 	unsigned int bytesperline = 0;
 	unsigned int sizeimage = 0;
 	int i;
 	u32 memory_type = 0;
 	u32 org_w, org_h;
 
+	fmt = mtk_camera_find_format(f, formats, num_formats);
+	if (fmt == NULL) {
+		pix_fmt_mp->pixelformat = formats->fourcc;
+		fmt = mtk_camera_find_format(f, formats, num_formats);
+	}
+
 	if (fmt == NULL)
 		return -EINVAL;
+
+	frmsize = mtk_camera_find_sizes(pix_fmt_mp->width, pix_fmt_mp->height,
+				    fmt->sizes, fmt->num_sizes);
+	if (frmsize == NULL) {
+		pix_fmt_mp->width = fmt->sizes[0].width;
+		pix_fmt_mp->height = fmt->sizes[0].height;
+	}
 
 	pix_fmt_mp->field = V4L2_FIELD_NONE;
 	/* Clamp the width and height. */
@@ -560,7 +576,6 @@ camera_set_format_mplane(struct file *file, void *fh,
 	struct v4l2_pix_format_mplane *pix_mp;
 	struct mtk_q_data *q_data = &ctx->q_data;
 	struct mtk_camera_fmt *fmt;
-	struct v4l2_frmsize_discrete *frmsize;
 	uint32_t size[3];
 	int i, ret = 0;
 
@@ -583,41 +598,29 @@ camera_set_format_mplane(struct file *file, void *fh,
 		dev_err(ctx->dev, "cam%d:[%d]: q_data is NULL\n", ctx->camera_id, ctx->id);
 		return -EINVAL;
 	}
-	pix_mp = &format->fmt.pix_mp;
 
 	if (q_data->num_formats == 0) {
 		dev_err(ctx->dev, "number of formats is 0\n");
 		return -EINVAL;
 	}
 
-	fmt = mtk_camera_find_format(format, q_data->formats, q_data->num_formats);
-	if (fmt == NULL) {
-		format->fmt.pix_mp.pixelformat = q_data->formats->fourcc;
-		fmt = mtk_camera_find_format(format, q_data->formats, q_data->num_formats);
-	}
-	q_data->fmt = fmt;
-
-	ret = mtk_camera_try_fmt_mplane(format, q_data->fmt);
+	ret = mtk_camera_try_fmt_mplane(format, q_data->formats, q_data->num_formats);
 	if (ret) {
 		dev_err(ctx->dev, "try format failed\n");
 		return ret;
 	}
+
+	fmt = mtk_camera_find_format(format, q_data->formats, q_data->num_formats);
+	pix_mp = &format->fmt.pix_mp;
+	q_data->fmt = fmt;
+	q_data->width = pix_mp->width;
+	q_data->height = pix_mp->height;
 
 	for (i = 0; i < fmt->num_planes; i++) {
 		q_data->bytesperline[i] = pix_mp->plane_fmt[i].bytesperline;
 		q_data->sizeimage[i] = pix_mp->plane_fmt[i].sizeimage;
 		dev_dbg(ctx->dev, "format %s, bytesperline:%u, sizeimage: %u\n",
 			fmt->name, q_data->bytesperline[i], q_data->sizeimage[i]);
-	}
-
-	frmsize = mtk_camera_find_sizes(pix_mp->width, pix_mp->height,
-				    fmt->sizes, fmt->num_sizes);
-	if (frmsize == NULL) {
-		q_data->width = pix_mp->width = fmt->sizes[0].width;
-		q_data->height = pix_mp->height = fmt->sizes[0].height;
-	} else {
-		q_data->width = pix_mp->width;
-		q_data->height = pix_mp->height;
 	}
 
 	size[0] = pix_mp->width;
@@ -662,24 +665,13 @@ camera_try_format_mplane(struct file *file, void *fh,
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_stream *stream = handle->stream;
 	struct mtk_camera_ctx *ctx = stream->ctx;
-	struct mtk_camera_fmt *fmt;
-	struct mtk_camera_fmt *formats;
-	int num_formats, ret;
+	int ret;
 
 	ret = mtk_camera_init_stream(stream);
 	if (ret)
 		return ret;
 
-	formats = ctx->q_data.formats;
-	num_formats = ctx->q_data.num_formats;
-
-	fmt = mtk_camera_find_format(format, formats, num_formats);
-	if (fmt == NULL) {
-		format->fmt.pix_mp.pixelformat = formats->fourcc;
-		fmt = mtk_camera_find_format(format, formats, num_formats);
-	}
-
-	return mtk_camera_try_fmt_mplane(format, fmt);
+	return mtk_camera_try_fmt_mplane(format, ctx->q_data.formats, ctx->q_data.num_formats);
 }
 
 static int
@@ -1045,8 +1037,6 @@ int mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 	int ret = 0;
 
 	memset(q_data, 0, sizeof(struct mtk_q_data));
-	q_data->width  = MTK_VIDEO_CAPTURE_DEF_WIDTH;
-	q_data->height = MTK_VIDEO_CAPTURE_DEF_HEIGHT;
 
 	if (!ctx->cam_if_rdy) {
 		ret = camera_if_init(ctx);
@@ -1117,6 +1107,8 @@ int mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 	}
 
 	q_data->fmt = &q_data->formats[0];
+	q_data->width  = q_data->fmt->sizes[0].width;
+	q_data->height = q_data->fmt->sizes[0].height;
 	if (ctx->stream_id == STREAM_PREVIEW || ctx->stream_id == STREAM_VIDEO) {
 		for (i = 0; i < q_data->fmt->num_planes; ++i) {
 			bytesperline = q_data->width * q_data->fmt->row_depth[i] / 8;
