@@ -1332,7 +1332,7 @@ int mtk_camera_stream_create_context(struct mtk_camera_stream *stream)
 
 	queue = &ctx->queue;
 	queue->type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-	queue->io_modes	= VB2_DMABUF | VB2_MMAP;
+	queue->io_modes = VB2_MMAP;
 	queue->drv_priv	= ctx;
 	queue->buf_struct_size = sizeof(struct camera_buffer);
 	queue->ops		= &mtk_camera_vb2_ops;
