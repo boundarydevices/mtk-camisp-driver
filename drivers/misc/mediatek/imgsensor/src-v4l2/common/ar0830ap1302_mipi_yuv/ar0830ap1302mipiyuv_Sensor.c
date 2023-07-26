@@ -51,8 +51,8 @@ static struct imgsensor_info_struct imgsensor_info = {
 		.framelength = 3180, // record different mode's framelength
 		.startx = 0, // record different mode's startx of grabwindow
 		.starty = 0, // record different mode's starty of grabwindow
-		.grabwindow_width = 3200, // record different mode's width of grabwindow
-		.grabwindow_height = 1800, // record different mode's height of grabwindow
+		.grabwindow_width = 2560, // record different mode's width of grabwindow
+		.grabwindow_height = 1440, // record different mode's height of grabwindow
 		.mipi_data_lp2hs_settle_dc = 85,
 		.mipi_pixel_rate = 610000000,
 		.max_framerate = 300, // max_fps * 10
@@ -154,7 +154,7 @@ static struct imgsensor_info_struct imgsensor_info = {
 };
 /* Sensor output window information */
 static struct SENSOR_WINSIZE_INFO_STRUCT imgsensor_winsize_info[AR0830AP1302_SUPPORTED_SENSOR_MODE_NUMBER] = {
-	{3840, 2160, 0, 0, 3200, 1800, 3200, 1800, 0, 0, 3200, 1800, 0, 0, 3200, 1800}, /* Preview */
+	{3840, 2160, 0, 0, 2560, 1440, 2560, 1440, 0, 0, 2560, 1440, 0, 0, 2560, 1440}, /* Preview */
 	{3840, 2160, 0, 0, 3840, 2160, 3840, 2160, 0, 0, 3840, 2160, 0, 0, 3840, 2160}, /* capture */
 	{3840, 2160, 0, 0, 1920, 1080, 1920, 1080, 0, 0, 1920, 1080, 0, 0, 1920, 1080}, /* video */
 	{3840, 2160, 0, 0, 1920, 1080, 1920, 1080, 0, 0, 1920, 1080, 0, 0, 1920, 1080}, /*hight speed video */
@@ -163,10 +163,10 @@ static struct SENSOR_WINSIZE_INFO_STRUCT imgsensor_winsize_info[AR0830AP1302_SUP
 
 static struct SENSOR_VC_INFO_STRUCT SENSOR_VC_INFO[3] = {/* Preview mode setting */
 	{0x01, 0x08, 0x00,   0x08, 0x40, 0x00,
-	 0x00, 0x1e, 3200,   1800,
-	 0x01, 0x1e, 3200,   1800,
-	 0x02, 0x1e, 3200,   1800,
-	 0x03, 0x1e, 3200,   1800 },
+	 0x00, 0x1e, 2560,   1440,
+	 0x01, 0x1e, 2560,   1440,
+	 0x02, 0x1e, 2560,   1440,
+	 0x03, 0x1e, 2560,   1440 },
 	/* Capture mode setting */
 	{0x01, 0x08, 0x00,   0x08, 0x40, 0x00,
 	 0x00, 0x1e, 3840,   2160,
@@ -1096,8 +1096,8 @@ static struct mtk_mbus_frame_desc_entry frame_desc_prev[] = {
 		.bus.csi2 = {
 			.channel = 0,
 			.data_type = 0x1e,
-			.hsize = 3200,
-			.vsize = 1800,
+			.hsize = 2560,
+			.vsize = 1440,
 		},
 	},
 };
