@@ -9,8 +9,6 @@
 #include <linux/list.h>
 #include <linux/of.h>
 #include <linux/rpmsg.h>
-#include <linux/pm_qos.h>
-
 #include <media/media-device.h>
 #include <media/media-request.h>
 #include <media/v4l2-async.h>
@@ -404,7 +402,7 @@ struct mtk_cam_ctx {
 
 	/* To support debug dump */
 	struct mtkcam_ipi_config_param config_params;
-	struct pm_qos_request qos_request;
+
 };
 
 struct mtk_cam_device {

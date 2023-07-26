@@ -6257,9 +6257,6 @@ int mtk_cam_ctx_stream_on(struct mtk_cam_ctx *ctx)
 	if (raw_dev)
 		mtk_cam_register_iommu_tf_callback(raw_dev);
 
-	/* update qos to prevent deep idle during transfer */
-	cpu_latency_qos_update_request(&ctx->qos_request, 150);
-
 	return 0;
 
 fail_sv_stream_off:
@@ -6333,9 +6330,6 @@ int mtk_cam_ctx_stream_off(struct mtk_cam_ctx *ctx)
 	unsigned int i, enabled_sv = 0;
 	int ret;
 	int feature = 0;
-
-	/* register qos to prevent deep idle during transfer */
-	cpu_latency_qos_update_request(&ctx->qos_request, PM_QOS_DEFAULT_VALUE);
 
 	if (!ctx->streaming) {
 		dev_info(cam->dev, "ctx-%d is already streaming off\n",
@@ -7313,10 +7307,6 @@ static int mtk_cam_probe(struct platform_device *pdev)
 	ret = mtk_cam_debug_fs_init(cam_dev);
 	if (ret < 0)
 		goto fail_uninit_link_change_wq;
-
-	/* register qos to prevent deep idle during transfer */
-	for (i = 0; i < cam_dev->max_stream_num; i++)
-		cpu_latency_qos_add_request(&cam_dev->ctxs[i].qos_request, PM_QOS_DEFAULT_VALUE);
 
 	return 0;
 
