@@ -2894,6 +2894,7 @@ static int raw_stagger_select(struct mtk_cam_ctx *ctx,
 	int stagger_plan = STAGGER_STREAM_PLAN_OTF_ALL;
 	int stagger_order_mask[STAGGER_MAX_STREAM_NUM] = {0};
 	int mask = 0x0;
+	int raw_select = 0;
 	bool selected = false;
 
 	stagger_order = stagger_mode_plan[stagger_plan];
@@ -2926,6 +2927,7 @@ static int raw_stagger_select(struct mtk_cam_ctx *ctx,
 	for (i = 0; i < stagger_ctx_num + 1; i++) {
 		if (stagger_order_mask[i] == 0) {
 			stagger_select = stagger_order.stagger_select[i];
+			raw_select = stagger_select.raw_select;
 			result->stagger_path = (pipe_hw_mode) ?
 				mtk_cam_get_stagger_path(pipe_hw_mode) :
 				stagger_select.mode_decision;
@@ -2936,9 +2938,13 @@ static int raw_stagger_select(struct mtk_cam_ctx *ctx,
 	}
 
 	result->enabled_raw = 0;
+
+	if (raw_select == 0)
+		return false;
+
 	for (m = MTKCAM_SUBDEV_RAW_0; m < RAW_PIPELINE_NUM; m++) {
 		mask = 1 << m;
-		if (stagger_select.raw_select & mask) { /*check stagger raw select mask*/
+		if (raw_select & mask) { /*check stagger raw select mask*/
 			if (!(raw_status & mask)) { /*check available raw select mask*/
 				result->enabled_raw |= mask;
 				selected = true;
@@ -2946,7 +2952,7 @@ static int raw_stagger_select(struct mtk_cam_ctx *ctx,
 			}
 		} else {
 			dev_info(cam->dev, "[%s:select] traversed current raw %d/0x%x, stagger_select_raw_mask:0x%x\n",
-				__func__, m, mask, stagger_select.raw_select);
+				__func__, m, mask, raw_select);
 		}
 	}
 
