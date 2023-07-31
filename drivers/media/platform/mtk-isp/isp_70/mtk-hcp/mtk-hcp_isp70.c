@@ -403,6 +403,11 @@ void *isp70_get_hwid_virt(void)
 }
 EXPORT_SYMBOL(isp70_get_hwid_virt);
 
+phys_addr_t isp70_get_gce_mem_size(void)
+{
+	return mb[IMG_MEM_G_ID].size;
+}
+EXPORT_SYMBOL(isp70_get_gce_mem_size);
 
 int isp70_allocate_working_buffer(struct mtk_hcp *hcp_dev, unsigned int mode)
 {
@@ -783,4 +788,5 @@ struct mtk_hcp_data isp70_hcp_data = {
 	.get_gce = isp70_get_gce,
 	.put_gce = isp70_put_gce,
 	.get_hwid_virt = isp70_get_hwid_virt,
+	.get_gce_mem_size = isp70_get_gce_mem_size,
 };
