@@ -958,6 +958,81 @@ camera_s_input(struct file *file, void *fh, unsigned int input)
 	return input == 0 ? 0 : -EINVAL;
 }
 
+static int camera_queryctrl(struct file *file, void *fh,
+			struct v4l2_queryctrl *qc)
+{
+	struct mtk_camera_fh *handle = fh;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct video_device *vfd = video_devdata(file);
+	struct v4l2_fh *vfh =
+		test_bit(V4L2_FL_USES_V4L2_FH, &vfd->flags) ? fh : NULL;
+	int ret;
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
+
+	if (vfh && !vfh->ctrl_handler) {
+		vfh->ctrl_handler = vfd->ctrl_handler;
+		return v4l2_queryctrl(vfh->ctrl_handler, qc);
+	}
+
+	if (vfd->ctrl_handler)
+		return v4l2_queryctrl(vfd->ctrl_handler, qc);
+
+	return -ENOTTY;
+}
+
+static int camera_query_ext_ctrl(struct file *file, void *fh,
+			struct v4l2_query_ext_ctrl *qec)
+{
+	struct mtk_camera_fh *handle = fh;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct video_device *vfd = video_devdata(file);
+	struct v4l2_fh *vfh =
+		test_bit(V4L2_FL_USES_V4L2_FH, &vfd->flags) ? fh : NULL;
+	int ret;
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
+
+	if (vfh && !vfh->ctrl_handler) {
+		vfh->ctrl_handler = vfd->ctrl_handler;
+		return v4l2_query_ext_ctrl(vfh->ctrl_handler, qec);
+	}
+
+	if (vfd->ctrl_handler)
+		return v4l2_query_ext_ctrl(vfd->ctrl_handler, qec);
+
+	return -ENOTTY;
+}
+
+static int camera_querymenu(struct file *file, void *fh,
+			struct v4l2_querymenu *qm)
+{
+	struct mtk_camera_fh *handle = fh;
+	struct mtk_camera_stream *stream = handle->stream;
+	struct video_device *vfd = video_devdata(file);
+	struct v4l2_fh *vfh =
+		test_bit(V4L2_FL_USES_V4L2_FH, &vfd->flags) ? fh : NULL;
+	int ret;
+
+	ret = mtk_camera_init_stream(stream);
+	if (ret)
+		return ret;
+
+	if (vfh && !vfh->ctrl_handler) {
+		vfh->ctrl_handler = vfd->ctrl_handler;
+		return v4l2_querymenu(vfh->ctrl_handler, qm);
+	}
+
+	if (vfd->ctrl_handler)
+		return v4l2_querymenu(vfd->ctrl_handler, qm);
+
+	return -ENOTTY;
+}
+
 static const struct v4l2_ioctl_ops mtk_camera_ioctl_ops = {
 	.vidioc_querycap		= camera_querycap,
 	.vidioc_enum_framesizes		= camera_enum_framesizes,
@@ -978,6 +1053,9 @@ static const struct v4l2_ioctl_ops mtk_camera_ioctl_ops = {
 	.vidioc_s_input			= camera_s_input,
 	.vidioc_g_parm			= camera_get_param,
 	.vidioc_s_parm			= camera_set_param,
+	.vidioc_queryctrl		= camera_queryctrl,
+	.vidioc_query_ext_ctrl		= camera_query_ext_ctrl,
+	.vidioc_querymenu		= camera_querymenu,
 	.vidioc_subscribe_event		= v4l2_ctrl_subscribe_event,
 	.vidioc_unsubscribe_event	= v4l2_event_unsubscribe,
 };

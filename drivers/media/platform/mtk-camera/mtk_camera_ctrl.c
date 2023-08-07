@@ -155,8 +155,25 @@ static int mtk_camera_s_ctrl(struct v4l2_ctrl *ctrl)
 	return ret;
 }
 
+static int mtk_camera_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
+{
+	struct mtk_camera_ctx *ctx = ctrl_to_ctx(ctrl);
+
+	switch (ctrl->id) {
+	case V4L2_CID_MIN_BUFFERS_FOR_CAPTURE:
+		ctrl->val = ctx->queue.min_buffers_needed + 1;
+		break;
+
+	default:
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
 static const struct v4l2_ctrl_ops mtk_camera_ctrl_ops = {
 	.s_ctrl = mtk_camera_s_ctrl,
+	.g_volatile_ctrl = mtk_camera_g_volatile_ctrl,
 };
 
 static const struct v4l2_ctrl_config mtk_camera_ctrl_min_fps = {
@@ -448,6 +465,14 @@ static int mtk_camera_ctrls_create(struct mtk_camera_ctx *ctx)
 	// ctx->ctrls.hdr = v4l2_ctrl_new_custom(&ctx->ctrl_hdl,
 	//					&mtk_camera_ctrl_hdr,
 	//					NULL);
+
+	ctx->ctrls.min_buffers_for_capture = v4l2_ctrl_new_std(&ctx->ctrl_hdl,
+						&mtk_camera_ctrl_ops,
+						V4L2_CID_MIN_BUFFERS_FOR_CAPTURE,
+						1, 32, 1, 1);
+	if (ctx->ctrls.min_buffers_for_capture)
+		ctx->ctrls.min_buffers_for_capture->flags |= V4L2_CTRL_FLAG_VOLATILE;
+
 
 	ctx->ctrls_rdy = ctx->ctrl_hdl.error == 0;
 

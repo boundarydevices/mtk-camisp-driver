@@ -98,6 +98,7 @@ struct mtk_camera_ctrls {
 	struct v4l2_ctrl *iso;
 	struct v4l2_ctrl *frame_duration;
 	struct v4l2_ctrl *hdr;
+	struct v4l2_ctrl *min_buffers_for_capture;
 };
 
 /**
