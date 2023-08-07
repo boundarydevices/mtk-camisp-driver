@@ -589,7 +589,7 @@ static void cmdq_cb_timeout_worker(struct work_struct *work)
 	pipe = (struct mtk_imgsys_pipe *)swork->pipe;
 	if (!pipe->streaming) {
 		pr_info("%s pipe already streamoff\n", __func__);
-		goto release_work;
+		goto release_req;
 	}
 
 	if (!req) {
@@ -633,9 +633,11 @@ static void cmdq_cb_timeout_worker(struct work_struct *work)
 		wake_up_interruptible(&frm_info_waitq);
 	}
 
+release_req:
+	media_request_put(&req->req);
+
 release_work:
 	mtk_hcp_put_gce_buffer(req->imgsys_pipe->imgsys_dev->scp_pdev);
-	media_request_put(&req->req);
 	/*vfree(swork);*/
 	pr_debug("%s leave\n", __func__);
 }
@@ -1537,6 +1539,8 @@ static void imgsys_scp_handler(void *data, unsigned int len, void *priv)
 			mutex_lock(&(reqfd_cbinfo_list.mymutex));
 			cb_info = vmalloc(
 				sizeof(vlist_type(struct reqfd_cbinfo_t)));
+			if (!cb_info)
+				return;
 			INIT_LIST_HEAD(vlist_link(cb_info, struct reqfd_cbinfo_t));
 			cb_info->req_fd = swfrm_info->request_fd;
 			cb_info->exp_cnt = swfrm_info->exp_totalcb_cnt;
@@ -1890,8 +1894,11 @@ static int mtk_imgsys_hw_connect(struct mtk_imgsys_dev *imgsys_dev)
 	if (IS_ERR_OR_NULL(dvfs_info->reg))
 		dev_dbg(dvfs_info->dev,
 			"%s: [ERROR] reg is err or null\n", __func__);
-	else
+	else {
 		ret = regulator_enable(dvfs_info->reg);
+		if (ret)
+			dev_info(imgsys_dev->dev, "%s: regulater_enable failed\n", __func__);
+	}
 
 	pm_runtime_get_sync(imgsys_dev->dev);
 	/*set default value for hw module*/
