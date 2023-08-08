@@ -1459,14 +1459,14 @@ void mtk_camera_stream_destroy_context(struct mtk_camera_stream *stream)
 }
 
 int mtk_camera_register_video_device(struct mtk_camera_dev *camdev,
-				    struct mtk_camera_stream *stream,
-				    struct video_device *video)
+				    struct mtk_camera_stream *stream)
 {
+	struct video_device *video = &stream->video;
 	int ret;
 
 	video->fops = &mtk_camera_fops;
 	video->ioctl_ops = &mtk_camera_ioctl_ops;
-	video->release = video_device_release;
+	video->release = video_device_release_empty;
 	video->lock = &stream->dev_mutex;
 	video->v4l2_dev  = &camdev->v4l2_dev;
 	video->vfl_type = VFL_TYPE_VIDEO;
@@ -1522,7 +1522,7 @@ int mtk_camera_create_stream(struct mtk_camera_dev *camdev)
 			return ret;
 		}
 
-		ret = mtk_camera_register_video_device(camdev, stream, &stream->video);
+		ret = mtk_camera_register_video_device(camdev, stream);
 		if (ret) {
 			dev_err(dev, "failed to register video device stream_id=%d ret=%d\n",
 				stream_id, ret);
