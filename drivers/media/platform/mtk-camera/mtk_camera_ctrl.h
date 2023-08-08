@@ -34,5 +34,6 @@
 #define V4L2_CID_CAMERA_MULTI_OUTPUT_NUM              (V4L2_CID_USER_MTK_CAMERA_BASE + 12)
 
 int mtk_camera_ctrls_setup(struct mtk_camera_ctx *ctx);
+void mtk_camera_ctrls_destroy(struct mtk_camera_ctx *ctx);
 
 #endif /* _MTK_CAMERA_CTRL_H_ */

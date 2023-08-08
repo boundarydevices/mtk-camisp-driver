@@ -498,3 +498,10 @@ int mtk_camera_ctrls_setup(struct mtk_camera_ctx *ctx)
 
 	return 0;
 }
+
+void mtk_camera_ctrls_destroy(struct mtk_camera_ctx *ctx)
+{
+	v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
+	ctx->stream->video.ctrl_handler = NULL;
+	memset(&ctx->ctrls, 0, sizeof(ctx->ctrls));
+}

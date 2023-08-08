@@ -1438,7 +1438,6 @@ int mtk_camera_stream_create_context(struct mtk_camera_stream *stream)
 	return 0;
 
 err_vb2_init:
-	v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
 	devm_kfree(dev, ctx);
 	mutex_unlock(&stream->dev_mutex);
 
@@ -1451,11 +1450,12 @@ void mtk_camera_stream_destroy_context(struct mtk_camera_stream *stream)
 
 	mutex_lock(&stream->dev_mutex);
 	vb2_queue_release(&ctx->queue);
-	v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
+	mtk_camera_ctrls_destroy(ctx);
+	stream->queue = NULL;
+	stream->ctx = NULL;
 	mutex_unlock(&stream->dev_mutex);
 
 	devm_kfree(ctx->dev, ctx);
-	stream->ctx = NULL;
 }
 
 int mtk_camera_register_video_device(struct mtk_camera_dev *camdev,
@@ -1533,8 +1533,37 @@ int mtk_camera_create_stream(struct mtk_camera_dev *camdev)
 		mutex_lock(&camdev->stream_mutex);
 		list_add_tail(&stream->list, &camdev->streams);
 		mutex_unlock(&camdev->stream_mutex);
+
+		dev_dbg(dev, "created stream_id=%d\n", stream->stream_id);
 	}
 	return 0;
+}
+
+void mtk_camera_destroy_stream(struct mtk_camera_dev *camdev)
+{
+	struct mtk_camera_stream *stream;
+	struct device *dev = camdev->dev;
+
+	mutex_lock(&camdev->stream_mutex);
+	while (!list_empty(&camdev->streams)) {
+		stream = list_first_entry(&camdev->streams, struct mtk_camera_stream, list);
+
+		if (!video_is_registered(&stream->video))
+			continue;
+
+		video_unregister_device(&stream->video);
+		mtk_camera_stream_destroy_context(stream);
+
+		mutex_destroy(&stream->capture_mutex);
+		mutex_destroy(&stream->dev_mutex);
+		mutex_destroy(&stream->init_mutex);
+
+		dev_dbg(dev, "destroyed stream_id=%d\n", stream->stream_id);
+
+		list_del(&stream->list);
+		devm_kfree(dev, stream);
+	}
+	mutex_unlock(&camdev->stream_mutex);
 }
 
 static int mtk_camera_probe(struct platform_device *pdev)
@@ -1627,26 +1656,14 @@ MODULE_DEVICE_TABLE(of, mtk_camera_match);
 static int mtk_camera_remove(struct platform_device *pdev)
 {
 	struct mtk_camera_dev *camdev;
-	struct mtk_camera_stream *stream;
 
 	camdev = platform_get_drvdata(pdev);
 
 	dev_dbg(&pdev->dev, "%s dev %p\n", __func__, camdev);
-	mutex_lock(&camdev->stream_mutex);
-	list_for_each_entry(stream, &camdev->streams, list) {
-		if (!video_is_registered(&stream->video))
-			continue;
-
-		video_unregister_device(&stream->video);
-
-		mutex_destroy(&stream->capture_mutex);
-		mutex_destroy(&stream->dev_mutex);
-		mutex_destroy(&stream->init_mutex);
-	}
-	mutex_unlock(&camdev->stream_mutex);
+	mtk_camera_destroy_stream(camdev);
 	mutex_destroy(&camdev->stream_mutex);
-
 	v4l2_device_unregister(&camdev->v4l2_dev);
+	dev_info(&pdev->dev, "%s success\n", __func__);
 
 	return 0;
 }
