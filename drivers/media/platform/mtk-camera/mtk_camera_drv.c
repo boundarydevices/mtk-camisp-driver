@@ -94,7 +94,7 @@ static int mtk_camera_has_privileges(struct mtk_camera_fh *handle)
 	return handle->state == MTK_HANDLE_ACTIVE;
 }
 
-int mtk_camera_init_stream(struct mtk_camera_stream *stream);
+static int mtk_camera_init_stream(struct mtk_camera_stream *stream);
 
 /* -----------------------------------------------------------------------------
  * Video queue operations
@@ -894,7 +894,7 @@ camera_dqbuf(struct file *file, void *fh, struct v4l2_buffer *b)
 	return ret;
 }
 
-int camera_streamon(struct file *file, void *fh, enum v4l2_buf_type type)
+static int camera_streamon(struct file *file, void *fh, enum v4l2_buf_type type)
 {
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_ctx *ctx = handle->stream->ctx;
@@ -913,7 +913,7 @@ int camera_streamon(struct file *file, void *fh, enum v4l2_buf_type type)
 	return ret;
 }
 
-int camera_streamoff(struct file *file, void *fh, enum v4l2_buf_type type)
+static int camera_streamoff(struct file *file, void *fh, enum v4l2_buf_type type)
 {
 	struct mtk_camera_fh *handle = fh;
 	struct mtk_camera_ctx *ctx = handle->stream->ctx;
@@ -1104,7 +1104,7 @@ static void mtk_camera_release(struct mtk_camera_ctx *ctx)
 	ctx->state = MTK_STATE_FREE;
 }
 
-int mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
+static int mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 {
 	struct mtk_q_data *q_data = &ctx->q_data;
 	unsigned int bytesperline = 0;
@@ -1209,7 +1209,7 @@ int mtk_camera_set_default_params(struct mtk_camera_ctx *ctx)
 	return 0;
 }
 
-int mtk_camera_set_needed_buffers(struct mtk_camera_ctx *ctx)
+static int mtk_camera_set_needed_buffers(struct mtk_camera_ctx *ctx)
 {
 	struct vb2_queue *queue = &ctx->queue;
 	struct mtk_camera_stream *stream = ctx->stream;
@@ -1262,7 +1262,7 @@ int mtk_camera_set_needed_buffers(struct mtk_camera_ctx *ctx)
 	return 0;
 }
 
-int mtk_camera_init_stream(struct mtk_camera_stream *stream)
+static int mtk_camera_init_stream(struct mtk_camera_stream *stream)
 {
 	struct mtk_camera_ctx *ctx = stream->ctx;
 	int ret = 0;
@@ -1388,7 +1388,7 @@ static const struct v4l2_file_operations mtk_camera_fops = {
 	.mmap		= fops_camera_mmap,
 };
 
-int mtk_camera_stream_create_context(struct mtk_camera_stream *stream)
+static int mtk_camera_stream_create_context(struct mtk_camera_stream *stream)
 {
 	struct mtk_camera_ctx *ctx = NULL;
 	struct mtk_camera_dev *camdev = stream->camdev;
@@ -1444,7 +1444,7 @@ err_vb2_init:
 	return ret;
 }
 
-void mtk_camera_stream_destroy_context(struct mtk_camera_stream *stream)
+static void mtk_camera_stream_destroy_context(struct mtk_camera_stream *stream)
 {
 	struct mtk_camera_ctx *ctx = stream->ctx;
 
@@ -1458,7 +1458,7 @@ void mtk_camera_stream_destroy_context(struct mtk_camera_stream *stream)
 	devm_kfree(ctx->dev, ctx);
 }
 
-int mtk_camera_register_video_device(struct mtk_camera_dev *camdev,
+static int mtk_camera_register_video_device(struct mtk_camera_dev *camdev,
 				    struct mtk_camera_stream *stream)
 {
 	struct video_device *video = &stream->video;
@@ -1490,7 +1490,7 @@ int mtk_camera_register_video_device(struct mtk_camera_dev *camdev,
 	return 0;
 }
 
-int mtk_camera_create_stream(struct mtk_camera_dev *camdev)
+static int mtk_camera_create_stream(struct mtk_camera_dev *camdev)
 {
 	int stream_id;
 	int ret;
@@ -1539,7 +1539,7 @@ int mtk_camera_create_stream(struct mtk_camera_dev *camdev)
 	return 0;
 }
 
-void mtk_camera_destroy_stream(struct mtk_camera_dev *camdev)
+static void mtk_camera_destroy_stream(struct mtk_camera_dev *camdev)
 {
 	struct mtk_camera_stream *stream;
 	struct device *dev = camdev->dev;

@@ -101,7 +101,7 @@ static void handle_get_param_ack_msg(struct cam_vcu_inst *inst, struct cam_vcu_i
 	}
 }
 
-struct cam_vcu_inst *get_inst_by_stream_id(struct mtk_camera_dev *camdev, uint64_t stream_id)
+static struct cam_vcu_inst *get_inst_by_stream_id(struct mtk_camera_dev *camdev, uint64_t stream_id)
 {
 	struct mtk_camera_stream *stream;
 	struct mtk_camera_ctx *ctx;
@@ -134,7 +134,7 @@ struct cam_vcu_inst *get_inst_by_stream_id(struct mtk_camera_dev *camdev, uint64
  * This function runs in interrupt context and it means there's a IPI MSG
  * from VCU.
  */
-int vcu_ipi_handler(void *data, unsigned int len, void *priv)
+static int vcu_ipi_handler(void *data, unsigned int len, void *priv)
 {
 	struct cam_vcu_ipi_ack *m = data;
 	struct mtk_camera_dev *camdev = (struct mtk_camera_dev *)priv;
@@ -354,7 +354,7 @@ static int camera_init(void *ctx, unsigned long *handle)
 	return 0;
 }
 
-int camera_init_buffer(unsigned long handle, void *fb)
+static int camera_init_buffer(unsigned long handle, void *fb)
 {
 	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)handle;
 	struct mtk_camera_mem *mem = (struct mtk_camera_mem *)fb;
@@ -379,7 +379,7 @@ int camera_init_buffer(unsigned long handle, void *fb)
 	return camera_send_ap_ipi(inst, AP_IPIMSG_CAM_INIT_BUFFER, &info);
 }
 
-int camera_deinit_buffer(unsigned long handle, void *fb)
+static int camera_deinit_buffer(unsigned long handle, void *fb)
 {
 	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)handle;
 	struct mtk_camera_ctx *ctx = inst->ctx;
@@ -408,14 +408,14 @@ int camera_deinit_buffer(unsigned long handle, void *fb)
 	return camera_send_ap_ipi(inst, AP_IPIMSG_CAM_DEINIT_BUFFER, &info);
 }
 
-int camera_start_stream(unsigned long handle)
+static int camera_start_stream(unsigned long handle)
 {
 	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)handle;
 
 	return camera_send_ap_ipi(inst, AP_IPIMSG_CAM_START_STREAM, NULL);
 }
 
-int camera_capture(unsigned long handle, void *fb)
+static int camera_capture(unsigned long handle, void *fb)
 {
 	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)handle;
 	struct mtk_camera_ctx *ctx = inst->ctx;
@@ -436,7 +436,7 @@ int camera_capture(unsigned long handle, void *fb)
 	return camera_send_ap_ipi(inst, AP_IPIMSG_CAM_START, &info);
 }
 
-int camera_get_param(unsigned long handle,
+static int camera_get_param(unsigned long handle,
 		 enum camera_get_param_type type, void *out)
 {
 	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)handle;
@@ -458,7 +458,7 @@ int camera_get_param(unsigned long handle,
 	return ret;
 }
 
-int camera_set_param(unsigned long handle,
+static int camera_set_param(unsigned long handle,
 		 enum camera_set_param_type type, void *in)
 {
 	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)handle;
@@ -507,14 +507,14 @@ int camera_set_param(unsigned long handle,
 	return ret;
 }
 
-int camera_stop_stream(unsigned long handle)
+static int camera_stop_stream(unsigned long handle)
 {
 	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)handle;
 
 	return camera_send_ap_ipi(inst, AP_IPIMSG_CAM_STOP_STREAM, NULL);
 }
 
-void camera_deinit(unsigned long handle)
+static void camera_deinit(unsigned long handle)
 {
 	struct cam_vcu_inst *inst = (struct cam_vcu_inst *)handle;
 
